@@ -282,8 +282,8 @@ contenedorHoras.innerHTML = 'Cargando horarios...';
 const { data: agenda, error: errAgenda } = await supabaseCliente
 .from('configuracion_agenda')
 .select('*')
-.eq('dia_semana', diaPalabra)
-.single();
+// .eq('negocio_id', negocioId) 
+// .eq('dia_semana', diaTexto)
 
 if (errAgenda || !agenda) {
 contenedorHoras.innerHTML = 'Sin turnos para este día.';
