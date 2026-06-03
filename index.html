@@ -280,10 +280,10 @@ const contenedorHoras = document.getElementById('contenedor-horas');
 contenedorHoras.innerHTML = 'Cargando horarios...';
 
 const { data: agenda, error: errAgenda } = await supabaseCliente
-.from('configuracion_agenda')
-.select('*')
-// .eq('negocio_id', negocioId) 
-// .eq('dia_semana', diaTexto)
+  .from('configuracion_agenda')
+  .select('*')
+  .eq('duracion_minutos', 30) // <--- CAMBIAMOS ESTA LÍNEA
+  // .eq('dia_semana', diaTexto) // <--- ESTA DEJALA ANULADA
 
 if (errAgenda || !agenda) {
 contenedorHoras.innerHTML = 'Sin turnos para este día.';
