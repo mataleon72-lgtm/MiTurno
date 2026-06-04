@@ -2,353 +2,183 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Turno App</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        user-select: none; 
-        -webkit-tap-highlight-color: transparent; 
-    }
-    body {
-        background-color: #e0e0e0; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        overflow: hidden;
-    }
-    #app-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        background-color: #ffffff;
-        overflow: hidden;
-    }
-    @media (min-aspect-ratio: 432/960) {
-        #app-container {
-            width: auto;
-            aspect-ratio: 432/960;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-    }
-    .pantalla {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        display: none; 
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out; 
-    }
-    .pantalla.activa {
-        display: block;
-        opacity: 1;
-    }
-    #pantalla-portada { background-image: url('portada.jpg'); }
-    #pantalla-seleccion { background-image: url('seleccion.jpg'); }
-    #pantalla-datos { background-image: url('datos.jpg'); }
-    #pantalla-exito { background-image: url('exito.jpg'); }
-
-    .btn-invisible {
-        position: absolute;
-        background: transparent; 
-        border: none;
-        cursor: pointer;
-        z-index: 10;
-    }
-    .texto-dinamico {
-        position: absolute;
-        color: #ffffff;
-        font-weight: 500;
-        white-space: nowrap;
-        z-index: 5;
-    }
-    .input-invisible {
-        position: absolute;
-        background: transparent; 
-        border: none;
-        outline: none;
-        color: #333;
-        font-size: 18px;
-        padding: 5px 10px;
-        z-index: 10;
-    }
-    #txt-nombre { top: 55.5%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; }
-    #txt-telefono { top: 62.6%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; }
-    #txt-direccion { top: 70.1%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 16px; white-space: normal; line-height: 1.2; } 
-    #btn-comenzar { top: 77.6%; left: 6.7%; width: 86.5%; height: 17.1%; }
-    .btn-volver { top: 5%; left: 5%; width: 15.3%; height: 7.4%; border-radius: 50%; }
-
-    #control-mes {
-        position: absolute;
-        top: 14.8%; left: 16.4%; width: 67.1%; height: 4.7%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 10;
-        color: #333;
-        font-weight: bold;
-        font-size: 18px;
-    }
-    #control-mes button {
-        background: transparent; color: #333; border: none; 
-        font-size: 20px; font-weight: bold; cursor: pointer;
-        padding: 0 10px;
-    }
-    #contenedor-calendario {
-        position: absolute;
-        top: 30.7%; left: 7.9%; width: 84.5%; height: 30.2%;
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        grid-template-rows: repeat(6, 1fr);
-        gap: 4px;
-        z-index: 10;
-        padding: 5px;
-    }
-    #contenedor-horas {
-        position: absolute;
-        top: 68.6%; left: 7.9%; width: 84.5%; height: 26.6%;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        align-content: start;
-        overflow-y: auto;
-        z-index: 10;
-        padding: 5px;
-    }
-    .celda-dia {
-        background: transparent;
-        border: none;
-        border-radius: 4px;
-        color: #333; 
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .celda-dia.dia-vacio {
-        background: transparent;
-        cursor: default;
-    }
-    .celda-dia.seleccionado {
-        background: #333 !important; 
-        color: #fff;
-        border-radius: 50%;
-    }
-    .celda-hora {
-        background: rgba(0, 128, 0, 0.7); 
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-weight: bold;
-        font-size: 13px;
-        padding: 8px 0;
-        cursor: pointer;
-        text-align: center;
-    }
-
-    #in-nombre { top: 34.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-apellido { top: 47.2%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-dni { top: 60.2%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-telefono { top: 72.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #btn-confirmar { top: 84.2%; left: 11.6%; width: 78.9%; height: 10.6%; }
-
-    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 20px; }
-    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 20px; }
-    #btn-mapa { top: 65.6%; left: 9.5%; width: 83.3%; height: 26.3%; }
-</style>
 </head>
-<body>
-<div id="app-container">
-    <div id="pantalla-portada" class="pantalla activa">
-        <div id="txt-nombre" class="texto-dinamico">Dr. Juan Pérez</div>
-        <div id="txt-telefono" class="texto-dinamico">11-5555-4444</div>
-        <div id="txt-direccion" class="texto-dinamico">Av. Siempre Viva 742, Consultorio B</div>
-        <button id="btn-comenzar" class="btn-invisible" onclick="navegarA('pantalla-seleccion'); inicializarCalendario();"></button>
-    </div>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div id="pantalla-seleccion" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-portada')"></button>
-        <div id="control-mes">
-            <button onclick="modificarMes(-1)">◀</button>
-            <span id="nombre-mes">-</span>
-            <button onclick="modificarMes(1)">▶</button>
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
+        <h1 id="nombre-negocio" class="text-2xl font-bold text-gray-800 mb-2">Cargando negocio...</h1>
+        <p id="rubro-negocio" class="text-sm text-gray-500 mb-6">...</p>
+
+        <div class="mb-6 text-left">
+            <label for="calendario" class="block text-sm font-medium text-gray-700 mb-2">Selecciona un día:</label>
+            <input type="date" id="calendario" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-gray-700 font-semibold shadow-sm">
         </div>
-        <div id="contenedor-calendario"></div>
-        <div id="contenedor-horas"></div>
+
+        <div class="border-t border-gray-200 pt-4">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Horarios Disponibles</h2>
+            <div id="contenedor-horas" class="grid grid-cols-3 gap-3">
+                <p class="text-gray-400 text-sm col-span-3 py-4">Selecciona una fecha para ver los turnos.</p>
+            </div>
+        </div>
     </div>
 
-    <div id="pantalla-datos" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-seleccion')"></button>
-        <input type="text" id="in-nombre" class="input-invisible" placeholder="Ej: Carlos">
-        <input type="text" id="in-apellido" class="input-invisible" placeholder="Ej: Gómez">
-        <input type="number" id="in-dni" class="input-invisible" placeholder="Sin puntos">
-        <input type="tel" id="in-telefono" class="input-invisible" placeholder="Código de área + número">
-        <button id="btn-confirmar" class="btn-invisible" onclick="confirmarTurno()"></button>
-    </div>
+    <script>
+        // ========================================================
+        // 🔐 CONFIGURACIÓN DE TU CONEXIÓN SUPABASE (BLINDADA)
+        // ========================================================
+        const SUPABASE_URL = "https://mvvfkmlgnmkvwnuvtryh.supabase.co";
+        // Tu clave pública anon JWT real que conseguimos hoy
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbWstdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcyOTYwMDAsImV4cCI6MjAzMjg3MjAwMH0.1_QfGYsbiI9D9IAqrEdpfSlA_ZV5jkRwM"; 
 
-    <div id="pantalla-exito" class="pantalla">
-        <div id="txt-exito-fecha" class="texto-dinamico">-</div>
-        <div id="txt-exito-hora" class="texto-dinamico">-</div>
-        <button id="btn-mapa" class="btn-invisible" onclick="abrirMapa()"></button>
-    </div>
-</div>
-<script>
-let turnoSeleccionado = { fechaTexto: "", fechaISO: "", hora: "" };
-let fechaNavegacion = new Date();
-const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_QfGYsbiI9D9IAqrEdpfSlA_ZV5jkRwM';
-const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ID real de tu negocio (Kinesiología Julian Riggieri)
+        const NEGOCIO_ID = "02191edc-f3dd-4e18-aab5-b3c79957f478";
 
-async function probarConexion() {
-const { data, error } = await supabaseCliente.from('negocios').select('*');
-if (error) console.error("Error al conectar:", error);
-else console.log("¡Conexión exitosa!", data);
-}
-probarConexion();
+        // Elementos de la pantalla
+        const txtNombre = document.getElementById('nombre-negocio');
+        const txtRubro = document.getElementById('rubro-negocio');
+        const inputCalendario = document.getElementById('calendario');
+        const contenedorHoras = document.getElementById('contenedor-horas');
 
-function navegarA(idDestino) {
-document.querySelectorAll('.pantalla').forEach(pantalla => {
-pantalla.classList.remove('activa');
-});
-document.getElementById(idDestino).classList.add('activa');
-}
+        // Variables globales para guardar la selección del cliente
+        let turnoSeleccionado = { fechaTexto: '', fechaISO: '', hora: '' };
 
-function inicializarCalendario() {
-fechaNavegacion = new Date();
-construirCalendario();
-}
+        // ========================================================
+        // 🚀 AL ARRANCAR: Cargar los datos del Negocio en la Web
+        // ========================================================
+        async function cargarDatosNegocio() {
+            try {
+                const { data: negocio, error } = await supabaseCliente
+                    .from('negocios')
+                    .select('*')
+                    .eq('id', NEGOCIO_ID)
+                    .single();
 
-function modificarMes(direccion) {
-fechaNavegacion.setMonth(fechaNavegacion.getMonth() + direccion);
-construirCalendario();
-document.getElementById('contenedor-horas').innerHTML = '';
-}
+                if (error || !negocio) {
+                    txtNombre.innerText = "Negocio no encontrado";
+                    return;
+                }
 
-function construirCalendario() {
-const contenedor = document.getElementById('contenedor-calendario');
-contenedor.innerHTML = '';
-let año = fechaNavegacion.getFullYear();
-let mes = fechaNavegacion.getMonth();
-document.getElementById('nombre-mes').innerText = mesesNombres[mes] + ' ' + año;
-let primerDiaSemana = new Date(año, mes, 1).getDay();
-let totalDiasMes = new Date(año, mes + 1, 0).getDate();
+                txtNombre.innerText = negocio.nombre;
+                txtRubro.innerText = negocio.rubro || "Kinesiología";
+            } catch (err) {
+                txtNombre.innerText = "Error de conexión";
+            }
+        }
 
-for (let i = 0; i < primerDiaSemana; i++) {
-let celdaVacia = document.createElement('div');
-celdaVacia.className = 'celda-dia dia-vacio';
-contenedor.appendChild(celdaVacia);
-}
+        // Ejecutamos la carga inicial del negocio
+        cargarDatosNegocio();
 
-for (let dia = 1; dia <= totalDiasMes; dia++) {
-let btnDia = document.createElement('button');
-btnDia.className = 'celda-dia';
-btnDia.innerText = dia;
-let fechaObjeto = new Date(año, mes, dia);
-let opcionesDiaPalabra = { weekday: 'long' };
-let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra);
-diaSemanaPalabra = diaSemanaPalabra.charAt(0).toUpperCase() + diaSemanaPalabra.slice(1);
-let fechaFormateadaText = dia + ' de ' + mesesNombres[mes] + ' de ' + año;
-let fechaISO = año + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+        // Escuchar cuando el usuario cambia el día en el calendario
+        inputCalendario.addEventListener('change', (e) => {
+            const fechaSeleccionada = e.target.value; // Formato AAAA-MM-DD
+            if (!fechaSeleccionada) return;
 
-btnDia.onclick = () => {
-document.querySelectorAll('.celda-dia').forEach(c => c.classList.remove('seleccionado'));
-btnDia.classList.add('seleccionado');
-buscarHorariosReales(diaSemanaPalabra, fechaFormateadaText, fechaISO);
-};
-contenedor.appendChild(btnDia);
-}
-}
+            // truco matemático para evitar que JS reste un día por zona horaria
+            const fechaPartes = fechaSeleccionada.split('-');
+            const objetoFecha = new Date(fechaPartes[0], fechaPartes[1] - 1, fechaPartes[2]);
 
-async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
-turnoSeleccionado.fechaTexto = fechaTexto;
-turnoSeleccionado.fechaISO = fechaISO;
-const contenedorHoras = document.getElementById('contenedor-horas');
-contenedorHoras.innerHTML = 'Cargando horarios...';
+            // Obtener el nombre del día de la semana (ej: "miércoles")
+            const diaPalabra = objetoFecha.toLocaleDateString('es-ES', { weekday: 'long' });
+            
+            // Formato lindo para mostrarle al cliente (ej: "Miércoles 3 de Junio")
+            const fechaTextoLindo = objetoFecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
-const { data: agenda, error: errAgenda } = await supabaseCliente
-  .from('configuracion_agenda')
-  .select('*')
-  .eq('duracion_minutos', 30) // <--- CAMBIAMOS ESTA LÍNEA
-  // .eq('dia_semana', diaTexto) // <--- ESTA DEJALA ANULADA
+            // Llamamos al motor blindado para buscar las horas
+            buscarHorariosReales(diaPalabra, fechaTextoLindo, fechaSeleccionada);
+        });
 
-if (errAgenda || !agenda) {
-contenedorHoras.innerHTML = 'Sin turnos para este día.';
-return;
-}
+        // ========================================================
+        // 🎯 MOTOR PRINCIPAL: Buscar agenda y dibujar botones
+        // ========================================================
+        async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
+            turnoSeleccionado.fechaTexto = fechaTexto;
+            turnoSeleccionado.fechaISO = fechaISO;
+            
+            contenedorHoras.innerHTML = '<p class="text-gray-500 text-sm col-span-3 py-4 animate-pulse">Cargando horarios...</p>';
 
-const { data: ocupados, error: errOcupados } = await supabaseCliente
-.from('turnos_activos')
-.select('hora')
-.eq('fecha', fechaISO)
-.eq('estado', 'reservado');
+            // Traemos la configuración completa (sin trabas de filtros estrictos)
+            const { data: agenda, error: errAgenda } = await supabaseCliente
+                .from('configuracion_agenda')
+                .select('*');
 
-let listadoOcupados = [];
-if (ocupados) {
-listadoOcupados = ocupados.map(o => o.hora.substring(0, 5));
-}
-contenedorHoras.innerHTML = '';
+            // 1. TU BENDITO ESCUDO DE BLINDAJE INTEGRADO IMPECABLE
+            function limpiarTexto(texto) {
+                if (!texto) return "";
+                return texto
+                    .trim()                  
+                    .toUpperCase()           
+                    .normalize("NFD")        
+                    .replace(/[\u0300-\u036f]/g, ""); 
+            }
 
-let intervalo = 30;
-if (agenda['duración_minutos']) { intervalo = agenda['duración_minutos']; }
-else if (agenda['duracion_minutos']) { intervalo = agenda['duracion_minutos']; }
+            const agendaEncontrada = agenda && agenda[0];
 
-let [horaActual, minActual] = agenda.hora_inicio.split(':').map(Number);
-let [horaFin, minFin] = agenda.hora_fin.split(':').map(Number);
-let minutosTotalesInicio = horaActual * 60 + minActual;
-let minutosTotalesFin = horaFin * 60 + minFin;
+            if (errAgenda || !agendaEncontrada) {
+                contenedorHoras.innerHTML = '<p class="text-gray-400 text-sm col-span-3 py-4">Sin turnos configurados.</p>';
+                return;
+            }
 
-while (minutosTotalesInicio < minutosTotalesFin) {
-let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
-let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
-let horaTexto = hStr + ':' + mStr;
-if (!listadoOcupados.includes(horaTexto)) {
-let btnHora = document.createElement('button');
-btnHora.className = 'celda-hora';
-btnHora.innerText = horaTexto;
-btnHora.onclick = () => clickEnHora(horaTexto);
-contenedorHoras.appendChild(btnHora);
-}
-minutosTotalesInicio += intervalo;
-}
-if (contenedorHoras.innerHTML === '') {
-contenedorHoras.innerHTML = 'No quedan horarios libres.';
-}
-}
+            // Comparamos el día que tocó el cliente contra el de Supabase bajo tu escudo
+            const diaCalculado = limpiarTexto(diaPalabra); 
+            const diaBaseDatos = limpiarTexto(agendaEncontrada.dia_semana); 
 
-function clickEnHora(horaElegida) {
-turnoSeleccionado.hora = horaElegida;
-navegarA('pantalla-datos');
-}
+            if (diaCalculado !== diaBaseDatos) {
+                contenedorHoras.innerHTML = '<p class="text-gray-400 text-sm col-span-3 py-4">Sin turnos para este día.</p>';
+                return;
+            }
 
-function confirmarTurno() {
-let nombre = document.getElementById('in-nombre').value;
-let apellido = document.getElementById('in-apellido').value;
-if(nombre === "" || apellido === "") {
-alert("Por favor, completá los datos principales para continuar.");
-return;
-}
-document.getElementById('txt-exito-fecha').innerText = turnoSeleccionado.fechaTexto;
-document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.hora + ' hs - ' + nombre + ' ' + apellido;
-navegarA('pantalla-exito');
-}
+            // Si pasa el escudo, leemos las horas de Supabase
+            const horaInicioRaw = agendaEncontrada.hora_inicio; // "08:00:00"
+            const horaFinRaw = agendaEncontrada.hora_fin;       // "17:00:00"
+            const duracion = agendaEncontrada.duracion_minutos; // 30
 
-function abrirMapa() {
-window.open('https://maps.google.com/?q=Buenos+Aires,Argentina', '_blank');
-}
-</script>
+            // Cortamos el texto con el .split() de forma segura
+            const [startH, startM] = horaInicioRaw.split(':').map(Number);
+            const [endH, endM] = horaFinRaw.split(':').map(Number);
+
+            let minutosActuales = startH * 60 + startM;
+            const minutosFinales = endH * 60 + endM;
+
+            // Limpiamos el contenedor para meter los botones nuevos
+            contenedorHoras.innerHTML = '';
+
+            // Bucle matemático para generar los intervalos de tiempo en pantalla
+            while (minutosActuales < minutosFinales) {
+                const hrs = Math.floor(minutosActuales / 60);
+                const mins = minutosActuales % 60;
+                
+                // Formateo lindo con ceros adelante (ej: "08:30")
+                const horaFormateada = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+                // Creamos el botón verde estilizado de Tailwind
+                const boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-xl shadow-md transition transform active:scale-95 text-sm cursor-pointer';
+                boton.innerText = horaFormateada;
+
+                // Acción al tocar la hora elegida
+                boton.onclick = () => {
+                    turnoSeleccionado.hora = horaFormateada;
+                    alert(`¡Turno reservado con éxito!\nFecha: ${turnoSeleccionado.fechaTexto}\nHora: ${turnoSeleccionado.hora}`);
+                };
+
+                contenedorHoras.appendChild(boton);
+
+                // Sumamos la duración (ej: +30 minutos) para el siguiente turno
+                minutosActuales += duracion;
+            }
+
+            // Si el bucle terminó y no se generó ningún botón por algún error de horario
+            if (contenedorHoras.children.length === 0) {
+                contenedorHoras.innerHTML = '<p class="text-gray-400 text-sm col-span-3 py-4">Sin turnos para este día.</p>';
+            }
+        }
+    </script>
 </body>
 </html>
