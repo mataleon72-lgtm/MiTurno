@@ -67,10 +67,13 @@
     }
     .texto-dinamico {
         position: absolute;
-        color: #ffffff;
-        font-weight: 500;
-        white-space: nowrap;
+        color: #333333; /* Cambiado a oscuro para que se lea perfecto en tus tarjetas blancas */
+        font-weight: 600;
         z-index: 5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
     }
     .input-invisible {
         position: absolute;
@@ -82,9 +85,23 @@
         padding: 5px 10px;
         z-index: 10;
     }
-    #txt-nombre { top: 55.5%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; }
-    #txt-telefono { top: 62.6%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; }
-    #txt-direccion { top: 70.1%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 16px; white-space: normal; line-height: 1.2; } 
+    
+    /* 🎨 Estilos para evitar el color azul basura en tus inputs */
+    .input-invisible:focus {
+        outline: none;
+        background: transparent;
+    }
+    .input-invisible:-webkit-autofill,
+    .input-invisible:-webkit-autofill:hover, 
+    .input-invisible:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0px 1000px #edf2f7 inset !important;
+        box-shadow: 0 0 0px 1000px #edf2f7 inset !important;
+        -webkit-text-fill-color: #333 !important;
+    }
+
+    #txt-nombre { top: 55.5%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; color: #fff; justify-content: flex-start; }
+    #txt-telefono { top: 62.6%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; color: #fff; justify-content: flex-start; }
+    #txt-direccion { top: 70.1%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 16px; color: #fff; justify-content: flex-start; text-align: left; } 
     #btn-comenzar { top: 77.6%; left: 6.7%; width: 86.5%; height: 17.1%; }
     .btn-volver { top: 5%; left: 5%; width: 15.3%; height: 7.4%; border-radius: 50%; }
 
@@ -157,6 +174,13 @@
         cursor: pointer;
         text-align: center;
     }
+    .mensaje-estado {
+        grid-column: span 4;
+        text-align: center;
+        color: #95a5a6;
+        font-size: 14px;
+        padding: 20px 0;
+    }
 
     #in-nombre { top: 34.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
     #in-apellido { top: 47.2%; left: 11.6%; width: 78.9%; height: 6.9%; }
@@ -164,8 +188,9 @@
     #in-telefono { top: 72.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
     #btn-confirmar { top: 84.2%; left: 11.6%; width: 78.9%; height: 10.6%; }
 
-    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 20px; text-align: center; color: #333; }
-    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 20px; text-align: center; color: #333; }
+    /* 🎯 Reestructuración y Centrado Perfecto en la pantalla de éxito */
+    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; }
+    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; }
     #btn-mapa { top: 65.6%; left: 9.5%; width: 83.3%; height: 26.3%; }
 </style>
 </head>
@@ -193,7 +218,7 @@
         <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-seleccion')"></button>
         <input type="text" id="in-nombre" class="input-invisible" placeholder="Ej: Carlos">
         <input type="text" id="in-apellido" class="input-invisible" placeholder="Ej: Gómez">
-        <input type="number" id="in-dni" class="input-invisible" placeholder="Sin puntos">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="in-dni" class="input-invisible" placeholder="Sin puntos">
         <input type="tel" id="in-telefono" class="input-invisible" placeholder="Código de área + número">
         <button id="btn-confirmar" class="btn-invisible" onclick="confirmarTurno()"></button>
     </div>
@@ -209,16 +234,13 @@ let turnoSeleccionado = { fechaTexto: "", fechaISO: "", hora: "" };
 let fechaNavegacion = new Date();
 const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-// ========================================================
-// 🔐 CONEXIÓN SUPABASE REPARADA CON TU LLAVE MAESTRA POSTA
-// ========================================================
 const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
 const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const NEGOCIO_ID = "02191edc-f3dd-4e18-aab5-b3c79957f478";
 
-// Función para inyectar los datos reales del Kinesiólogo en la portada
+// Carga del Kinesiólogo en la portada
 async function cargarDatosNegocio() {
     try {
         const { data: negocio, error } = await supabaseCliente
@@ -229,7 +251,7 @@ async function cargarDatosNegocio() {
 
         if (!error && negocio) {
             document.getElementById('txt-nombre').innerText = negocio.nombre;
-            document.getElementById('txt-telefono').innerText = "Kinesiología"; // Ponemos el rubro o data extra
+            document.getElementById('txt-telefono').innerText = negocio.rubro || "Kinesiología";
             document.getElementById('txt-direccion').innerText = "Hacé clic abajo para comenzar"; 
         }
     } catch (err) {
@@ -240,7 +262,7 @@ cargarDatosNegocio();
 
 function navegarA(idDestino) {
 document.querySelectorAll('.pantalla').forEach(pantalla => {
-pantalla.classList.remove('activa');
+pantballa = pantalla.classList.remove('activa');
 });
 document.getElementById(idDestino).classList.add('activa');
 }
@@ -275,10 +297,13 @@ for (let dia = 1; dia <= totalDiasMes; dia++) {
 let btnDia = document.createElement('button');
 btnDia.className = 'celda-dia';
 btnDia.innerText = dia;
-let fechaObjeto = new Date(año, mes, dia);
-let opcionesDiaPalabra = { weekday: 'long' };
+
+// Usamos UTC explícito para que no haya desfasaje de días por la zona horaria de Argentina
+let fechaObjeto = new Date(Date.UTC(año, mes, dia, 12, 0, 0));
+let opcionesDiaPalabra = { weekday: 'long', timeZone: 'UTC' };
 let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra);
 diaSemanaPalabra = diaSemanaPalabra.charAt(0).toUpperCase() + diaSemanaPalabra.slice(1);
+
 let fechaFormateadaText = dia + ' de ' + mesesNombres[mes] + ' de ' + año;
 let fechaISO = año + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
 
@@ -291,7 +316,7 @@ contenedor.appendChild(btnDia);
 }
 }
 
-// 🎯 MOTOR PRINCIPAL DE HORARIOS CON TU ESCUDO ORIGINAL INTEGRADO
+// MOTOR DE HORARIOS TOTALMENTE ASIMILADOR Y BLINDADO
 async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
 turnoSeleccionado.fechaTexto = fechaTexto;
 turnoSeleccionado.fechaISO = fechaISO;
@@ -302,7 +327,7 @@ const { data: agenda, error: errAgenda } = await supabaseCliente
   .from('configuracion_agenda')
   .select('*');
 
-// TU PROPIO ESCUDO CONTRA MAYÚSCULAS Y TILDES
+// ESCUDO DEFINITIVO CONTRA TILDES, MAYÚSCULAS Y ESPACIOS BASURA
 function limpiarTexto(texto) {
     if (!texto) return "";
     return texto
@@ -319,7 +344,6 @@ contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día
 return;
 }
 
-// Comparamos los días de la semana de forma blindada
 const diaCalculado = limpiarTexto(diaPalabra);
 const diaBaseDatos = limpiarTexto(agendaEncontrada.dia_semana);
 
@@ -346,9 +370,9 @@ if (agendaEncontrada.duracion_minutos) { intervalo = agendaEncontrada.duracion_m
 let [horaActual, minActual] = agendaEncontrada.hora_inicio.split(':').map(Number);
 let [horaFin, minFin] = agendaEncontrada.hora_fin.split(':').map(Number);
 let minutosTotalesInicio = horaActual * 60 + minActual;
-let minutosTotalesFin = horaFin * 60 + minFin;
+let minutesTotalesFin = horaFin * 60 + minFin;
 
-while (minutosTotalesInicio < minutosTotalesFin) {
+while (minutosTotalesInicio < minutesTotalesFin) {
 let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
 let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
 let horaTexto = hStr + ':' + mStr;
@@ -378,13 +402,16 @@ if(nombre === "" || apellido === "") {
 alert("Por favor, completá los datos principales para continuar.");
 return;
 }
-document.getElementById('txt-exito-fecha').innerText = turnoSeleccionado.fechaTexto;
-document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.hora + ' hs - ' + nombre + ' ' + apellido;
+
+// 🎯 REESTRUCTURACIÓN DE CAMPOS SOLICITADA
+document.getElementById('txt-exito-fecha').innerText = nombre + ' ' + apellido;
+document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.fechaTexto + ' - ' + turnoSeleccionado.hora + ' hs';
 navegarA('pantalla-exito');
 }
 
 function abrirMapa() {
-window.open('https://maps.google.com/?q=Buenos+Aires,Argentina', '_blank');
+// Dirección exacta configurada para abrir en Google Maps
+window.open('https://www.google.com/maps/search/?api=1&query=Av.+Francisco+Beiró+y+Sanabria,+Devoto,+Buenos+Aires', '_blank');
 }
 </script>
 </body>
