@@ -100,16 +100,17 @@
         const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let miNegocioID = null;
-        let misSucursales = []; // Guardamos las sucursales en memoria
+        let misSucursales = [];
 
         function navegarA(idDestino) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.getElementById(idDestino).classList.add('activa');
         }
 
+        // REGISTRAR NEGOCIO NUEVO (CON BLINDAJE DE ESPACIOS)
         async function registrarNegocio() {
             const nombre = document.getElementById('reg-nombre').value.trim();
-            const alias = document.getElementById('reg-alias').value.trim().toUpperCase();
+            const alias = document.getElementById('reg-alias').value.trim().toUpperCase(); // Filtro estricto
             const rubro = document.getElementById('reg-rubro').value.trim();
             const telefono = document.getElementById('reg-telefono').value.trim();
             const password = document.getElementById('reg-password').value;
@@ -119,12 +120,13 @@
             const { error } = await supabaseCliente.from('negocios').insert([{ nombre, alias, rubro, telefono, password }]);
             if (error) return alert("Supabase dice: " + error.message);
             
-            alert("¡Negocio creado con éxito! Iniciá sesión para continuar.");
+            alert("¡Negocio creado con éxito! Iniciá sesión con tu alias.");
             navegarA('pantalla-login');
         }
 
+        // LOGIN AL PANEL (CON BLINDAJE DE ESPACIOS)
         async function loginNegocio() {
-            const alias = document.getElementById('log-alias').value.trim().toUpperCase();
+            const alias = document.getElementById('log-alias').value.trim().toUpperCase(); // Filtro estricto
             const password = document.getElementById('log-password').value;
 
             const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', password).single();
@@ -138,7 +140,7 @@
             }
         }
 
-        // --- GESTIÓN DE SUCURSALES ---
+        // GESTIÓN DE SUCURSALES
         async function cargarSucursales() {
             const { data, error } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', miNegocioID);
             if (error) return console.error(error);
@@ -147,9 +149,8 @@
             renderizarListaSucursales();
             actualizarSelectoresSucursales();
 
-            // Lógica de ruteo inteligente
             if (misSucursales.length === 0) {
-                navegarA('pantalla-sucursales'); // Si no tiene, lo obligamos a crear una
+                navegarA('pantalla-sucursales');
             } else {
                 navegarA('pantalla-agenda');
                 cargarTurnosDelDia();
@@ -196,7 +197,7 @@
             
             document.getElementById('suc-nombre').value = '';
             document.getElementById('suc-direccion').value = '';
-            await cargarSucursales(); // Recargamos todo
+            await cargarSucursales();
         }
 
         async function borrarSucursal(id) {
@@ -212,7 +213,7 @@
             cargarTurnosDelDia();
         }
 
-        // --- AGENDA Y HORARIOS ---
+        // AGENDA Y HORARIOS
         async function cargarTurnosDelDia() {
             if (misSucursales.length === 0) return;
             const fecha = document.getElementById('filtro-fecha').value;
