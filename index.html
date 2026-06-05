@@ -263,7 +263,9 @@ const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const NEGOCIO_ID = "02191edc-f3dd-4e18-aab5-b3c79957f478";
 
-// Cargar dinámicamente los datos en la portada desde la tabla negocios
+// Agregamos esta variable suelta justo arriba de la función
+let direccionParaMapa = ""; 
+
 async function cargarDatosNegocio() {
     try {
         const { data: negocio, error } = await supabaseCliente
@@ -276,6 +278,9 @@ async function cargarDatosNegocio() {
             document.getElementById('txt-nombre').innerText = negocio.nombre;
             document.getElementById('txt-telefono').innerText = negocio.telefono || "Teléfono no configurado";
             document.getElementById('txt-direccion').innerText = negocio.direccion || "Dirección no configurada"; 
+            
+            // Atrapamos la dirección para usarla en el mapa
+            direccionParaMapa = negocio.direccion; 
         }
     } catch (err) {
         console.error(err);
@@ -474,7 +479,13 @@ async function cancelarYVolver() {
 }
 
 function abrirMapa() {
-    window.open('https://maps.google.com/?q=Av.+Francisco+Beiro+y+Sanabria,+Devoto', '_blank');
+    if (direccionParaMapa) {
+        // encodeURIComponent transforma los espacios y comas en formato web válido (ej: %20)
+        let linkGoogleMaps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(direccionParaMapa);
+        window.open(linkGoogleMaps, '_blank');
+    } else {
+        alert("La dirección del negocio no está configurada.");
+    }
 }
 </script>
 </body>
