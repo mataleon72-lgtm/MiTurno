@@ -102,7 +102,7 @@
                 .select();
 
             if (error) {
-                alert("Error al crear. Quizás el Alias ya existe.");
+                alert("Supabase dice: " + error.message + " \nDetalles: " + error.details);
                 console.error(error);
             } else {
                 alert("¡Negocio creado con éxito! Tu ID es: " + alias);
