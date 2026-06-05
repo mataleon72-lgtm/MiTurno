@@ -12,19 +12,20 @@
         input, select { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background: #008080; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
         button.secundario { background: #7f8c8d; }
-        .turno-item { background: #ecf0f1; padding: 10px; margin: 5px 0; border-radius: 5px; }
-        hr { margin: 20px 0; }
+        button.peligro { background: #e74c3c; padding: 5px; margin-top: 5px; font-size: 0.8em; }
+        .turno-item, .sucursal-item { background: #ecf0f1; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        hr { margin: 20px 0; border: 0; border-top: 1px solid #ccc; }
+        .header-sucursal { background: #dff9fb; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #008080; }
     </style>
 </head>
 <body>
 
     <div id="pantalla-registro" class="pantalla activa">
         <h2>Crear mi Negocio</h2>
-        <input type="text" id="reg-nombre" placeholder="Nombre del Profesional / Local">
+        <input type="text" id="reg-nombre" placeholder="Tu Nombre / Razón Social">
         <input type="text" id="reg-alias" placeholder="Elegí tu Alias (Ej: DR-PEREZ)">
-        <input type="text" id="reg-rubro" placeholder="Rubro o Especialidad (Ej: Kinesiología)">
-        <input type="text" id="reg-telefono" placeholder="Teléfono">
-        <input type="text" id="reg-direccion" placeholder="Dirección">
+        <input type="text" id="reg-rubro" placeholder="Rubro (Ej: Kinesiología)">
+        <input type="text" id="reg-telefono" placeholder="Teléfono de contacto">
         <input type="password" id="reg-password" placeholder="Crear una Contraseña">
         <button onclick="registrarNegocio()">Registrarme</button>
         <button class="secundario" onclick="navegarA('pantalla-login')">Ya tengo cuenta. Entrar</button>
@@ -35,22 +36,42 @@
         <input type="text" id="log-alias" placeholder="Tu Alias (Ej: DR-PEREZ)">
         <input type="password" id="log-password" placeholder="Contraseña">
         <button onclick="loginNegocio()">Ingresar</button>
-        <button class="secundario" onclick="navegarA('pantalla-registro')">No tengo cuenta. Crear una</button>
+        <button class="secundario" onclick="navegarA('pantalla-registro')">No tengo cuenta</button>
+    </div>
+
+    <div id="pantalla-sucursales" class="pantalla">
+        <h2>Mis Consultorios</h2>
+        <p style="font-size: 0.9em; color: #555;">Acá podés gestionar los lugares donde atendés.</p>
+        <div id="lista-sucursales">Cargando...</div>
+        <hr>
+        <h3>Agregar Nuevo Lugar</h3>
+        <input type="text" id="suc-nombre" placeholder="Nombre (Ej: Clínica Morón)">
+        <input type="text" id="suc-direccion" placeholder="Dirección exacta (Ej: San Martín 123)">
+        <button onclick="crearSucursal()">Guardar Lugar</button>
+        <hr>
+        <button class="secundario" onclick="irAAgendaSiHaySucursales()">Ir a mi Agenda</button>
     </div>
 
     <div id="pantalla-agenda" class="pantalla">
         <h2>Mi Agenda</h2>
-        <input type="date" id="filtro-fecha" onchange="cargarTurnosDelDia()">
-        <div id="lista-turnos">
-            <p>Seleccioná una fecha para ver tus turnos.</p>
+        <div class="header-sucursal">
+            <label>Viendo turnos de:</label>
+            <select id="filtro-sucursal" onchange="cargarTurnosDelDia()"></select>
         </div>
+        <input type="date" id="filtro-fecha" onchange="cargarTurnosDelDia()">
+        <div id="lista-turnos"></div>
         <hr>
-        <button onclick="navegarA('pantalla-configuracion')">Configurar mis Horarios</button>
+        <button onclick="navegarA('pantalla-configuracion')">Configurar Horarios</button>
+        <button onclick="navegarA('pantalla-sucursales')" style="background: #34495e;">Mis Consultorios</button>
         <button class="secundario" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
 
     <div id="pantalla-configuracion" class="pantalla">
         <h2>Mis Horarios</h2>
+        <div class="header-sucursal">
+            <label>Configurar horarios para:</label>
+            <select id="conf-sucursal"></select>
+        </div>
         <select id="conf-dia">
             <option value="lunes">Lunes</option>
             <option value="martes">Martes</option>
@@ -79,131 +100,157 @@
         const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let miNegocioID = null;
+        let misSucursales = []; // Guardamos las sucursales en memoria
 
         function navegarA(idDestino) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.getElementById(idDestino).classList.add('activa');
         }
 
-        // 1. REGISTRAR NEGOCIO NUEVO
         async function registrarNegocio() {
             const nombre = document.getElementById('reg-nombre').value.trim();
             const alias = document.getElementById('reg-alias').value.trim().toUpperCase();
-            const rubro = document.getElementById('reg-rubro').value.trim(); // Capturamos el rubro
+            const rubro = document.getElementById('reg-rubro').value.trim();
             const telefono = document.getElementById('reg-telefono').value.trim();
-            const direccion = document.getElementById('reg-direccion').value.trim();
             const password = document.getElementById('reg-password').value;
 
             if(!nombre || !alias || !password || !rubro) return alert("Nombre, Alias, Rubro y Contraseña son obligatorios.");
 
-            // Insertar en Supabase incluyendo el campo rubro
-            const { data, error } = await supabaseCliente
-                .from('negocios')
-                .insert([{ 
-                    nombre: nombre, 
-                    alias: alias, 
-                    rubro: rubro, 
-                    telefono: telefono, 
-                    direccion: direccion, 
-                    password: password 
-                }])
-                .select();
-
-            if (error) {
-                alert("Supabase dice: " + error.message);
-                console.error(error);
-            } else {
-                alert("¡Negocio creado con éxito! Tu ID es: " + alias);
-                navegarA('pantalla-login');
-            }
+            const { error } = await supabaseCliente.from('negocios').insert([{ nombre, alias, rubro, telefono, password }]);
+            if (error) return alert("Supabase dice: " + error.message);
+            
+            alert("¡Negocio creado con éxito! Iniciá sesión para continuar.");
+            navegarA('pantalla-login');
         }
 
-        // 2. LOGIN AL PANEL
         async function loginNegocio() {
             const alias = document.getElementById('log-alias').value.trim().toUpperCase();
             const password = document.getElementById('log-password').value;
 
-            const { data, error } = await supabaseCliente
-                .from('negocios')
-                .select('*')
-                .eq('alias', alias)
-                .eq('password', password)
-                .single();
+            const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', password).single();
 
             if (error || !data) {
                 alert("Alias o contraseña incorrectos.");
             } else {
                 miNegocioID = data.id; 
                 document.getElementById('filtro-fecha').valueAsDate = new Date(); 
+                await cargarSucursales();
+            }
+        }
+
+        // --- GESTIÓN DE SUCURSALES ---
+        async function cargarSucursales() {
+            const { data, error } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', miNegocioID);
+            if (error) return console.error(error);
+            
+            misSucursales = data || [];
+            renderizarListaSucursales();
+            actualizarSelectoresSucursales();
+
+            // Lógica de ruteo inteligente
+            if (misSucursales.length === 0) {
+                navegarA('pantalla-sucursales'); // Si no tiene, lo obligamos a crear una
+            } else {
                 navegarA('pantalla-agenda');
                 cargarTurnosDelDia();
             }
         }
 
-        // 3. CARGAR LA AGENDA
-        async function cargarTurnosDelDia() {
-            const fechaISO = document.getElementById('filtro-fecha').value;
-            const contenedorLista = document.getElementById('lista-turnos');
-            contenedorLista.innerHTML = "Cargando...";
-
-            const { data, error } = await supabaseCliente
-                .from('turnos_activos')
-                .select('*')
-                .eq('negocio_id', miNegocioID)
-                .eq('fecha', fechaISO)
-                .order('hora', { ascending: true });
-
-            if (error) {
-                contenedorLista.innerHTML = "Error al cargar los turnos.";
+        function renderizarListaSucursales() {
+            const div = document.getElementById('lista-sucursales');
+            if (misSucursales.length === 0) {
+                div.innerHTML = "<p>Aún no tenés lugares creados.</p>";
                 return;
             }
-
-            if (data.length === 0) {
-                contenedorLista.innerHTML = "<p>No tenés turnos asignados para este día.</p>";
-                return;
-            }
-
-            contenedorLista.innerHTML = "";
-            data.forEach(turno => {
-                const div = document.createElement('div');
-                div.className = 'turno-item';
-                div.innerHTML = `<strong>${turno.hora.substring(0,5)} hs</strong> - ${turno.cliente_nombre} (${turno.cliente_telefono || 'Sin tel'})`;
-                contenedorLista.appendChild(div);
+            div.innerHTML = "";
+            misSucursales.forEach(suc => {
+                div.innerHTML += `
+                    <div class="sucursal-item">
+                        <strong>${suc.nombre}</strong><br>
+                        <small>${suc.direccion}</small><br>
+                        <button class="peligro" onclick="borrarSucursal('${suc.id}')">Borrar</button>
+                    </div>
+                `;
             });
         }
 
-        // 4. GUARDAR UNA NUEVA FRANJA HORARIA
+        function actualizarSelectoresSucursales() {
+            const selAgenda = document.getElementById('filtro-sucursal');
+            const selConfig = document.getElementById('conf-sucursal');
+            selAgenda.innerHTML = ""; selConfig.innerHTML = "";
+            
+            misSucursales.forEach(suc => {
+                let opt = `<option value="${suc.id}">${suc.nombre}</option>`;
+                selAgenda.innerHTML += opt;
+                selConfig.innerHTML += opt;
+            });
+        }
+
+        async function crearSucursal() {
+            const nombre = document.getElementById('suc-nombre').value.trim();
+            const direccion = document.getElementById('suc-direccion').value.trim();
+            if(!nombre || !direccion) return alert("Completá nombre y dirección.");
+
+            const { error } = await supabaseCliente.from('sucursales').insert([{ negocio_id: miNegocioID, nombre, direccion }]);
+            if (error) return alert("Error: " + error.message);
+            
+            document.getElementById('suc-nombre').value = '';
+            document.getElementById('suc-direccion').value = '';
+            await cargarSucursales(); // Recargamos todo
+        }
+
+        async function borrarSucursal(id) {
+            if(!confirm("¿Seguro querés borrar este lugar? Se borrarán sus horarios.")) return;
+            const { error } = await supabaseCliente.from('sucursales').delete().eq('id', id);
+            if (error) return alert("Error: " + error.message);
+            await cargarSucursales();
+        }
+
+        function irAAgendaSiHaySucursales() {
+            if (misSucursales.length === 0) return alert("Tenés que agregar al menos un consultorio primero.");
+            navegarA('pantalla-agenda');
+            cargarTurnosDelDia();
+        }
+
+        // --- AGENDA Y HORARIOS ---
+        async function cargarTurnosDelDia() {
+            if (misSucursales.length === 0) return;
+            const fecha = document.getElementById('filtro-fecha').value;
+            const sucursalId = document.getElementById('filtro-sucursal').value;
+            const div = document.getElementById('lista-turnos');
+            div.innerHTML = "Buscando turnos...";
+
+            const { data, error } = await supabaseCliente.from('turnos_activos')
+                .select('*').eq('negocio_id', miNegocioID).eq('sucursal_id', sucursalId).eq('fecha', fecha).order('hora', { ascending: true });
+
+            if (error) return div.innerHTML = "Error al cargar.";
+            if (data.length === 0) return div.innerHTML = "<p>No tenés turnos en esta sucursal hoy.</p>";
+
+            div.innerHTML = "";
+            data.forEach(turno => {
+                div.innerHTML += `<div class="turno-item"><strong>${turno.hora.substring(0,5)} hs</strong> - ${turno.cliente_nombre}</div>`;
+            });
+        }
+
         async function guardarFranjaHoraria() {
+            const sucursalId = document.getElementById('conf-sucursal').value;
             const dia = document.getElementById('conf-dia').value;
             const inicio = document.getElementById('conf-inicio').value;
             const fin = document.getElementById('conf-fin').value;
             const duracion = document.getElementById('conf-duracion').value;
 
-            if(!inicio || !fin) return alert("Completá la hora de inicio y fin.");
+            if(!inicio || !fin || !sucursalId) return alert("Completá todos los datos.");
 
-            const { data, error } = await supabaseCliente
-                .from('configuracion_agenda')
-                .insert([{
-                    negocio_id: miNegocioID,
-                    dia_semana: dia,
-                    hora_inicio: inicio,
-                    hora_fin: fin,
-                    duracion_minutos: duracion,
-                    cupo_maximo: 1
-                }]);
+            const { error } = await supabaseCliente.from('configuracion_agenda').insert([{
+                negocio_id: miNegocioID, sucursal_id: sucursalId, dia_semana: dia, hora_inicio: inicio, hora_fin: fin, duracion_minutos: duracion, cupo_maximo: 1
+            }]);
 
-            if (error) {
-                alert("Error al guardar la franja.");
-                console.error(error);
-            } else {
-                alert(`Franja de ${inicio} a ${fin} guardada con éxito para los ${dia}s.`);
-                document.getElementById('conf-inicio').value = '';
-                document.getElementById('conf-fin').value = '';
-            }
+            if (error) return alert("Error al guardar: " + error.message);
+            alert(`Franja guardada con éxito.`);
         }
 
         function cerrarSesion() {
-            miNegocioID = null;
+            miNegocioID = null; misSucursales = [];
             document.getElementById('log-password').value = '';
             navegarA('pantalla-login');
         }
