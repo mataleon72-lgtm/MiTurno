@@ -54,6 +54,8 @@
         opacity: 1;
     }
     #pantalla-portada { background-image: url('portada.jpg'); }
+    /* 🎨 Añadimos tu nuevo lienzo para seleccionar el lugar de atención */
+    #pantalla-sucursal { background-image: url('sucursal.jpg'); } 
     #pantalla-seleccion { background-image: url('seleccion.jpg'); }
     #pantalla-datos { background-image: url('datos.jpg'); }
     #pantalla-exito { background-image: url('exito.jpg'); }
@@ -93,7 +95,6 @@
         appearance: none;
     }
     
-    /* 🎨 Extirpación total del color azul/gris basura de los navegadores */
     .input-invisible:focus, .input-invisible:active {
         background: transparent !important;
         outline: none !important;
@@ -108,7 +109,7 @@
         transition: background-color 5000s ease-in-out 0s;
     }
 
-    /* Posiciones exactas de tu Portada móvil */
+    /* Posiciones de tu Portada */
     #txt-nombre { top: 58.0%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 22px; color: #fff; justify-content: flex-start; font-weight: bold; }
     #txt-telefono { top: 65.2%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 18px; color: #fff; justify-content: flex-start; }
     #txt-direccion { top: 72.5%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 15px; color: #fff; justify-content: flex-start; text-align: left; } 
@@ -116,6 +117,37 @@
     
     /* Botones invisibles para las flechas de Volver Atrás */
     .btn-volver { top: 6.5%; left: 5.5%; width: 15.0%; height: 7.0%; border-radius: 50%; }
+
+    /* 🎨 Estilo para el contenedor dinámico de los consultorios en tu lienzo sucursal.jpg */
+    #contenedor-sucursales {
+        position: absolute;
+        top: 30.0%; left: 10.0%; width: 80.0%; height: 55.0%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 10;
+        overflow-y: auto;
+    }
+    /* Botones estilizados para las sucursales (ajustalo como quieras a tu diseño) */
+    .btn-sucursal-opcion {
+        background: #008080;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn-sucursal-opcion small {
+        display: block;
+        font-size: 12px;
+        font-weight: normal;
+        margin-top: 4px;
+        opacity: 0.9;
+    }
 
     /* Estructura de tu Almanaque flotante */
     #control-mes {
@@ -200,7 +232,7 @@
     #in-telefono { top: 72.3%; left: 10.5%; width: 79.0%; height: 6.0%; }
     #btn-confirmar { top: 84.2%; left: 14.0%; width: 72.0%; height: 7.5%; }
 
-    /* 🎯 Reestructuración solicitada: Centrado perfecto y orden corregido en Éxito */
+    /* Reestructuración de Éxito */
     #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 18px; font-weight: bold; color: #333; }
     #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; color: #333; }
     #btn-mapa { top: 65.6%; left: 9.5%; width: 83.3%; height: 26.3%; }
@@ -214,12 +246,21 @@
         <div id="txt-nombre" class="texto-dinamico">Cargando...</div>
         <div id="txt-telefono" class="texto-dinamico">...</div>
         <div id="txt-direccion" class="texto-dinamico">...</div>
-        <button id="btn-comenzar" class="btn-invisible" onclick="navegarA('pantalla-seleccion'); inicializarCalendario();"></button>
+        <!-- Al hacer clic, ahora va primero a buscar las sucursales -->
+        <button id="btn-comenzar" class="btn-invisible" onclick="buscarSucursalesMedico()"></button>
+    </div>
+
+    <!-- 🎨 NUEVA PANTALLA 1B: SELECCIÓN DE CONSULTORIO -->
+    <div id="pantalla-sucursal" class="pantalla">
+        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-portada')"></button>
+        <div id="contenedor-sucursales">
+            <!-- Botones inyectados dinámicamente aquí -->
+        </div>
     </div>
 
     <!-- PANTALLA 2: CALENDARIO -->
     <div id="pantalla-seleccion" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-portada')"></button>
+        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-sucursal')"></button>
         <div id="control-mes">
             <button onclick="modificarMes(-1)">◀</button>
             <span id="nombre-mes">-</span>
@@ -234,7 +275,6 @@
         <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-seleccion')"></button>
         <input type="text" id="in-nombre" class="input-invisible" placeholder="">
         <input type="text" id="in-apellido" class="input-invisible" placeholder="">
-        <!-- DNI configurado como texto numérico: abre teclado de números en celu y no tiene flechas -->
         <input type="text" inputmode="numeric" pattern="[0-9]*" id="in-dni" class="input-invisible" placeholder="">
         <input type="tel" id="in-telefono" class="input-invisible" placeholder="">
         <button id="btn-confirmar" class="btn-invisible" onclick="confirmarTurno()"></button>
@@ -242,7 +282,6 @@
 
     <!-- PANTALLA 4: ÉXITO -->
     <div id="pantalla-exito" class="pantalla">
-        <!-- Flecha de volver en éxito activa: borra el turno en caliente si se arrepiente -->
         <button class="btn-invisible btn-volver" onclick="cancelarYVolver()"></button>
         <div id="txt-exito-fecha" class="texto-dinamico">-</div>
         <div id="txt-exito-hora" class="texto-dinamico">-</div>
@@ -261,10 +300,11 @@ const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
 const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const NEGOCIO_ID = "02191edc-f3dd-4e18-aab5-b3c79957f478";
+// 🌟 Poné acá el id real del médico que tiene cargados consultorio1 y consultorio2
+const NEGOCIO_ID = "ff5ea334-1f87-4e93-b809-331d368d58c8"; 
 
-// Agregamos esta variable suelta justo arriba de la función
-let direccionParaMapa = ""; 
+let sucursalSeleccionadaID = null;
+let direccionMapaActual = ""; // Guardamos la dirección para Google Maps dinámico
 
 async function cargarDatosNegocio() {
     try {
@@ -276,11 +316,8 @@ async function cargarDatosNegocio() {
 
         if (!error && negocio) {
             document.getElementById('txt-nombre').innerText = negocio.nombre;
-            document.getElementById('txt-telefono').innerText = negocio.telefono || "Teléfono no configurado";
-            document.getElementById('txt-direccion').innerText = negocio.direccion || "Dirección no configurada"; 
-            
-            // Atrapamos la dirección para usarla en el mapa
-            direccionParaMapa = negocio.direccion; 
+            document.getElementById('txt-telefono').innerText = negocio.rubro || "Kinesiología";
+            document.getElementById('txt-direccion').innerText = "Toca comenzar para ver sedes"; 
         }
     } catch (err) {
         console.error(err);
@@ -293,6 +330,40 @@ function navegarA(idDestino) {
         pantalla.classList.remove('activa');
     });
     document.getElementById(idDestino).classList.add('activa');
+}
+
+// 🎨 NUEVA FUNCIÓN: Busca los centros médicos y arma los botones flotantes
+async function buscarSucursalesMedico() {
+    const contenedor = document.getElementById('contenedor-sucursales');
+    contenedor.innerHTML = '<p style="text-align:center; color:#666;">Buscando sedes...</p>';
+    navegarA('pantalla-sucursal');
+
+    const { data: sucursales, error } = await supabaseCliente
+        .from('sucursales')
+        .select('*')
+        .eq('negocio_id', NEGOCIO_ID);
+
+    if (error || !sucursales || sucursales.length === 0) {
+        contenedor.innerHTML = '<p style="text-align:center; color:#ff4d4d;">Este profesional no tiene consultorios activos.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = "";
+    sucursales.forEach(suc => {
+        contenedor.innerHTML += `
+            <button class="btn-sucursal-opcion" onclick="seleccionarSucursal('${suc.id}', '${suc.direccion}')">
+                ${suc.nombre}
+                <small>📍 ${suc.direccion}</small>
+            </button>
+        `;
+    });
+}
+
+function seleccionarSucursal(idSucursal, direccion) {
+    sucursalSeleccionadaID = idSucursal;
+    direccionMapaActual = direccion; // Guardamos la calle para el botón de mapas final
+    inicializarCalendario();
+    navegarA('pantalla-seleccion');
 }
 
 function inicializarCalendario() {
@@ -327,7 +398,6 @@ function construirCalendario() {
         btnDia.className = 'celda-dia';
         btnDia.innerText = dia;
 
-        // Fijamos hora al mediodía UTC para evitar problemas de desfasajes horarios de zona
         let fechaObjeto = new Date(Date.UTC(año, mes, dia, 12, 0, 0));
         let opcionesDiaPalabra = { weekday: 'long', timeZone: 'UTC' };
         let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra).toLowerCase();
@@ -344,18 +414,19 @@ function construirCalendario() {
     }
 }
 
-// 🎯 NUEVO MOTOR DE AGENDA GLOBALIZADO: Levanta martes, miércoles y jueves sin fugas
+// 🌟 FILTRO POR SUCURSAL ACTIVADO
 async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
     turnoSeleccionado.fechaTexto = fechaTexto;
     turnoSeleccionado.fechaISO = fechaISO;
     const contenedorHoras = document.getElementById('contenedor-horas');
     contenedorHoras.innerHTML = '<p class="mensaje-estado">Cargando...</p>';
 
-    // Bajamos el paquete completo de agendas de este negocio
+    // Bajamos las agendas pero filtradas por NEGOCIO y SUCURSAL
     const { data: agenda, error: errAgenda } = await supabaseCliente
       .from('configuracion_agenda')
       .select('*')
-      .eq('negocio_id', NEGOCIO_ID);
+      .eq('negocio_id', NEGOCIO_ID)
+      .eq('sucursal_id', sucursalSeleccionadaID);
 
     function limpiarTexto(texto) {
         if (!texto) return "";
@@ -364,22 +435,22 @@ async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
 
     const diaCalculadoClean = limpiarTexto(diaPalabra);
     
-    // Macheamos el día de la semana contra la base de datos de forma blindada
     let agendaDelDia = null;
     if (agenda) {
         agendaDelDia = agenda.find(item => limpiarTexto(item.dia_semana) === diaCalculadoClean);
     }
 
     if (errAgenda || !agendaDelDia) {
-        contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día.</p>';
+        contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día acá.</p>';
         return;
     }
 
-    // Buscamos turnos ocupados
-    const { data: ocupados, error: errOcupados } = await supabaseCliente
+    // Buscamos turnos ocupados filtrados también por sucursal
+    const { data: ocupados } = await supabaseCliente
         .from('turnos_activos')
         .select('hora')
         .eq('fecha', fechaISO)
+        .eq('sucursal_id', sucursalSeleccionadaID)
         .eq('estado', 'reservado');
 
     let listadoOcupados = [];
@@ -396,7 +467,6 @@ async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
     let minutosTotalesInicio = horaActual * 60 + minActual;
     let minutesTotalesFin = horaFin * 60 + minFin;
 
-    // Generador matemático de intervalos de tiempo
     while (minutosTotalesInicio < minutesTotalesFin) {
         let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
         let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
@@ -422,7 +492,7 @@ function clickEnHora(horaElegida) {
     navegarA('pantalla-datos');
 }
 
-// Envío a Supabase e inyección ordenada del éxito
+// 🌟 GUARDADO DE TURNO CON ENLACE A SUCURSAL
 async function confirmarTurno() {
     let nombre = document.getElementById('in-nombre').value.trim();
     let apellido = document.getElementById('in-apellido').value.trim();
@@ -438,6 +508,7 @@ async function confirmarTurno() {
         .from('turnos_activos')
         .insert([{
             negocio_id: NEGOCIO_ID,
+            sucursal_id: sucursalSeleccionadaID, // Guardamos la sucursal obligatoria
             fecha: turnoSeleccionado.fechaISO,
             hora: turnoSeleccionado.hora + ":00",
             estado: 'reservado',
@@ -448,30 +519,22 @@ async function confirmarTurno() {
 
     if (error) {
         alert("Hubo un error al reservar el turno. Por favor reintentá.");
-        console.error(error);
         return;
     }
 
-    // Registramos la identificación del turno recién nacido para habilitar el arrepentimiento
     if (data && data[0]) {
         idTurnoCreado = data[0].identificacion;
     }
 
-    // 🎯 REESTRUCTURACIÓN DE CAMPOS SOLICITADA EN ACCIÓN: Nombre arriba, Fecha y Hora abajo
     document.getElementById('txt-exito-fecha').innerText = nombre + ' ' + apellido;
     document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.fechaTexto + ' - ' + turnoSeleccionado.hora + ' hs';
     
     navegarA('pantalla-exito');
 }
 
-// Función del botón Volver en éxito: Borra en caliente y libera la grilla
 async function cancelarYVolver() {
     if (idTurnoCreado) {
-        await supabaseCliente
-            .from('turnos_activos')
-            .delete()
-            .eq('identificacion', idTurnoCreado);
-        
+        await supabaseCliente.from('turnos_activos').delete().eq('identificacion', idTurnoCreado);
         idTurnoCreado = null; 
     }
     navegarA('pantalla-seleccion');
@@ -479,13 +542,8 @@ async function cancelarYVolver() {
 }
 
 function abrirMapa() {
-    if (direccionParaMapa) {
-        // encodeURIComponent transforma los espacios y comas en formato web válido (ej: %20)
-        let linkGoogleMaps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(direccionParaMapa);
-        window.open(linkGoogleMaps, '_blank');
-    } else {
-        alert("La dirección del negocio no está configurada.");
-    }
+    // 🌟 Ahora Google Maps abre dinámicamente con la dirección de la sucursal elegida
+    window.open('https://maps.google.com/?q=' + encodeURIComponent(direccionMapaActual), '_blank');
 }
 </script>
 </body>
