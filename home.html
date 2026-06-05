@@ -28,6 +28,7 @@
 
     <div class="contenedor-home">
         
+        <!-- PARTE A: REGISTRO DEL PACIENTE -->
         <div id="registro-paciente" class="pantalla-inicial">
             <h2>¡Bienvenido a Mi Turno!</h2>
             <p>Para empezar a agendar tus turnos, dejanos tu nombre y teléfono de contacto.</p>
@@ -36,10 +37,12 @@
             <button onclick="registrarNuevoPaciente()" style="width: 100%; margin-top: 15px;">Comenzar</button>
         </div>
 
+        <!-- PARTE B: EL PANEL PRINCIPAL DEL PACIENTE -->
         <div id="panel-paciente" class="pantalla-inicial">
             <h2 id="saludo-paciente">Hola...</h2>
             <p>Gestioná tus profesionales y turnos desde acá.</p>
             
+            <!-- Buscador por Alias -->
             <div class="seccion">
                 <label style="font-weight: 600; color: #444;">Agregar Nuevo Profesional:</label>
                 <div class="caja-busqueda">
@@ -48,6 +51,7 @@
                 </div>
             </div>
 
+            <!-- Listado de Favoritos -->
             <div class="seccion" style="flex: 1;">
                 <label style="font-weight: 600; color: #444; display: block; margin-bottom: 10px;">Mis Profesionales Agendados:</label>
                 <div id="lista-favoritos" class="lista-profesionales">
@@ -59,14 +63,12 @@
     </div>
 
     <script>
-        // CONEXIÓN SUPABASE
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let idPacienteActual = localStorage.getItem('mi_turno_paciente_id');
 
-        // Verificar sesión del paciente al cargar
         async function verificarSesionPaciente() {
             if (!idPacienteActual) {
                 document.getElementById('registro-paciente').classList.add('activa');
@@ -77,7 +79,6 @@
             }
         }
 
-        // 1. REGISTRAR PACIENTE
         async function registrarNuevoPaciente() {
             const nombre = document.getElementById('pac-nombre').value.trim();
             const telefono = document.getElementById('pac-telefono').value.trim();
@@ -109,21 +110,33 @@
             }
         }
 
-        // 2. BUSCAR Y AGREGAR MÉDICO (CÓDIGO ACTUALIZADO CON ILIKE)
+        // 🕵️‍♂️ NUEVA FUNCIÓN CON ESPÍAS TÁCTICOS INTEGRADOS
         async function buscarYAgregarMedico() {
             const aliasBuscado = document.getElementById('input-alias-medico').value.trim().toUpperCase();
             if (!aliasBuscado) return alert("Escribí el código del profesional.");
 
-            // Buscar en Supabase ignorando mayúsculas/minúsculas
+            // 🔍 ESPÍA 1: Ver qué se está procesando exactamente
+            alert("Espía 1 - Buscando en Supabase el alias exacto: [" + aliasBuscado + "]");
+
             const { data: medico, error } = await supabaseCliente
                 .from('negocios')
                 .select('id, nombre')
                 .ilike('alias', aliasBuscado)
                 .single();
 
+            // 🔍 ESPÍA 2: Ver si Supabase tiró algún error interno o de red
+            if (error) {
+                alert("Espía 2 (Hubo Error en Supabase) -> Código: " + error.code + " | Mensaje: " + error.message);
+            }
+
+            // 🔍 ESPÍA 3: Ver si la respuesta vino vacía sin dar error de código
+            if (!medico) {
+                alert("Espía 3 -> Supabase respondió con éxito pero devolvió NULL (La tabla negocios no tiene ninguna fila que machee con ese alias).");
+            }
+
             if (error || !medico) return alert("No se encontró ningún profesional con ese código. Verificá que esté bien escrito.");
 
-            // Verificar si ya está agendado
+            // Continuar con el guardado si pasó los filtros
             const { data: yaExiste } = await supabaseCliente
                 .from('pacientes_profesionales')
                 .select('*')
@@ -136,7 +149,6 @@
                 return;
             }
 
-            // Insertar el enlace favorito
             const { error: errEnlace } = await supabaseCliente
                 .from('pacientes_profesionales')
                 .insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
@@ -148,7 +160,6 @@
             await cargarMedicosFavoritos();
         }
 
-        // 3. CARGAR LISTA VISUAL
         async function cargarMedicosFavoritos() {
             const contenedor = document.getElementById('lista-favoritos');
             
@@ -185,7 +196,6 @@
             window.location.href = `index.html?id=${idMedico}`;
         }
 
-        // Iniciar el chequeo de entrada
         verificarSesionPaciente();
     </script>
 </body>
