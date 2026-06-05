@@ -47,7 +47,7 @@
         background-repeat: no-repeat;
         display: none; 
         opacity: 0;
-        transition: opacity 0.3s ease-in-out; 
+        transition: opacity 0.2s ease-in-out; 
     }
     .pantalla.activa {
         display: block;
@@ -60,51 +60,64 @@
 
     .btn-invisible {
         position: absolute;
-        background: transparent; 
-        border: none;
+        background: transparent !important; 
+        border: none !important;
+        outline: none !important;
         cursor: pointer;
         z-index: 10;
     }
     .texto-dinamico {
         position: absolute;
-        color: #333333; /* Cambiado a oscuro para que se lea perfecto en tus tarjetas blancas */
+        color: #333333; 
         font-weight: 600;
         z-index: 5;
         display: flex;
         justify-content: center;
         align-items: center;
         text-align: center;
+        background: transparent !important;
     }
     .input-invisible {
         position: absolute;
-        background: transparent; 
-        border: none;
-        outline: none;
-        color: #333;
+        background: transparent !important; 
+        border: none !important;
+        outline: none !important;
+        color: #333 !important;
         font-size: 18px;
+        font-weight: 600;
         padding: 5px 10px;
         z-index: 10;
+        text-align: center;
+        box-shadow: none !important;
+        -webkit-appearance: none;
+        appearance: none;
     }
     
-    /* 🎨 Estilos para evitar el color azul basura en tus inputs */
-    .input-invisible:focus {
-        outline: none;
-        background: transparent;
+    /* 🎨 Extirpación total del color azul/gris basura de los navegadores */
+    .input-invisible:focus, .input-invisible:active {
+        background: transparent !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
     .input-invisible:-webkit-autofill,
     .input-invisible:-webkit-autofill:hover, 
     .input-invisible:-webkit-autofill:focus {
-        -webkit-box-shadow: 0 0 0px 1000px #edf2f7 inset !important;
-        box-shadow: 0 0 0px 1000px #edf2f7 inset !important;
+        -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+        box-shadow: 0 0 0px 1000px transparent inset !important;
         -webkit-text-fill-color: #333 !important;
+        transition: background-color 5000s ease-in-out 0s;
     }
 
-    #txt-nombre { top: 55.5%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; color: #fff; justify-content: flex-start; }
-    #txt-telefono { top: 62.6%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 20px; color: #fff; justify-content: flex-start; }
-    #txt-direccion { top: 70.1%; left: 24.7%; width: 70.6%; height: 5.4%; font-size: 16px; color: #fff; justify-content: flex-start; text-align: left; } 
-    #btn-comenzar { top: 77.6%; left: 6.7%; width: 86.5%; height: 17.1%; }
-    .btn-volver { top: 5%; left: 5%; width: 15.3%; height: 7.4%; border-radius: 50%; }
+    /* Posiciones exactas de tu Portada móvil */
+    #txt-nombre { top: 58.0%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 22px; color: #fff; justify-content: flex-start; font-weight: bold; }
+    #txt-telefono { top: 65.2%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 18px; color: #fff; justify-content: flex-start; }
+    #txt-direccion { top: 72.5%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 15px; color: #fff; justify-content: flex-start; text-align: left; } 
+    #btn-comenzar { top: 82.0%; left: 5.0%; width: 90.0%; height: 12.0%; }
+    
+    /* Botones invisibles para las flechas de Volver Atrás */
+    .btn-volver { top: 6.5%; left: 5.5%; width: 15.0%; height: 7.0%; border-radius: 50%; }
 
+    /* Estructura de tu Almanaque flotante */
     #control-mes {
         position: absolute;
         top: 14.8%; left: 16.4%; width: 67.1%; height: 4.7%;
@@ -112,42 +125,39 @@
         justify-content: space-between;
         align-items: center;
         z-index: 10;
-        color: #333;
+        color: #008080;
         font-weight: bold;
         font-size: 18px;
     }
     #control-mes button {
-        background: transparent; color: #333; border: none; 
+        background: transparent; color: #008080; border: none; 
         font-size: 20px; font-weight: bold; cursor: pointer;
         padding: 0 10px;
     }
     #contenedor-calendario {
         position: absolute;
-        top: 30.7%; left: 7.9%; width: 84.5%; height: 30.2%;
+        top: 33.5%; left: 9.0%; width: 82.0%; height: 26.5%;
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         grid-template-rows: repeat(6, 1fr);
-        gap: 4px;
+        gap: 2px;
         z-index: 10;
-        padding: 5px;
     }
     #contenedor-horas {
         position: absolute;
-        top: 68.6%; left: 7.9%; width: 84.5%; height: 26.6%;
+        top: 69.5%; left: 9.0%; width: 82.0%; height: 25.0%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        gap: 6px;
         align-content: start;
         overflow-y: auto;
         z-index: 10;
-        padding: 5px;
     }
     .celda-dia {
         background: transparent;
         border: none;
-        border-radius: 4px;
         color: #333; 
-        font-weight: 600;
+        font-weight: bold;
         font-size: 14px;
         cursor: pointer;
         display: flex;
@@ -160,42 +170,46 @@
     }
     .celda-dia.seleccionado {
         background: #333 !important; 
-        color: #fff;
+        color: #fff !important;
         border-radius: 50%;
     }
     .celda-hora {
-        background: rgba(0, 128, 0, 0.7); 
+        background: #2ecc71; 
         border: none;
         border-radius: 6px;
         color: white;
         font-weight: bold;
-        font-size: 13px;
-        padding: 8px 0;
+        font-size: 14px;
+        padding: 6px 0;
         cursor: pointer;
         text-align: center;
     }
     .mensaje-estado {
         grid-column: span 4;
         text-align: center;
-        color: #95a5a6;
-        font-size: 14px;
-        padding: 20px 0;
+        color: #7f8c8d;
+        font-size: 15px;
+        padding: 15px 0;
+        font-weight: 600;
     }
 
-    #in-nombre { top: 34.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-apellido { top: 47.2%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-dni { top: 60.2%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #in-telefono { top: 72.7%; left: 11.6%; width: 78.9%; height: 6.9%; }
-    #btn-confirmar { top: 84.2%; left: 11.6%; width: 78.9%; height: 10.6%; }
+    /* Cajas de texto invisibles de la Pantalla de Datos */
+    #in-nombre { top: 34.6%; left: 10.5%; width: 79.0%; height: 6.0%; }
+    #in-apellido { top: 47.1%; left: 10.5%; width: 79.0%; height: 6.0%; }
+    #in-dni { top: 59.8%; left: 10.5%; width: 79.0%; height: 6.0%; }
+    #in-telefono { top: 72.3%; left: 10.5%; width: 79.0%; height: 6.0%; }
+    #btn-confirmar { top: 84.2%; left: 14.0%; width: 72.0%; height: 7.5%; }
 
-    /* 🎯 Reestructuración y Centrado Perfecto en la pantalla de éxito */
-    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; }
-    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; }
+    /* 🎯 Reestructuración solicitada: Centrado perfecto y orden corregido en Éxito */
+    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 18px; font-weight: bold; color: #333; }
+    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; color: #333; }
     #btn-mapa { top: 65.6%; left: 9.5%; width: 83.3%; height: 26.3%; }
 </style>
 </head>
 <body>
 <div id="app-container">
+    
+    <!-- PANTALLA 1: PORTADA -->
     <div id="pantalla-portada" class="pantalla activa">
         <div id="txt-nombre" class="texto-dinamico">Cargando...</div>
         <div id="txt-telefono" class="texto-dinamico">...</div>
@@ -203,6 +217,7 @@
         <button id="btn-comenzar" class="btn-invisible" onclick="navegarA('pantalla-seleccion'); inicializarCalendario();"></button>
     </div>
 
+    <!-- PANTALLA 2: CALENDARIO -->
     <div id="pantalla-seleccion" class="pantalla">
         <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-portada')"></button>
         <div id="control-mes">
@@ -214,23 +229,31 @@
         <div id="contenedor-horas"></div>
     </div>
 
+    <!-- PANTALLA 3: FORMULARIO -->
     <div id="pantalla-datos" class="pantalla">
         <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-seleccion')"></button>
-        <input type="text" id="in-nombre" class="input-invisible" placeholder="Ej: Carlos">
-        <input type="text" id="in-apellido" class="input-invisible" placeholder="Ej: Gómez">
-        <input type="text" inputmode="numeric" pattern="[0-9]*" id="in-dni" class="input-invisible" placeholder="Sin puntos">
-        <input type="tel" id="in-telefono" class="input-invisible" placeholder="Código de área + número">
+        <input type="text" id="in-nombre" class="input-invisible" placeholder="">
+        <input type="text" id="in-apellido" class="input-invisible" placeholder="">
+        <!-- DNI configurado como texto numérico: abre teclado de números en celu y no tiene flechas -->
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="in-dni" class="input-invisible" placeholder="">
+        <input type="tel" id="in-telefono" class="input-invisible" placeholder="">
         <button id="btn-confirmar" class="btn-invisible" onclick="confirmarTurno()"></button>
     </div>
 
+    <!-- PANTALLA 4: ÉXITO -->
     <div id="pantalla-exito" class="pantalla">
+        <!-- Flecha de volver en éxito activa: borra el turno en caliente si se arrepiente -->
+        <button class="btn-invisible btn-volver" onclick="cancelarYVolver()"></button>
         <div id="txt-exito-fecha" class="texto-dinamico">-</div>
         <div id="txt-exito-hora" class="texto-dinamico">-</div>
         <button id="btn-mapa" class="btn-invisible" onclick="abrirMapa()"></button>
     </div>
+
 </div>
+
 <script>
 let turnoSeleccionado = { fechaTexto: "", fechaISO: "", hora: "" };
+let idTurnoCreado = null; 
 let fechaNavegacion = new Date();
 const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -240,7 +263,7 @@ const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const NEGOCIO_ID = "02191edc-f3dd-4e18-aab5-b3c79957f478";
 
-// Carga del Kinesiólogo en la portada
+// Cargar dinámicamente los datos en la portada desde la tabla negocios
 async function cargarDatosNegocio() {
     try {
         const { data: negocio, error } = await supabaseCliente
@@ -252,7 +275,7 @@ async function cargarDatosNegocio() {
         if (!error && negocio) {
             document.getElementById('txt-nombre').innerText = negocio.nombre;
             document.getElementById('txt-telefono').innerText = negocio.rubro || "Kinesiología";
-            document.getElementById('txt-direccion').innerText = "Hacé clic abajo para comenzar"; 
+            document.getElementById('txt-direccion').innerText = negocio.direccion || "Dirección no configurada"; 
         }
     } catch (err) {
         console.error(err);
@@ -261,157 +284,197 @@ async function cargarDatosNegocio() {
 cargarDatosNegocio();
 
 function navegarA(idDestino) {
-document.querySelectorAll('.pantalla').forEach(pantalla => {
-pantballa = pantalla.classList.remove('activa');
-});
-document.getElementById(idDestino).classList.add('activa');
+    document.querySelectorAll('.pantalla').forEach(pantalla => {
+        pantalla.classList.remove('activa');
+    });
+    document.getElementById(idDestino).classList.add('activa');
 }
 
 function inicializarCalendario() {
-fechaNavegacion = new Date();
-construirCalendario();
+    fechaNavegacion = new Date();
+    construirCalendario();
 }
 
 function modificarMes(direccion) {
-fechaNavegacion.setMonth(fechaNavegacion.getMonth() + direccion);
-construirCalendario();
-document.getElementById('contenedor-horas').innerHTML = '';
+    fechaNavegacion.setMonth(fechaNavegacion.getMonth() + direccion);
+    construirCalendario();
+    document.getElementById('contenedor-horas').innerHTML = '';
 }
 
 function construirCalendario() {
-const contenedor = document.getElementById('contenedor-calendario');
-contenedor.innerHTML = '';
-let año = fechaNavegacion.getFullYear();
-let mes = fechaNavegacion.getMonth();
-document.getElementById('nombre-mes').innerText = mesesNombres[mes] + ' ' + año;
-let primerDiaSemana = new Date(año, mes, 1).getDay();
-let totalDiasMes = new Date(año, mes + 1, 0).getDate();
+    const contenedor = document.getElementById('contenedor-calendario');
+    contenedor.innerHTML = '';
+    let año = fechaNavegacion.getFullYear();
+    let mes = fechaNavegacion.getMonth();
+    document.getElementById('nombre-mes').innerText = mesesNombres[mes] + ' ' + año;
+    
+    let primerDiaSemana = new Date(año, mes, 1).getDay();
+    let totalDiasMes = new Date(año, mes + 1, 0).getDate();
 
-for (let i = 0; i < primerDiaSemana; i++) {
-let celdaVacia = document.createElement('div');
-celdaVacia.className = 'celda-dia dia-vacio';
-contenedor.appendChild(celdaVacia);
+    for (let i = 0; i < primerDiaSemana; i++) {
+        let celdaVacia = document.createElement('div');
+        celdaVacia.className = 'celda-dia dia-vacio';
+        contenedor.appendChild(celdaVacia);
+    }
+
+    for (let dia = 1; dia <= totalDiasMes; dia++) {
+        let btnDia = document.createElement('button');
+        btnDia.className = 'celda-dia';
+        btnDia.innerText = dia;
+
+        // Fijamos hora al mediodía UTC para evitar problemas de desfasajes horarios de zona
+        let fechaObjeto = new Date(Date.UTC(año, mes, dia, 12, 0, 0));
+        let opcionesDiaPalabra = { weekday: 'long', timeZone: 'UTC' };
+        let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra).toLowerCase();
+
+        let fechaFormateadaText = dia + ' de ' + mesesNombres[mes] + ' de ' + año;
+        let fechaISO = año + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+
+        btnDia.onclick = () => {
+            document.querySelectorAll('.celda-dia').forEach(c => c.classList.remove('seleccionado'));
+            btnDia.classList.add('seleccionado');
+            buscarHorariosReales(diaSemanaPalabra, fechaFormateadaText, fechaISO);
+        };
+        contenedor.appendChild(btnDia);
+    }
 }
 
-for (let dia = 1; dia <= totalDiasMes; dia++) {
-let btnDia = document.createElement('button');
-btnDia.className = 'celda-dia';
-btnDia.innerText = dia;
-
-// Usamos UTC explícito para que no haya desfasaje de días por la zona horaria de Argentina
-let fechaObjeto = new Date(Date.UTC(año, mes, dia, 12, 0, 0));
-let opcionesDiaPalabra = { weekday: 'long', timeZone: 'UTC' };
-let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra);
-diaSemanaPalabra = diaSemanaPalabra.charAt(0).toUpperCase() + diaSemanaPalabra.slice(1);
-
-let fechaFormateadaText = dia + ' de ' + mesesNombres[mes] + ' de ' + año;
-let fechaISO = año + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
-
-btnDia.onclick = () => {
-document.querySelectorAll('.celda-dia').forEach(c => c.classList.remove('seleccionado'));
-btnDia.classList.add('seleccionado');
-buscarHorariosReales(diaSemanaPalabra, fechaFormateadaText, fechaISO);
-};
-contenedor.appendChild(btnDia);
-}
-}
-
-// MOTOR DE HORARIOS TOTALMENTE ASIMILADOR Y BLINDADO
+// 🎯 NUEVO MOTOR DE AGENDA GLOBALIZADO: Levanta martes, miércoles y jueves sin fugas
 async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
-turnoSeleccionado.fechaTexto = fechaTexto;
-turnoSeleccionado.fechaISO = fechaISO;
-const contenedorHoras = document.getElementById('contenedor-horas');
-contenedorHoras.innerHTML = '<p class="mensaje-estado">Cargando...</p>';
+    turnoSeleccionado.fechaTexto = fechaTexto;
+    turnoSeleccionado.fechaISO = fechaISO;
+    const contenedorHoras = document.getElementById('contenedor-horas');
+    contenedorHoras.innerHTML = '<p class="mensaje-estado">Cargando...</p>';
 
-const { data: agenda, error: errAgenda } = await supabaseCliente
-  .from('configuracion_agenda')
-  .select('*');
+    // Bajamos el paquete completo de agendas de este negocio
+    const { data: agenda, error: errAgenda } = await supabaseCliente
+      .from('configuracion_agenda')
+      .select('*')
+      .eq('negocio_id', NEGOCIO_ID);
 
-// ESCUDO DEFINITIVO CONTRA TILDES, MAYÚSCULAS Y ESPACIOS BASURA
-function limpiarTexto(texto) {
-    if (!texto) return "";
-    return texto
-        .trim()                  
-        .toUpperCase()           
-        .normalize("NFD")        
-        .replace(/[\u0300-\u036f]/g, ""); 
-}
+    function limpiarTexto(texto) {
+        if (!texto) return "";
+        return texto.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
 
-const agendaEncontrada = agenda && agenda[0];
+    const diaCalculadoClean = limpiarTexto(diaPalabra);
+    
+    // Macheamos el día de la semana contra la base de datos de forma blindada
+    let agendaDelDia = null;
+    if (agenda) {
+        agendaDelDia = agenda.find(item => limpiarTexto(item.dia_semana) === diaCalculadoClean);
+    }
 
-if (errAgenda || !agendaEncontrada) {
-contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día.</p>';
-return;
-}
+    if (errAgenda || !agendaDelDia) {
+        contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día.</p>';
+        return;
+    }
 
-const diaCalculado = limpiarTexto(diaPalabra);
-const diaBaseDatos = limpiarTexto(agendaEncontrada.dia_semana);
+    // Buscamos turnos ocupados
+    const { data: ocupados, error: errOcupados } = await supabaseCliente
+        .from('turnos_activos')
+        .select('hora')
+        .eq('fecha', fechaISO)
+        .eq('estado', 'reservado');
 
-if (diaCalculado !== diaBaseDatos) {
-contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día.</p>';
-return;
-}
+    let listadoOcupados = [];
+    if (ocupados) {
+        listadoOcupados = ocupados.map(o => o.hora.substring(0, 5));
+    }
+    
+    contenedorHoras.innerHTML = '';
 
-const { data: ocupados, error: errOcupados } = await supabaseCliente
-.from('turnos_activos')
-.select('hora')
-.eq('fecha', fechaISO)
-.eq('estado', 'reservado');
+    let intervalo = agendaDelDia.duracion_minutos || 30;
+    let [horaActual, minActual] = agendaDelDia.hora_inicio.split(':').map(Number);
+    let [horaFin, minFin] = agendaDelDia.hora_fin.split(':').map(Number);
+    
+    let minutosTotalesInicio = horaActual * 60 + minActual;
+    let minutesTotalesFin = horaFin * 60 + minFin;
 
-let listadoOcupados = [];
-if (ocupados) {
-listadoOcupados = ocupados.map(o => o.hora.substring(0, 5));
-}
-contenedorHoras.innerHTML = '';
-
-let intervalo = 30;
-if (agendaEncontrada.duracion_minutos) { intervalo = agendaEncontrada.duracion_minutos; }
-
-let [horaActual, minActual] = agendaEncontrada.hora_inicio.split(':').map(Number);
-let [horaFin, minFin] = agendaEncontrada.hora_fin.split(':').map(Number);
-let minutosTotalesInicio = horaActual * 60 + minActual;
-let minutesTotalesFin = horaFin * 60 + minFin;
-
-while (minutosTotalesInicio < minutesTotalesFin) {
-let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
-let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
-let horaTexto = hStr + ':' + mStr;
-if (!listadoOcupados.includes(horaTexto)) {
-let btnHora = document.createElement('button');
-btnHora.className = 'celda-hora';
-btnHora.innerText = horaTexto;
-btnHora.onclick = () => clickEnHora(horaTexto);
-contenedorHoras.appendChild(btnHora);
-}
-minutosTotalesInicio += intervalo;
-}
-if (contenedorHoras.innerHTML === '') {
-contenedorHoras.innerHTML = '<p class="mensaje-estado">No quedan horarios.</p>';
-}
+    // Generador matemático de intervalos de tiempo
+    while (minutosTotalesInicio < minutesTotalesFin) {
+        let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
+        let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
+        let horaTexto = hStr + ':' + mStr;
+        
+        if (!listadoOcupados.includes(horaTexto)) {
+            let btnHora = document.createElement('button');
+            btnHora.className = 'celda-hora';
+            btnHora.innerText = horaTexto;
+            btnHora.onclick = () => clickEnHora(horaTexto);
+            contenedorHoras.appendChild(btnHora);
+        }
+        minutosTotalesInicio += intervalo;
+    }
+    
+    if (contenedorHoras.innerHTML === '') {
+        contenedorHoras.innerHTML = '<p class="mensaje-estado">No quedan horarios.</p>';
+    }
 }
 
 function clickEnHora(horaElegida) {
-turnoSeleccionado.hora = horaElegida;
-navegarA('pantalla-datos');
+    turnoSeleccionado.hora = horaElegida;
+    navegarA('pantalla-datos');
 }
 
-function confirmarTurno() {
-let nombre = document.getElementById('in-nombre').value;
-let apellido = document.getElementById('in-apellido').value;
-if(nombre === "" || apellido === "") {
-alert("Por favor, completá los datos principales para continuar.");
-return;
+// Envío a Supabase e inyección ordenada del éxito
+async function confirmarTurno() {
+    let nombre = document.getElementById('in-nombre').value.trim();
+    let apellido = document.getElementById('in-apellido').value.trim();
+    let dni = document.getElementById('in-dni').value.trim();
+    let telefono = document.getElementById('in-telefono').value.trim();
+
+    if(nombre === "" || apellido === "") {
+        alert("Por favor, ingresá tu Nombre y Apellido.");
+        return;
+    }
+
+    const { data, error } = await supabaseCliente
+        .from('turnos_activos')
+        .insert([{
+            negocio_id: NEGOCIO_ID,
+            fecha: turnoSeleccionado.fechaISO,
+            hora: turnoSeleccionado.hora + ":00",
+            estado: 'reservado',
+            cliente_nombre: nombre + ' ' + apellido,
+            cliente_telefono: telefono
+        }])
+        .select();
+
+    if (error) {
+        alert("Hubo un error al reservar el turno. Por favor reintentá.");
+        console.error(error);
+        return;
+    }
+
+    // Registramos la identificación del turno recién nacido para habilitar el arrepentimiento
+    if (data && data[0]) {
+        idTurnoCreado = data[0].identificacion;
+    }
+
+    // 🎯 REESTRUCTURACIÓN DE CAMPOS SOLICITADA EN ACCIÓN: Nombre arriba, Fecha y Hora abajo
+    document.getElementById('txt-exito-fecha').innerText = nombre + ' ' + apellido;
+    document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.fechaTexto + ' - ' + turnoSeleccionado.hora + ' hs';
+    
+    navegarA('pantalla-exito');
 }
 
-// 🎯 REESTRUCTURACIÓN DE CAMPOS SOLICITADA
-document.getElementById('txt-exito-fecha').innerText = nombre + ' ' + apellido;
-document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.fechaTexto + ' - ' + turnoSeleccionado.hora + ' hs';
-navegarA('pantalla-exito');
+// Función del botón Volver en éxito: Borra en caliente y libera la grilla
+async function cancelarYVolver() {
+    if (idTurnoCreado) {
+        await supabaseCliente
+            .from('turnos_activos')
+            .delete()
+            .eq('identificacion', idTurnoCreado);
+        
+        idTurnoCreado = null; 
+    }
+    navegarA('pantalla-seleccion');
+    construirCalendario();
 }
 
 function abrirMapa() {
-// Dirección exacta configurada para abrir en Google Maps
-window.open('https://www.google.com/maps/search/?api=1&query=Av.+Francisco+Beiró+y+Sanabria,+Devoto,+Buenos+Aires', '_blank');
+    window.open('https://maps.google.com/?q=Av.+Francisco+Beiro+y+Sanabria,+Devoto', '_blank');
 }
 </script>
 </body>
