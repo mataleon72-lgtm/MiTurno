@@ -22,6 +22,7 @@
         <h2>Crear mi Negocio</h2>
         <input type="text" id="reg-nombre" placeholder="Nombre del Profesional / Local">
         <input type="text" id="reg-alias" placeholder="Elegí tu Alias (Ej: DR-PEREZ)">
+        <input type="text" id="reg-rubro" placeholder="Rubro o Especialidad (Ej: Kinesiología)">
         <input type="text" id="reg-telefono" placeholder="Teléfono">
         <input type="text" id="reg-direccion" placeholder="Dirección">
         <input type="password" id="reg-password" placeholder="Crear una Contraseña">
@@ -77,7 +78,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Variable global para guardar quién está usando el panel
         let miNegocioID = null;
 
         function navegarA(idDestino) {
@@ -87,22 +87,30 @@
 
         // 1. REGISTRAR NEGOCIO NUEVO
         async function registrarNegocio() {
-            const nombre = document.getElementById('reg-nombre').value;
+            const nombre = document.getElementById('reg-nombre').value.trim();
             const alias = document.getElementById('reg-alias').value.trim().toUpperCase();
-            const telefono = document.getElementById('reg-telefono').value;
-            const direccion = document.getElementById('reg-direccion').value;
+            const rubro = document.getElementById('reg-rubro').value.trim(); // Capturamos el rubro
+            const telefono = document.getElementById('reg-telefono').value.trim();
+            const direccion = document.getElementById('reg-direccion').value.trim();
             const password = document.getElementById('reg-password').value;
 
-            if(!nombre || !alias || !password) return alert("Nombre, Alias y Contraseña son obligatorios.");
+            if(!nombre || !alias || !password || !rubro) return alert("Nombre, Alias, Rubro y Contraseña son obligatorios.");
 
-            // Insertar en Supabase
+            // Insertar en Supabase incluyendo el campo rubro
             const { data, error } = await supabaseCliente
                 .from('negocios')
-                .insert([{ nombre: nombre, alias: alias, telefono: telefono, direccion: direccion, password: password }])
+                .insert([{ 
+                    nombre: nombre, 
+                    alias: alias, 
+                    rubro: rubro, 
+                    telefono: telefono, 
+                    direccion: direccion, 
+                    password: password 
+                }])
                 .select();
 
             if (error) {
-                alert("Supabase dice: " + error.message + " \nDetalles: " + error.details);
+                alert("Supabase dice: " + error.message);
                 console.error(error);
             } else {
                 alert("¡Negocio creado con éxito! Tu ID es: " + alias);
@@ -125,14 +133,14 @@
             if (error || !data) {
                 alert("Alias o contraseña incorrectos.");
             } else {
-                miNegocioID = data.id; // Guardamos su UUID real para hacer las consultas
-                document.getElementById('filtro-fecha').valueAsDate = new Date(); // Ponemos la fecha de hoy
+                miNegocioID = data.id; 
+                document.getElementById('filtro-fecha').valueAsDate = new Date(); 
                 navegarA('pantalla-agenda');
                 cargarTurnosDelDia();
             }
         }
 
-        // 3. CARGAR LA AGENDA (LOS TURNOS RESERVADOS)
+        // 3. CARGAR LA AGENDA
         async function cargarTurnosDelDia() {
             const fechaISO = document.getElementById('filtro-fecha').value;
             const contenedorLista = document.getElementById('lista-turnos');
@@ -189,7 +197,6 @@
                 console.error(error);
             } else {
                 alert(`Franja de ${inicio} a ${fin} guardada con éxito para los ${dia}s.`);
-                // Limpiamos los inputs
                 document.getElementById('conf-inicio').value = '';
                 document.getElementById('conf-fin').value = '';
             }
