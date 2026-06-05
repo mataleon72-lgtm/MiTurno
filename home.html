@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mis Médicos - Mi Turno</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .contenedor-home { background: #fff; width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-height: 85vh; display: flex; flex-direction: column; }
+        h2 { color: #333; margin-bottom: 5px; }
+        p { color: #666; font-size: 0.9em; margin-top: 0; }
+        .seccion { margin-bottom: 25px; }
+        .caja-busqueda { display: flex; gap: 8px; margin-top: 10px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: #008080; }
+        button { background: #008080; color: white; border: none; padding: 12px 18px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:active { opacity: 0.9; }
+        .lista-profesionales { display: flex; flex-direction: column; gap: 12px; flex-content: start; }
+        .btn-medico { background: #ffffff; border: 2px solid #008080; color: #008080; padding: 16px; border-radius: 10px; text-align: left; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-medico:hover { background: #e6f2f2; }
+        .btn-medico small { color: #666; font-weight: normal; margin-top: 4px; font-size: 0.85em; }
+        .pantalla-inicial { display: none; }
+        .pantalla-inicial.activa { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-home">
+        
+        <!-- PARTE A: REGISTRO DEL PACIENTE (Solo se muestra la primera vez en el celu) -->
+        <div id="registro-paciente" class="pantalla-inicial">
+            <h2>¡Bienvenido a Mi Turno!</h2>
+            <p>Para empezar a agendar tus turnos, dejanos tu nombre y teléfono de contacto.</p>
+            <input type="text" id="pac-nombre" placeholder="Tu Nombre y Apellido">
+            <input type="tel" id="pac-telefono" placeholder="Tu Teléfono (Ej: 1122334455)" style="margin-top: 10px;">
+            <button onclick="registrarNuevoPaciente()" style="width: 100%; margin-top: 15px;">Comenzar</button>
+        </div>
+
+        <!-- PARTE B: EL PANEL PRINCIPAL DEL PACIENTE (Se muestra siempre) -->
+        <div id="panel-paciente" class="pantalla-inicial">
+            <h2 id="saludo-paciente">Hola...</h2>
+            <p>Gestioná tus profesionales y turnos desde acá.</p>
+            
+            <!-- Buscador por Alias -->
+            <div class="seccion">
+                <label style="font-weight: 600; color: #444;">Agregar Nuevo Profesional:</label>
+                <div class="caja-busqueda">
+                    <input type="text" id="input-alias-medico" placeholder="Ingresá el Código (Ej: CHULE)">
+                    <button onclick="buscarYAgregarMedico()">Agregar</button>
+                </div>
+            </div>
+
+            <!-- Listado de Favoritos -->
+            <div class="seccion" style="flex: 1;">
+                <label style="font-weight: 600; color: #444; display: block; margin-bottom: 10px;">Mis Profesionales Agendados:</label>
+                <div id="lista-favoritos" class="lista-profesionales">
+                    <p style="color: #999;">Aún no agregaste ningún profesional.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // CONEXIÓN SUPABASE
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let idPacienteActual = localStorage.getItem('mi_turno_paciente_id');
+
+        // Verificar si el paciente ya usó la app antes en este dispositivo
+        async function verificarSesionPaciente() {
+            if (!idPacienteActual) {
+                // Es un usuario nuevo, mostramos el formulario de registro
+                document.getElementById('registro-paciente').classList.add('activa');
+            } else {
+                // Ya está registrado, traemos sus datos y su lista de favoritos
+                document.getElementById('panel-paciente').classList.add('activa');
+                await recuperarDatosPaciente();
+                await cargarMedicosFavoritos();
+            }
+        }
+
+        // 1. REGISTRAR PACIENTE POR ÚNICA VEZ
+        async function registrarNuevoPaciente() {
+            const nombre = document.getElementById('pac-nombre').value.trim();
+            const telefono = document.getElementById('pac-telefono').value.trim();
+
+            if (!nombre || !telefono) return alert("Por favor, completá tu nombre y teléfono.");
+
+            const { data, error } = await supabaseCliente
+                .from('pacientes')
+                .insert([{ nombre, telefono }])
+                .select();
+
+            if (error) return alert("Error al registrar: " + error.message);
+
+            if (data && data[0]) {
+                // Guardamos su ID oculto en la memoria del navegador para siempre
+                localStorage.setItem('mi_turno_paciente_id', data[0].id);
+                idPacienteActual = data[0].id;
+                
+                // Cambiamos de pantalla
+                document.getElementById('registro-paciente').classList.remove('activa');
+                document.getElementById('panel-paciente').classList.add('activa');
+                await recuperarDatosPaciente();
+                await cargarMedicosFavoritos();
+            }
+        }
+
+        async function recuperarDatosPaciente() {
+            const { data } = await supabaseCliente.from('pacientes').select('nombre').eq('id', idPacienteActual).single();
+            if (data) {
+                document.getElementById('saludo-paciente').innerText = `¡Hola, ${data.nombre.split(' ')[0]}!`;
+            }
+        }
+
+        // 2. BUSCAR UN MÉDICO POR SU ALIAS Y AGREGARLO A FAVORITOS
+        async function buscarYAgregarMedico() {
+            const aliasBuscado = document.getElementById('input-alias-medico').value.trim().toUpperCase();
+            if (!aliasBuscado) return alert("Escribí el código del profesional.");
+
+            // A. Buscar si el alias existe en la tabla negocios
+            const { data: medico, error } = await supabaseCliente
+                .from('negocios')
+                .select('id, nombre')
+                .eq('alias', aliasBuscado)
+                .single();
+
+            if (error || !medico) return alert("No se encontró ningún profesional con ese código. Verificá que esté bien escrito.");
+
+            // B. Verificar si el paciente ya lo tenía agendado para no duplicar
+            const { data: yaExiste } = await supabaseCliente
+                .from('pacientes_profesionales')
+                .select('*')
+                .eq('paciente_id', idPacienteActual)
+                .eq('negocio_id', medico.id);
+
+            if (yaExiste && yaExiste.length > 0) {
+                alert("Ya tenés a este profesional en tu lista.");
+                document.getElementById('input-alias-medico').value = '';
+                return;
+            }
+
+            // C. Insertar el enlace en la tabla puente pacientes_profesionales
+            const { error: errEnlace } = await supabaseCliente
+                .from('pacientes_profesionales')
+                .insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
+
+            if (errEnlace) return alert("Error al agendar: " + errEnlace.message);
+
+            alert(`¡${medico.nombre} agregado con éxito a tu lista!`);
+            document.getElementById('input-alias-medico').value = '';
+            await cargarMedicosFavoritos(); // Recargar listado visual
+        }
+
+        // 3. CARGAR LOS MÉDICOS FAVORITOS EN LA PANTALLA
+        async function cargarMedicosFavoritos() {
+            const contenedor = document.getElementById('lista-favoritos');
+            
+            // Traemos las relaciones del paciente e incluimos los datos de la tabla negocios (Supabase hace el Join automático)
+            const { data: favoritos, error } = await supabaseCliente
+                .from('pacientes_profesionales')
+                .select(`
+                    negocio_id,
+                    negocios ( nombre, rubro )
+                `)
+                .eq('paciente_id', idPacienteActual);
+
+            if (error) return console.error(error);
+
+            if (!favoritos || favoritos.length === 0) {
+                contenedor.innerHTML = '<p style="color: #999; text-align:center; padding: 20px 0;">Aún no agregaste códigos. Pedile su código a tu médico para agendarlo acá.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = "";
+            favoritos.forEach(fav => {
+                const medico = fav.negocios;
+                if (medico) {
+                    // Creamos el botón dinámico. Al tocarlo, se dispara el redireccionamiento mágico a tu index.html
+                    contenedor.innerHTML += `
+                        <button class="btn-medico" onclick="irAlTurneroDelMedico('${fav.negocio_id}')">
+                            ${medico.nombre}
+                            <small>⚕️ ${medico.rubro || 'Profesional'}</small>
+                        </button>
+                    `;
+                }
+            });
+        }
+
+        // 🌟 EL PASE DE MAGIA: Manda al paciente a tu index.html pasándole el ID real por la URL
+        function irAlTurneroDelMedico(idMedico) {
+            window.location.href = `index.html?id=${idMedico}`;
+        }
+
+        // Ejecutar al cargar la página
+        verificarSesionPaciente();
+    </script>
+</body>
+</html>
