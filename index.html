@@ -274,7 +274,7 @@ async function cargarDatosNegocio() {
 
         if (!error && negocio) {
             document.getElementById('txt-nombre').innerText = negocio.nombre;
-            document.getElementById('txt-telefono').innerText = negocio.rubro || "Kinesiología";
+            document.getElementById('txt-telefono').innerText = negocio.telefono || "Teléfono no configurado";
             document.getElementById('txt-direccion').innerText = negocio.direccion || "Dirección no configurada"; 
         }
     } catch (err) {
