@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel de Gestión - Mi Turno</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* CONFIGURACIÓN GRÁFICA UNIFICADA */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: white; 
+        }
+        .contenedor { width: 90%; max-width: 400px; padding: 25px 0; display: none; }
+        .contenedor.activa { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-logo { text-align: center; margin-bottom: 20px; }
+        .header-logo img { max-width: 240px; width: 100%; }
+        p.subtitulo { text-align: center; font-size: 15px; margin-top: -10px; margin-bottom: 25px; font-weight: 700; font-style: italic; }
+
+        .caja-blanca { 
+            background: white; border-radius: 16px; padding: 20px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); margin-bottom: 20px; color: #333;
+        }
+        .caja-blanca label { color: #444; font-weight: 800; display: block; margin-bottom: 6px; font-size: 16px; }
+        
+        input, select { 
+            width: 100%; background: #F4F4F4; border: 2px solid #F4F4F4; border-radius: 8px; 
+            padding: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif; 
+            font-size: 16px; outline: none; transition: all 0.3s; color: #333; font-weight: 700;
+        }
+        input:focus, select:focus { border-color: #009E9B; background: #FFF; }
+
+        /* Botones de Imagen (Amarillos Estilo Corel) */
+        .btn-img { text-align: center; cursor: pointer; margin-bottom: 15px; transition: transform 0.2s; }
+        .btn-img:active { transform: scale(0.95); }
+        .btn-img img { max-width: 260px; width: 100%; }
+
+        /* Tarjetas de Listados */
+        .item-lista {
+            background: #F4F4F4; padding: 12px; border-radius: 8px; margin-bottom: 8px;
+            font-weight: 700; color: #333; display: flex; justify-content: space-between; align-items: center;
+        }
+        .item-lista small { color: #009E9B; display: block; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div id="seccion-agenda" class="contenedor activa">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" alt="Mi Agenda">
+        </div>
+
+        <div class="caja-blanca">
+            <label>Elegir consultorio</label>
+            <select id="agenda-consultorio" onchange="cargarTurnosDelDia()"></select>
+
+            <label>Calendario (Día Seleccionado)</label>
+            <input type="date" id="agenda-fecha" onchange="cargarTurnosDelDia()">
+        </div>
+
+        <div class="caja-blanca">
+            <label>Turnos Reservados:</label>
+            <div id="lista-turnos-pacientes">
+                <p style="color: #999; font-size: 14px; text-align: center; margin: 0;">Seleccioná consultorio y fecha para ver tus turnos.</p>
+            </div>
+        </div>
+
+        <div class="btn-img" onclick="abrirConfiguracionHorarios()">
+            <div style="background:#F4B41A; color:white; padding:15px; border-radius:12px; font-weight:900; font-size:18px; text-align:center; max-width:260px; margin:0 auto; box-shadow:0 4px 10px rgba(0,0,0,0.2);">Configurar Horarios</div>
+        </div>
+
+        <div class="btn-img" onclick="mostrarPantallaConsultorios()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Mis Consultorios" style="max-width:180px;">
+        </div>
+
+        <div class="btn-img" onclick="cerrarSesion()" style="margin-top: 20px; opacity: 0.8;">
+            <span style="font-weight: 700; text-decoration: underline; cursor: pointer;">Cerrar Sesión</span>
+        </div>
+    </div>
+
+
+    <div id="seccion-consultorios" class="contenedor">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Mis Consultorios">
+        </div>
+        <p class="subtitulo">Gestioná tus lugares de atención</p>
+
+        <div class="caja-blanca">
+            <label style="font-size: 18px; margin-bottom: 12px; color: #009E9B;">Agregar nuevo lugar</label>
+            
+            <label>Nombre</label>
+            <input type="text" id="cons-nombre" placeholder="Ej: Consultorio Saenz Peña">
+
+            <label>Dirección</label>
+            <input type="text" id="cons-direccion" placeholder="Ej: San Pedro 1263 Piso 1">
+        </div>
+
+        <div class="btn-img" onclick="guardarNuevoConsultorio()">
+            <div style="background:#F4B41A; color:white; padding:15px; border-radius:12px; font-weight:900; font-size:18px; text-align:center; max-width:260px; margin:0 auto; box-shadow:0 4px 10px rgba(0,0,0,0.2);">Guardar Consultorio</div>
+        </div>
+
+        <div class="caja-blanca">
+            <label>Tus lugares actuales:</label>
+            <div id="lista-mis-consultorios"></div>
+        </div>
+
+        <div class="btn-img" onclick="mostrarPantallaAgenda()" style="margin-top: 20px;">
+            <div style="background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:12px; border-radius:10px; font-weight:700; text-align:center; max-width:180px; margin:0 auto;">Ir a mi Agenda</div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const idMedicoLogueado = localStorage.getItem('mi_turno_negocio_id');
+
+        // Poner la fecha de hoy por defecto en el calendario
+        document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
+
+        async function verificarAutenticacion() {
+            if (!idMedicoLogueado) {
+                alert("Sesión expirada o no válida.");
+                window.location.href = "panel.html";
+                return;
+            }
+            document.getElementById('seccion-agenda').classList.add('activa');
+            await cargarSelectorConsultorios();
+            await cargarConsultoriosListado();
+        }
+
+        // NAVEGACIÓN ENTRE PANTALLAS INTERNAS
+        function mostrarPantallaConsultorios() {
+            document.getElementById('seccion-agenda').classList.remove('activa');
+            document.getElementById('seccion-consultorios').classList.add('activa');
+            window.scrollTo(0,0);
+        }
+
+        function mostrarPantallaAgenda() {
+            document.getElementById('seccion-consultorios').classList.remove('activa');
+            document.getElementById('seccion-agenda').classList.add('activa');
+            window.scrollTo(0,0);
+            cargarSelectorConsultorios();
+        }
+
+        // CONTROLADOR DE CONSULTORIOS
+        async function guardarNuevoConsultorio() {
+            const nombre = document.getElementById('cons-nombre').value.trim();
+            const direccion = document.getElementById('cons-direccion').value.trim();
+
+            if(!nombre || !direccion) return alert("Completá nombre y dirección.");
+
+            const { error } = await supabaseCliente.from('consultorios').insert([{
+                negocio_id: idMedicoLogueado, nombre, direccion
+            }]);
+
+            if(error) return alert("Error: " + error.message);
+
+            alert("Consultorio guardado con éxito.");
+            document.getElementById('cons-nombre').value = "";
+            document.getElementById('cons-direccion').value = "";
+            await cargarConsultoriosListado();
+        }
+
+        async function cargarSelectorConsultorios() {
+            const select = document.getElementById('agenda-consultorio');
+            select.innerHTML = '<option value="">Seleccioná un lugar</option>';
+            
+            const { data } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedicoLogueado);
+            data?.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+            });
+        }
+
+        async function cargarConsultoriosListado() {
+            const lista = document.getElementById('lista-mis-consultorios');
+            lista.innerHTML = "";
+            const { data } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedicoLogueado);
+            
+            if(!data || data.length === 0) {
+                lista.innerHTML = '<p style="color:#999; text-align:center; margin:0; font-size:14px;">No tenés consultorios creados todavía.</p>';
+                return;
+            }
+            data.forEach(c => {
+                lista.innerHTML += `<div class="item-lista">${c.nombre} <small>${c.direccion}</small></div>`;
+            });
+        }
+
+        // LECTURA DE TURNOS EN VIVO (Para ver el éxito de tu amigo)
+        async function cargarTurnosDelDia() {
+            const idCons = document.getElementById('agenda-consultorio').value;
+            const fecha = document.getElementById('agenda-fecha').value;
+            const contenedor = document.getElementById('lista-turnos-pacientes');
+
+            if(!idCons || !fecha) {
+                contenedor.innerHTML = '<p style="color: #999; font-size: 14px; text-align: center; margin: 0;">Seleccioná consultorio y fecha para ver tus turnos.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = '<p style="color: #666; font-size: 14px; text-align: center; margin: 0;">Buscando turnos...</p>';
+
+            const { data: turnos, error } = await supabaseCliente
+                .from('turnos_activos')
+                .select('*')
+                .eq('consultorio_id', idCons)
+                .eq('fecha', fecha)
+                .order('hora', { ascending: true });
+
+            if(error) return contenedor.innerHTML = `<p style="color:red;">Error al cargar: ${error.message}</p>`;
+
+            if(!turnos || turnos.length === 0) {
+                contenedor.innerHTML = '<p style="color: #333; font-weight:700; text-align: center; margin: 0;">No tenés reservas para este día.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = "";
+            turnos.forEach(t => {
+                contenedor.innerHTML += `
+                    <div class="item-lista">
+                        <div>
+                            <span style="color:#009E9B; font-weight:900; font-size:16px;">[${t.hora.substring(0,5)}]</span> ${t.paciente_nombre}
+                            <small>Tel: ${t.paciente_telefono} | DNI: ${t.paciente_dni || 'S/D'}</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function abrirConfiguracionHorarios() {
+            const idCons = document.getElementById('agenda-consultorio').value;
+            if(!idCons) return alert("Por favor, seleccioná primero qué consultorio querés configurar en el menú de arriba.");
+            // En el próximo turno enlazaremos la app de agendas, por ahora le mandamos una alerta clara
+            alert("¡Perfecto! El consultorio seleccionado es válido. En el próximo módulo abriremos la grilla horaria para este ID.");
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('mi_turno_negocio_id');
+            window.location.href = "panel.html";
+        }
+
+        verificarAutenticacion();
+    </script>
+</body>
+</html>
