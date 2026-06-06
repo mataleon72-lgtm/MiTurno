@@ -16,13 +16,26 @@
         .contenedor.activa { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header-logo { text-align: center; margin-bottom: 15px; }
-        .header-logo img { max-width: 220px; width: 100%; }
-        p.subtitulo { text-align: center; font-size: 14px; margin-top: -5px; margin-bottom: 20px; font-weight: 700; opacity: 0.9; }
+        .header-logo { text-align: center; margin-bottom: 10px; }
+        .header-logo img { max-width: 240px; width: 100%; }
+
+        /* Contenedor especial con fondo de imagen para la sección de Horarios */
+        .contenedor-con-fondo {
+            background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
+            background-size: 100% 100%;
+            border-radius: 30px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            margin-top: 10px;
+            color: #333;
+        }
+        .contenedor-con-fondo label { color: #555; font-weight: 800; display: block; margin-bottom: 6px; font-size: 15px; }
+        .contenedor-con-fondo h2 { color: #555; text-align: center; font-weight: 900; margin-top: 0; font-size: 26px; }
+        .contenedor-con-fondo p.sub { color: #666; text-align: center; margin-top: -5px; margin-bottom: 25px; font-weight: 700; font-size: 14px; }
 
         .caja-blanca { 
             background: white; border-radius: 20px; padding: 20px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2); margin-bottom: 20px; color: #333;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #333;
         }
         .caja-blanca label { color: #007D82; font-weight: 800; display: block; margin-bottom: 6px; font-size: 15px; }
         
@@ -31,14 +44,17 @@
             padding: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif; 
             font-size: 16px; outline: none; color: #333; font-weight: 700;
         }
-        input:focus { border-color: #009E9B; background: #FFF; }
+        input:focus, select:focus { border-color: #009E9B; background: #FFF; }
 
         .btn-amarillo { 
             background: #F4B41A; color: white; border: none; border-radius: 12px; 
             padding: 15px; font-weight: 900; font-size: 18px; text-align: center; 
             width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 15px;
         }
-        .btn-img { text-align: center; cursor: pointer; margin-bottom: 15px; transition: transform 0.2s; }
+        
+        /* Botones de Imagen */
+        .btn-img { text-align: center; cursor: pointer; margin: 15px 0; transition: transform 0.2s; }
+        .btn-img:active { transform: scale(0.96); }
         .btn-img img { max-width: 240px; width: 100%; }
 
         .item-lista {
@@ -46,32 +62,37 @@
             font-weight: 700; color: #333; display: flex; justify-content: space-between; align-items: center;
         }
         .item-lista small { color: #009E9B; display: block; font-size: 13px; font-weight: 800; }
-        .btn-borrar { background: #FF4B2B; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 900; }
     </style>
 </head>
 <body>
 
     <div id="seccion-agenda" class="contenedor activa">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" alt="Mi Agenda">
+        </div>
+
         <div class="btn-img" onclick="mostrarPantallaConsultorios()">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/crearconsultorio.png" alt="Crear Sucursal">
         </div>
-        <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" alt="Agenda">
-        </div>
+
         <div class="caja-blanca">
             <label>Sucursal de atención</label>
             <select id="agenda-sucursal" onchange="cargarTurnos()"></select>
+            
             <label>Fecha</label>
             <input type="date" id="agenda-fecha" onchange="cargarTurnos()">
         </div>
+
         <div class="caja-blanca">
             <label>Turnos de hoy:</label>
             <div id="lista-turnos"></div>
         </div>
+
         <div class="btn-img" onclick="mostrarPantallaHorarios()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/mishorarios.png" alt="Configurar Horarios" style="max-width: 200px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/seleccionarfranjahoraria.png" alt="Seleccionar Franja Horaria">
         </div>
-        <p onclick="cerrarSesion()" style="text-align:center; text-decoration:underline; font-size:14px; cursor:pointer;">Cerrar Sesión</p>
+
+        <p onclick="cerrarSesion()" style="text-align:center; text-decoration:underline; font-size:14px; cursor:pointer; margin-top: 25px; opacity:0.8;">Cerrar Sesión</p>
     </div>
 
     <div id="seccion-sucursales" class="contenedor">
@@ -79,10 +100,10 @@
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Sucursales">
         </div>
         <div class="caja-blanca">
-            <label>Nombre de Sucursal</label>
-            <input type="text" id="suc-nombre" placeholder="Ej: Centro">
+            <label>Nombre de Sucursal / Sede</label>
+            <input type="text" id="suc-nombre" placeholder="Ej: Consultorio Centro">
             <label>Dirección</label>
-            <input type="text" id="suc-dir" placeholder="Ej: Av. Mayo 123">
+            <input type="text" id="suc-dir" placeholder="Ej: Av. Rivadavia 1420">
             <button class="btn-amarillo" onclick="guardarSucursal()">Guardar Sucursal</button>
         </div>
         <div class="caja-blanca">
@@ -93,29 +114,34 @@
     </div>
 
     <div id="seccion-horarios" class="contenedor">
-        <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/mishorarios.png" alt="Horarios">
-        </div>
-        <div class="caja-blanca">
+        <div class="contenedor-con-fondo">
+            <h2>Mis Horarios</h2>
+            <p class="sub">Cera tus franjas horarias de atención</p>
+
             <label>Seleccioná Sucursal</label>
             <select id="hor-sucursal" onchange="cargarHorarios()"></select>
-            <label>Día</label>
+            
+            <label>Día de la semana</label>
             <select id="hor-dia">
                 <option value="1">Lunes</option><option value="2">Martes</option>
                 <option value="3">Miércoles</option><option value="4">Jueves</option>
                 <option value="5">Viernes</option><option value="6">Sábado</option>
                 <option value="0">Domingo</option>
             </select>
+            
             <div style="display:flex; gap:10px;">
                 <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="09:00"></div>
                 <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="18:00"></div>
             </div>
+            
             <button class="btn-amarillo" onclick="guardarHorario()">Asignar Horario</button>
         </div>
-        <div class="caja-blanca">
-            <label>Esquema de atención:</label>
+
+        <div class="caja-blanca" style="margin-top: 20px;">
+            <label>Esquema de atención guardado:</label>
             <div id="lista-horarios"></div>
         </div>
+        
         <button class="btn-amarillo" style="background:#009E9B" onclick="mostrarPantallaAgenda()">Volver a mi Agenda</button>
     </div>
 
@@ -136,50 +162,68 @@
         function mostrarPantallaConsultorios() { switchSeccion('seccion-sucursales'); }
         function mostrarPantallaHorarios() { switchSeccion('seccion-horarios'); cargarSelectores(); }
         function mostrarPantallaAgenda() { switchSeccion('seccion-agenda'); cargarSelectores(); }
-        function switchSeccion(id) { document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); document.getElementById(id).classList.add('activa'); window.scrollTo(0,0); }
+        
+        function switchSeccion(id) { 
+            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); 
+            document.getElementById(id).classList.add('activa'); 
+            window.scrollTo(0,0); 
+        }
 
         async function cargarSelectores() {
             const { data } = await supabase.from('sucursales').select('*').eq('negocio_id', idMedico);
-            const html = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '<option>Crea una sucursal</option>';
+            const html = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '<option value="">Crea una sucursal primero</option>';
             document.getElementById('agenda-sucursal').innerHTML = html;
             document.getElementById('hor-sucursal').innerHTML = html;
+            cargarTurnos();
+            cargarHorarios();
         }
 
         async function guardarSucursal() {
-            const nombre = document.getElementById('suc-nombre').value;
-            const direccion = document.getElementById('suc-dir').value;
+            const nombre = document.getElementById('suc-nombre').value.trim();
+            const direccion = document.getElementById('suc-dir').value.trim();
+            if(!nombre || !direccion) return alert("Completá los datos");
+
             await supabase.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion }]);
-            alert("Sucursal guardada");
+            alert("¡Sucursal guardada!");
+            document.getElementById('suc-nombre').value = '';
+            document.getElementById('suc-dir').value = '';
             await cargarSucursalesListado();
+            await cargarSelectores();
         }
 
         async function cargarSucursalesListado() {
             const { data } = await supabase.from('sucursales').select('*').eq('negocio_id', idMedico);
-            document.getElementById('lista-sucursales').innerHTML = data?.map(s => `<div class="item-lista">${s.nombre} <small>${s.direccion}</small></div>`).join('') || '';
+            document.getElementById('lista-sucursales').innerHTML = data?.map(s => `<div class="item-lista">${s.nombre} <small>${s.direccion}</small></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No tenés sucursales.</p>';
         }
 
         async function guardarHorario() {
             const idSuc = document.getElementById('hor-sucursal').value;
+            if(!idSuc) return alert("Seleccioná o creá una sucursal");
+            
             const dia = document.getElementById('hor-dia').value;
             const ini = document.getElementById('hor-inicio').value;
             const fin = document.getElementById('hor-fin').value;
+
             await supabase.from('agenda').insert([{ sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin }]);
-            alert("Horario asignado");
+            alert("¡Horario asignado!");
             await cargarHorarios();
         }
 
         async function cargarHorarios() {
             const idSuc = document.getElementById('hor-sucursal').value;
+            if(!idSuc) return;
             const { data } = await supabase.from('agenda').select('*').eq('sucursal_id', idSuc);
-            const dias = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)}hs</small></div>`).join('') || '';
+            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">Sin horarios en esta sede.</p>';
         }
 
         async function cargarTurnos() {
             const idSuc = document.getElementById('agenda-sucursal').value;
             const fecha = document.getElementById('agenda-fecha').value;
+            if(!idSuc || !fecha) return;
+
             const { data } = await supabase.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
-            document.getElementById('lista-turnos').innerHTML = data?.map(t => `<div class="item-lista"><div>[${t.hora.slice(0,5)}] ${t.paciente_nombre}<small>Tel: ${t.paciente_telefono}</small></div></div>`).join('') || '<p style="text-align:center; color:#999;">No hay turnos.</p>';
+            document.getElementById('lista-turnos').innerHTML = data?.map(t => `<div class="item-lista"><div>[${t.hora.slice(0,5)}] ${t.paciente_nombre}<small>Tel: ${t.paciente_telefono}</small></div></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No hay turnos agendados.</p>';
         }
 
         function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }
