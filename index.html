@@ -132,7 +132,7 @@
             }
 
             // 3. Traer consultorios
-            const { data: consultorios } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedico);
+            const { data: consultorios } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico);
             const selectCons = document.getElementById('select-consultorio');
             consultorios?.forEach(c => {
                 selectCons.innerHTML += `<option value="${c.id}">${c.nombre} (${c.direccion})</option>`;
@@ -149,7 +149,7 @@
             if (!idCons) { selectDia.disabled = true; return; }
 
             // Buscamos las configuraciones de agenda activas para este consultorio
-            const { data: agendas } = await supabaseCliente.from('agenda').select('dia_semana').eq('consultorio_id', idCons);
+            const { data: agendas } = await supabaseCliente.from('agenda').select('dia_semana').eq('sucursal_id', idCons);
             
             if(!agendas || agendas.length === 0) {
                 alert("Este consultorio aún no tiene horarios configurados.");
@@ -191,9 +191,9 @@
             let numeroDiaSemana = fechaObjeto.getDay();
 
             // 1. Traer límites de la agenda
-            const { data: agenda } = await supabaseCliente.from('agenda').select('*').eq('consultorio_id', idCons).eq('dia_semana', numeroDiaSemana).single();
+            const { data: agenda } = await supabaseCliente.from('agenda').select('*').eq('sucursal_id', idCons).eq('dia_semana', numeroDiaSemana).single();
             // 2. Traer turnos ya ocupados ese día
-            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('consultorio_id', idCons).eq('fecha', fechaSel);
+            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idCons).eq('fecha', fechaSel);
 
             if (!agenda) return;
 
@@ -237,7 +237,7 @@
             // Guardamos el turno usando la sesión limpia y automática
             const { error } = await supabaseCliente.from('turnos_activos').insert([{
                 negocio_id: idMedico,
-                consultorio_id: idCons,
+                sucursal_id: idCons,
                 fecha: fechaSel,
                 hora: horaSeleccionada,
                 paciente_nombre: nombrePaciente,

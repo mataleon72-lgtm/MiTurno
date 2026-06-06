@@ -73,8 +73,8 @@
             <div style="background:#F4B41A; color:white; padding:15px; border-radius:12px; font-weight:900; font-size:18px; text-align:center; max-width:260px; margin:0 auto; box-shadow:0 4px 10px rgba(0,0,0,0.2);">Configurar Horarios</div>
         </div>
 
-        <div class="btn-img" onclick="mostrarPantallaConsultorios()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Mis Consultorios" style="max-width:180px;">
+        <div class="btn-img" onclick="mostrarPantallasucursales()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20sucursales.png" alt="Mis sucursales" style="max-width:180px;">
         </div>
 
         <div class="btn-img" onclick="cerrarSesion()" style="margin-top: 20px; opacity: 0.8;">
@@ -83,9 +83,9 @@
     </div>
 
 
-    <div id="seccion-consultorios" class="contenedor">
+    <div id="seccion-sucursales" class="contenedor">
         <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Mis Consultorios">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20sucursales.png" alt="Mis sucursales">
         </div>
         <p class="subtitulo">Gestioná tus lugares de atención</p>
 
@@ -105,7 +105,7 @@
 
         <div class="caja-blanca">
             <label>Tus lugares actuales:</label>
-            <div id="lista-mis-consultorios"></div>
+            <div id="lista-mis-sucursales"></div>
         </div>
 
         <div class="btn-img" onclick="mostrarPantallaAgenda()" style="margin-top: 20px;">
@@ -130,25 +130,25 @@
                 return;
             }
             document.getElementById('seccion-agenda').classList.add('activa');
-            await cargarSelectorConsultorios();
-            await cargarConsultoriosListado();
+            await cargarSelectorsucursales();
+            await cargarsucursalesListado();
         }
 
         // NAVEGACIÓN ENTRE PANTALLAS INTERNAS
-        function mostrarPantallaConsultorios() {
+        function mostrarPantallasucursales() {
             document.getElementById('seccion-agenda').classList.remove('activa');
-            document.getElementById('seccion-consultorios').classList.add('activa');
+            document.getElementById('seccion-sucursales').classList.add('activa');
             window.scrollTo(0,0);
         }
 
         function mostrarPantallaAgenda() {
-            document.getElementById('seccion-consultorios').classList.remove('activa');
+            document.getElementById('seccion-sucursales').classList.remove('activa');
             document.getElementById('seccion-agenda').classList.add('activa');
             window.scrollTo(0,0);
-            cargarSelectorConsultorios();
+            cargarSelectorsucursales();
         }
 
-        // CONTROLADOR DE CONSULTORIOS
+        // CONTROLADOR DE sucursales
         async function guardarNuevoConsultorio() {
             const nombre = document.getElementById('cons-nombre').value.trim();
             const direccion = document.getElementById('cons-direccion').value.trim();
@@ -165,10 +165,10 @@
             alert("Lugar guardado con éxito.");
             document.getElementById('cons-nombre').value = "";
             document.getElementById('cons-direccion').value = "";
-            await cargarConsultoriosListado();
+            await cargarsucursalesListado();
         }
 
-        async function cargarSelectorConsultorios() {
+        async function cargarSelectorsucursales() {
             const select = document.getElementById('agenda-consultorio');
             select.innerHTML = '<option value="">Seleccioná un lugar</option>';
             
@@ -179,8 +179,8 @@
             });
         }
 
-        async function cargarConsultoriosListado() {
-            const lista = document.getElementById('lista-mis-consultorios');
+        async function cargarsucursalesListado() {
+            const lista = document.getElementById('lista-mis-sucursales');
             lista.innerHTML = "";
             // ACÁ ESTÁ EL ÚLTIMO CAMBIO
             const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedicoLogueado);
@@ -210,7 +210,7 @@
             const { data: turnos, error } = await supabaseCliente
                 .from('turnos_activos')
                 .select('*')
-                .eq('consultorio_id', idCons)
+                .eq('sucursal_id', idCons)
                 .eq('fecha', fecha)
                 .order('hora', { ascending: true });
 
