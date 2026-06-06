@@ -28,7 +28,6 @@
 
     <div class="contenedor-home">
         
-        <!-- PARTE A: REGISTRO DEL PACIENTE -->
         <div id="registro-paciente" class="pantalla-inicial">
             <h2>¡Bienvenido a Mi Turno!</h2>
             <p>Para empezar a agendar tus turnos, dejanos tu nombre y teléfono de contacto.</p>
@@ -37,12 +36,10 @@
             <button onclick="registrarNuevoPaciente()" style="width: 100%; margin-top: 15px;">Comenzar</button>
         </div>
 
-        <!-- PARTE B: EL PANEL PRINCIPAL DEL PACIENTE -->
         <div id="panel-paciente" class="pantalla-inicial">
             <h2 id="saludo-paciente">Hola...</h2>
             <p>Gestioná tus profesionales y turnos desde acá.</p>
             
-            <!-- Buscador por Alias -->
             <div class="seccion">
                 <label style="font-weight: 600; color: #444;">Agregar Nuevo Profesional:</label>
                 <div class="caja-busqueda">
@@ -51,7 +48,6 @@
                 </div>
             </div>
 
-            <!-- Listado de Favoritos -->
             <div class="seccion" style="flex: 1;">
                 <label style="font-weight: 600; color: #444; display: block; margin-bottom: 10px;">Mis Profesionales Agendados:</label>
                 <div id="lista-favoritos" class="lista-profesionales">
@@ -110,13 +106,10 @@
             }
         }
 
-        // 🕵️‍♂️ NUEVA FUNCIÓN CON ESPÍAS TÁCTICOS INTEGRADOS
+        // CÓDIGO LIMPIO SIN ALERTAS DE ESPÍAS
         async function buscarYAgregarMedico() {
             const aliasBuscado = document.getElementById('input-alias-medico').value.trim().toUpperCase();
             if (!aliasBuscado) return alert("Escribí el código del profesional.");
-
-            // 🔍 ESPÍA 1: Ver qué se está procesando exactamente
-            alert("Espía 1 - Buscando en Supabase el alias exacto: [" + aliasBuscado + "]");
 
             const { data: medico, error } = await supabaseCliente
                 .from('negocios')
@@ -124,19 +117,9 @@
                 .ilike('alias', aliasBuscado)
                 .single();
 
-            // 🔍 ESPÍA 2: Ver si Supabase tiró algún error interno o de red
-            if (error) {
-                alert("Espía 2 (Hubo Error en Supabase) -> Código: " + error.code + " | Mensaje: " + error.message);
-            }
-
-            // 🔍 ESPÍA 3: Ver si la respuesta vino vacía sin dar error de código
-            if (!medico) {
-                alert("Espía 3 -> Supabase respondió con éxito pero devolvió NULL (La tabla negocios no tiene ninguna fila que machee con ese alias).");
-            }
-
             if (error || !medico) return alert("No se encontró ningún profesional con ese código. Verificá que esté bien escrito.");
 
-            // Continuar con el guardado si pasó los filtros
+            // Verificar duplicados
             const { data: yaExiste } = await supabaseCliente
                 .from('pacientes_profesionales')
                 .select('*')
@@ -149,13 +132,13 @@
                 return;
             }
 
+            // Guardar favorito en Supabase
             const { error: errEnlace } = await supabaseCliente
                 .from('pacientes_profesionales')
                 .insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
 
             if (errEnlace) return alert("Error al agendar: " + errEnlace.message);
 
-            alert(`¡${medico.nombre} agregado con éxito!`);
             document.getElementById('input-alias-medico').value = '';
             await cargarMedicosFavoritos();
         }
