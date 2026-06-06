@@ -3,207 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel Profesional - Mi Turno</title>
+    <title>Acceso Profesional - Mi Turno</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* DISEÑO FLUIDO Y RESPONSIVE */
         body { 
             font-family: 'Nunito', sans-serif; 
             background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
-            margin: 0; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: white; 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; 
         }
-        .contenedor { 
-            width: 90%; 
-            max-width: 400px; 
-            padding: 30px 0; 
-            display: none; /* Oculto por defecto para alternar pantallas */
-        }
-        .contenedor.activa { 
-            display: block; 
-            animation: fadeIn 0.4s ease;
-        }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .contenedor { width: 90%; max-width: 360px; text-align: center; }
+        .logo { max-width: 100px; margin-bottom: 20px; }
+        h1 { font-size: 28px; font-weight: 900; margin-bottom: 30px; letter-spacing: -1px; }
 
-        /* Cabecera y Logos */
-        .header-logo { text-align: center; margin-bottom: 15px; }
-        .header-logo img { max-width: 140px; }
-        h2.titulo-pantalla { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 25px; letter-spacing: 0.5px; }
-
-        /* Cajas de Formulario Blancas */
-        .caja-blanca { 
-            background: white; 
-            border-radius: 16px; 
-            padding: 25px 20px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-            margin-bottom: 30px;
+        .caja-login { 
+            background: white; border-radius: 20px; padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: #333; text-align: left;
         }
-        .caja-blanca label { 
-            color: #555; 
-            font-weight: 700; 
-            display: block; 
-            margin-bottom: 6px; 
-            font-size: 15px; 
+        label { font-weight: 800; color: #007D82; display: block; margin-bottom: 5px; }
+        input { 
+            width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #EEE; 
+            margin-bottom: 20px; box-sizing: border-box; font-size: 16px; font-weight: 700;
         }
-        .caja-blanca small { color: #888; font-weight: 400; font-size: 12px; }
-        .caja-blanca input { 
-            width: 100%; 
-            background: #F4F4F4; 
-            border: 2px solid #F4F4F4; 
-            border-radius: 8px; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            box-sizing: border-box; 
-            font-family: 'Nunito', sans-serif; 
-            font-size: 16px; 
-            outline: none; 
-            transition: all 0.3s;
+        .btn-entrar { 
+            width: 100%; background: #F4B41A; color: white; border: none; padding: 18px; 
+            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .caja-blanca input:focus { border-color: #009E9B; background: #FFF; }
-
-        /* Botones de Imagen (Ingresar/Crear Cuenta) */
-        .btn-img { 
-            text-align: center; 
-            cursor: pointer; 
-            margin-bottom: 30px;
-            transition: transform 0.2s;
-        }
-        .btn-img:active { transform: scale(0.95); }
-        .btn-img img { max-width: 180px; width: 100%; }
-
-        /* Botón secundario transparente */
-        .btn-secundario { 
-            background: rgba(255, 255, 255, 0.2); 
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 15px; 
-            border-radius: 10px; 
-            text-align: center; 
-            font-weight: 700; 
-            cursor: pointer; 
-            font-size: 16px;
-        }
+        .registro { margin-top: 25px; font-size: 14px; color: white; opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div id="login-section" class="contenedor activa">
-        <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Logo Mi Turno">
-        </div>
-        <h2 class="titulo-pantalla">Login Profesional</h2>
+    <div class="contenedor">
+        <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" class="logo">
+        <h1>Acceso Profesional</h1>
 
-        <div class="caja-blanca">
-            <label>Tu Alias</label>
+        <div class="caja-login">
+            <label>Tu Alias (Código)</label>
             <input type="text" id="login-alias" placeholder="Ej: JULI">
             
             <label>Contraseña</label>
-            <input type="password" id="login-password" placeholder="********">
+            <input type="password" id="login-pass" placeholder="••••••••">
+
+            <button class="btn-entrar" onclick="ingresar()">Ingresar al Panel</button>
         </div>
 
-        <div class="btn-img" onclick="iniciarSesion()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton%20ingresar.png" alt="Ingresar">
-        </div>
-
-        <div class="btn-secundario" onclick="mostrarRegistro()">
-            No Tengo Cuenta<br><span style="font-weight: 400; font-size: 14px;">Registrarme</span>
-        </div>
-    </div>
-
-    <div id="registro-section" class="contenedor">
-        <div class="header-logo" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Logo" style="max-width: 100px;">
-            <h2 style="margin: 0; font-size: 24px; font-weight: 900;">Log In</h2>
-        </div>
-        
-        <p style="text-align: center; font-weight: 700; margin-top: 0;">No tengo cuenta / Registrarme</p>
-
-        <div class="caja-blanca">
-            <label>Nombre / Razón social</label>
-            <input type="text" id="reg-nombre">
-
-            <label>Alias <small>(Tus clientes te buscarán así)</small></label>
-            <input type="text" id="reg-alias" placeholder="Máx 6 letras">
-
-            <label>Rubro</label>
-            <input type="text" id="reg-rubro" placeholder="Ej: Kinesiología">
-
-            <label>Teléfono</label>
-            <input type="tel" id="reg-telefono">
-
-            <label>Contraseña</label>
-            <input type="password" id="reg-password">
-        </div>
-
-        <div class="btn-img" onclick="registrarNegocio()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton%20crear%20cuenta.png" alt="Crear Cuenta">
-        </div>
-
-        <div class="btn-secundario" onclick="mostrarLogin()" style="margin-bottom: 20px;">
-            Volver atrás
-        </div>
+        <p class="registro">¿Aún no tienes cuenta? <br> <b>Regístrate desde la web oficial</b></p>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // NAVEGACIÓN ENTRE PANTALLAS
-        function mostrarRegistro() {
-            document.getElementById('login-section').classList.remove('activa');
-            document.getElementById('registro-section').classList.add('activa');
-            window.scrollTo(0,0);
-        }
+        async function ingresar() {
+            const alias = document.getElementById('login-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('login-pass').value.trim();
 
-        function mostrarLogin() {
-            document.getElementById('registro-section').classList.remove('activa');
-            document.getElementById('login-section').classList.add('activa');
-            window.scrollTo(0,0);
-        }
+            if(!alias || !pass) return alert("Completa tus datos");
 
-        // MOTOR JS (LOGIN)
-        async function iniciarSesion() {
-            const alias = document.getElementById('login-alias').value.trim().toUpperCase();
-            const password = document.getElementById('login-password').value;
+            const { data, error } = await supabase.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
 
-            if(!alias || !password) return alert("Completá los datos");
+            if(error || !data) return alert("Alias o contraseña incorrectos");
 
-            const { data, error } = await supabaseCliente
-                .from('negocios')
-                .select('*')
-                .eq('alias', alias)
-                .eq('password', password)
-                .single();
-
-            if (error || !data) {
-                alert("Alias o contraseña incorrectos.");
-            } else {
-                localStorage.setItem('mi_turno_negocio_id', data.id);
-                window.location.href = "dashboard.html";
-            }
-        }
-
-        // MOTOR JS (REGISTRO + MERCADO PAGO)
-        async function registrarNegocio() {
-            const nombre = document.getElementById('reg-nombre').value.trim();
-            const alias = document.getElementById('reg-alias').value.trim().toUpperCase();
-            const rubro = document.getElementById('reg-rubro').value.trim();
-            const telefono = document.getElementById('reg-telefono').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            if(!nombre || !alias || !password || !rubro) return alert("Nombre, Alias, Rubro y Contraseña son obligatorios.");
-
-            const { error } = await supabaseCliente.from('negocios').insert([{ nombre, alias, rubro, telefono, password }]);
-            if (error) return alert("Error al registrar: " + error.message);
-            
-            alert("¡Tus datos se guardaron con éxito! Ahora te redirigiremos a Mercado Pago para activar tu cuenta.");
-            window.location.href = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
+            localStorage.setItem('mi_turno_negocio_id', data.id);
+            window.location.href = "dashboard.html";
         }
     </script>
 </body>
