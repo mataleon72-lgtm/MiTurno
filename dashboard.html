@@ -155,13 +155,14 @@
 
             if(!nombre || !direccion) return alert("Completá nombre y dirección.");
 
-            const { error } = await supabaseCliente.from('consultorios').insert([{
+            // ACÁ ESTÁ EL CAMBIO MAGICO: 'sucursales'
+            const { error } = await supabaseCliente.from('sucursales').insert([{
                 negocio_id: idMedicoLogueado, nombre, direccion
             }]);
 
             if(error) return alert("Error: " + error.message);
 
-            alert("Consultorio guardado con éxito.");
+            alert("Lugar guardado con éxito.");
             document.getElementById('cons-nombre').value = "";
             document.getElementById('cons-direccion').value = "";
             await cargarConsultoriosListado();
@@ -171,7 +172,8 @@
             const select = document.getElementById('agenda-consultorio');
             select.innerHTML = '<option value="">Seleccioná un lugar</option>';
             
-            const { data } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedicoLogueado);
+            // ACÁ ESTÁ EL CAMBIO
+            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedicoLogueado);
             data?.forEach(c => {
                 select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
             });
@@ -180,10 +182,11 @@
         async function cargarConsultoriosListado() {
             const lista = document.getElementById('lista-mis-consultorios');
             lista.innerHTML = "";
-            const { data } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedicoLogueado);
+            // ACÁ ESTÁ EL ÚLTIMO CAMBIO
+            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedicoLogueado);
             
             if(!data || data.length === 0) {
-                lista.innerHTML = '<p style="color:#999; text-align:center; margin:0; font-size:14px;">No tenés consultorios creados todavía.</p>';
+                lista.innerHTML = '<p style="color:#999; text-align:center; margin:0; font-size:14px;">No tenés lugares creados todavía.</p>';
                 return;
             }
             data.forEach(c => {
