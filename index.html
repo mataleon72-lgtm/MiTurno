@@ -300,13 +300,16 @@ const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
 const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 🌟 Poné acá el id real del médico que tiene cargados consultorio1 y consultorio2
-const NEGOCIO_ID = "ff5ea334-1f87-4e93-b809-331d368d58c8"; 
+// 🌟 AQUÍ ESTÁ EL DETECTOR INTELIGENTE DE ID (Pone esto para reemplazar el ID viejo y estático):
+const urlParams = new URLSearchParams(window.location.search);
+const NEGOCIO_ID = urlParams.get('id'); 
 
 let sucursalSeleccionadaID = null;
-let direccionMapaActual = ""; // Guardamos la dirección para Google Maps dinámico
+let direccionMapaActual = ""; 
 
+// De acá para abajo el resto de tus funciones sigue exactamente igual...
 async function cargarDatosNegocio() {
+// ...
     try {
         const { data: negocio, error } = await supabaseCliente
             .from('negocios')
