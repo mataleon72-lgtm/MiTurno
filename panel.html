@@ -100,7 +100,7 @@
             document.getElementById('titulo-pantalla').innerText = 'Acceso Profesional';
         }
 
-        // MOTOR 1: REGISTRO DE CUENTA NUEVA
+        // MOTOR DE REGISTRO OPTIMIZADO
         async function registrarCuenta() {
             const nombre = document.getElementById('reg-nombre').value.trim();
             const rubro = document.getElementById('reg-rubro').value.trim();
@@ -111,28 +111,35 @@
                 return alert("Por favor, completá todos los campos para registrarte.");
             }
 
-            // Insertamos el nuevo profesional en la base de datos
-            const { data, error } = await supabase.from('negocios').insert([
+            // Guardamos directo sin pedir respuesta compleja
+            const { error } = await supabase.from('negocios').insert([
                 { nombre: nombre, rubro: rubro, alias: alias, password: pass }
-            ]).select();
+            ]);
 
             if (error) {
-                // Si salta este error es porque se activó el candado "Is Unique" que pusimos hoy para los alias repetidos
                 if(error.code === '23505') {
-                    return alert("¡Ese Alias ya está siendo usado por otro profesional! Por favor, elegí uno diferente.");
+                    return alert("¡Ese Alias ya está siendo usado por otro profesional! Elegí uno diferente.");
                 }
                 return alert("Error al registrar: " + error.message);
             }
 
-            if(data && data.length > 0) {
-                alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
-                // Logueamos automáticamente al usuario recién nacido
-                localStorage.setItem('mi_turno_negocio_id', data[0].id);
-                window.location.href = "dashboard.html";
+            // Si no dio error, salimos a buscar el ID recién generado usando el Alias limpio
+            const { data: medico, error: errorBusqueda } = await supabase
+                .from('negocios')
+                .select('id')
+                .eq('alias', alias)
+                .single();
+
+            if (errorBusqueda || !medico) {
+                return alert("Cuenta creada, pero hubo un error al iniciar sesión automáticamente. Por favor, ingresá desde la pantalla de Login.");
             }
+
+            alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
+            localStorage.setItem('mi_turno_negocio_id', medico.id);
+            window.location.href = "dashboard.html";
         }
 
-        // MOTOR 2: INGRESO DE USUARIOS EXISTENTES
+        // MOTOR DE INGRESO
         async function ingresar() {
             const alias = document.getElementById('login-alias').value.toUpperCase().trim();
             const pass = document.getElementById('login-pass').value.trim();
