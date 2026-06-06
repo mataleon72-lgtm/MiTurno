@@ -5,57 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mis Médicos - Mi Turno</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .contenedor-home { background: #fff; width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-height: 85vh; display: flex; flex-direction: column; }
-        h2 { color: #333; margin-bottom: 5px; }
-        p { color: #666; font-size: 0.9em; margin-top: 0; }
-        .seccion { margin-bottom: 25px; }
-        .caja-busqueda { display: flex; gap: 8px; margin-top: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
-        input:focus { border-color: #008080; }
-        button { background: #008080; color: white; border: none; padding: 12px 18px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        button:active { opacity: 0.9; }
-        .lista-profesionales { display: flex; flex-direction: column; gap: 12px; flex-content: start; }
-        .btn-medico { background: #ffffff; border: 2px solid #008080; color: #008080; padding: 16px; border-radius: 10px; text-align: left; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-medico:hover { background: #e6f2f2; }
-        .btn-medico small { color: #666; font-weight: normal; margin-top: 4px; font-size: 0.85em; }
-        .pantalla-inicial { display: none; }
-        .pantalla-inicial.activa { display: block; }
+        /* DISEÑO FLUIDO Y RESPONSIVE */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: white; 
+        }
+        .contenedor { 
+            width: 90%; 
+            max-width: 400px; 
+            padding: 30px 0; 
+            display: none; 
+        }
+        .contenedor.activa { 
+            display: block; 
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cabecera y Logos */
+        .header-logo { text-align: center; margin-bottom: 20px; }
+        h2.titulo-pantalla { text-align: center; font-size: 26px; font-weight: 900; margin-bottom: 5px; margin-top: 5px;}
+        p.subtitulo { text-align: center; font-size: 15px; margin-top: 0; margin-bottom: 25px; opacity: 0.9; }
+
+        /* Cajas Blancas */
+        .caja-blanca { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            margin-bottom: 20px;
+        }
+        .caja-blanca label { color: #444; font-weight: 800; display: block; margin-bottom: 6px; font-size: 16px; }
+        .caja-blanca small { color: #888; font-weight: 400; font-size: 13px; display: block; margin-bottom: 8px;}
+        
+        input { 
+            width: 100%; background: #F4F4F4; border: 2px solid #F4F4F4; border-radius: 8px; 
+            padding: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif; 
+            font-size: 16px; outline: none; transition: all 0.3s;
+        }
+        input:focus { border-color: #009E9B; background: #FFF; }
+
+        /* Botón de Imagen */
+        .btn-img { text-align: center; cursor: pointer; margin-top: 10px; transition: transform 0.2s; }
+        .btn-img:active { transform: scale(0.95); }
+        .btn-img img { max-width: 180px; width: 100%; }
+
+        /* Buscador de Médicos */
+        .caja-busqueda { display: flex; gap: 8px; margin-bottom: 5px; }
+        .caja-busqueda input { margin-bottom: 0; flex: 1; }
+        
+        /* BOTÓN AMARILLO */
+        .btn-agregar { 
+            background: #F4B41A; /* Amarillo del diseño */
+            color: white; 
+            border: none; border-radius: 8px; padding: 0 15px; 
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-agregar:active { transform: scale(0.95); }
+
+        /* Lista de Médicos */
+        .lista-profesionales { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .btn-medico { 
+            background: #f8f9fa; border: 2px solid #e0e0e0; color: #333; padding: 15px; border-radius: 12px; 
+            text-align: left; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; 
+            cursor: pointer; display: flex; flex-direction: column; transition: all 0.2s;
+        }
+        .btn-medico:active { transform: scale(0.98); border-color: #009E9B; }
+        .btn-medico small { color: #009E9B; font-weight: 700; margin-top: 4px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="contenedor-home">
-        
-        <div id="registro-paciente" class="pantalla-inicial">
-            <h2>¡Bienvenido a Mi Turno!</h2>
-            <p>Para empezar a agendar tus turnos, dejanos tu nombre y teléfono de contacto.</p>
-            <input type="text" id="pac-nombre" placeholder="Tu Nombre y Apellido">
-            <input type="tel" id="pac-telefono" placeholder="Tu Teléfono (Ej: 1122334455)" style="margin-top: 10px;">
-            <button onclick="registrarNuevoPaciente()" style="width: 100%; margin-top: 15px;">Comenzar</button>
+    <div id="registro-paciente" class="contenedor">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20home.png" alt="Bienvenido a" style="max-width: 220px; margin-bottom: 10px;">
+            <br>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Mano" style="max-width: 90px;">
         </div>
+        <p class="subtitulo" style="margin-top: 15px;">Para empezar a agendar tus turnos, dejanos tu nombre, DNI y teléfono.</p>
 
-        <div id="panel-paciente" class="pantalla-inicial">
-            <h2 id="saludo-paciente">Hola...</h2>
-            <p>Gestioná tus profesionales y turnos desde acá.</p>
+        <div class="caja-blanca">
+            <label>Nombre y Apellido</label>
+            <input type="text" id="pac-nombre" placeholder="Ej: Juan Perez">
             
-            <div class="seccion">
-                <label style="font-weight: 600; color: #444;">Agregar Nuevo Profesional:</label>
-                <div class="caja-busqueda">
-                    <input type="text" id="input-alias-medico" placeholder="Ingresá el Código (Ej: CHULE)">
-                    <button onclick="buscarYAgregarMedico()">Agregar</button>
-                </div>
-            </div>
+            <label>DNI</label>
+            <input type="number" id="pac-dni" placeholder="Sin puntos">
 
-            <div class="seccion" style="flex: 1;">
-                <label style="font-weight: 600; color: #444; display: block; margin-bottom: 10px;">Mis Profesionales Agendados:</label>
-                <div id="lista-favoritos" class="lista-profesionales">
-                    <p style="color: #999;">Aún no agregaste ningún profesional.</p>
-                </div>
-            </div>
+            <label>Teléfono <small style="display:inline;">(Ej: 1122334455)</small></label>
+            <input type="tel" id="pac-telefono" style="margin-bottom: 5px;">
         </div>
 
+        <div class="btn-img" onclick="registrarNuevoPaciente()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton%20comenzar.png" alt="Comenzar">
+        </div>
+    </div>
+
+    <div id="panel-paciente" class="contenedor">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Mano" style="max-width: 80px;">
+        </div>
+        <h2 id="saludo-paciente" class="titulo-pantalla">¡Hola!</h2>
+        <p class="subtitulo">Gestioná tus profesionales y turnos desde acá.</p>
+        
+        <div class="caja-blanca">
+            <label>Agregar Nuevo Profesional:</label>
+            <div class="caja-busqueda">
+                <input type="text" id="input-alias-medico" placeholder="Código (Ej: CHULE)">
+                <button class="btn-agregar" onclick="buscarYAgregarMedico()">Agregar</button>
+            </div>
+            <small style="margin-top: 8px; text-align: center;">Pedile a tu médico su código.</small>
+        </div>
+
+        <div class="caja-blanca">
+            <label>Profesionales agendados:</label>
+            <div id="lista-favoritos" class="lista-profesionales">
+                <p style="color: #999; font-size: 14px; text-align: center;">Cargando tu lista...</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -77,19 +153,22 @@
 
         async function registrarNuevoPaciente() {
             const nombre = document.getElementById('pac-nombre').value.trim();
+            const dni = document.getElementById('pac-dni').value.trim();
             const telefono = document.getElementById('pac-telefono').value.trim();
 
-            if (!nombre || !telefono) return alert("Por favor, completá tu nombre y teléfono.");
+            if (!nombre || !telefono || !dni) return alert("Por favor, completá todos los campos.");
 
-            const { data, error } = await supabaseCliente
-                .from('pacientes')
-                .insert([{ nombre, telefono }])
-                .select();
-
+            // Se guardan los 3 datos en Supabase
+            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
             if (error) return alert("Error al registrar: " + error.message);
 
             if (data && data[0]) {
                 localStorage.setItem('mi_turno_paciente_id', data[0].id);
+                // Opcional: guardamos estos datos sueltos en memoria para que el Index los lea rápido después
+                localStorage.setItem('mi_turno_paciente_nombre', nombre);
+                localStorage.setItem('mi_turno_paciente_dni', dni);
+                localStorage.setItem('mi_turno_paciente_telefono', telefono);
+
                 idPacienteActual = data[0].id;
                 
                 document.getElementById('registro-paciente').classList.remove('activa');
@@ -101,42 +180,24 @@
 
         async function recuperarDatosPaciente() {
             const { data } = await supabaseCliente.from('pacientes').select('nombre').eq('id', idPacienteActual).single();
-            if (data) {
-                document.getElementById('saludo-paciente').innerText = `¡Hola, ${data.nombre.split(' ')[0]}!`;
-            }
+            if (data) document.getElementById('saludo-paciente').innerText = `¡Hola, ${data.nombre.split(' ')[0]}!`;
         }
 
-        // CÓDIGO LIMPIO SIN ALERTAS DE ESPÍAS
         async function buscarYAgregarMedico() {
             const aliasBuscado = document.getElementById('input-alias-medico').value.trim().toUpperCase();
             if (!aliasBuscado) return alert("Escribí el código del profesional.");
 
-            const { data: medico, error } = await supabaseCliente
-                .from('negocios')
-                .select('id, nombre')
-                .ilike('alias', aliasBuscado)
-                .single();
+            const { data: medico, error } = await supabaseCliente.from('negocios').select('id, nombre, rubro').ilike('alias', aliasBuscado).single();
+            if (error || !medico) return alert("No se encontró ningún profesional con ese código.");
 
-            if (error || !medico) return alert("No se encontró ningún profesional con ese código. Verificá que esté bien escrito.");
-
-            // Verificar duplicados
-            const { data: yaExiste } = await supabaseCliente
-                .from('pacientes_profesionales')
-                .select('*')
-                .eq('paciente_id', idPacienteActual)
-                .eq('negocio_id', medico.id);
-
+            const { data: yaExiste } = await supabaseCliente.from('pacientes_profesionales').select('*').eq('paciente_id', idPacienteActual).eq('negocio_id', medico.id);
             if (yaExiste && yaExiste.length > 0) {
                 alert("Ya tenés a este profesional en tu lista.");
                 document.getElementById('input-alias-medico').value = '';
                 return;
             }
 
-            // Guardar favorito en Supabase
-            const { error: errEnlace } = await supabaseCliente
-                .from('pacientes_profesionales')
-                .insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
-
+            const { error: errEnlace } = await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
             if (errEnlace) return alert("Error al agendar: " + errEnlace.message);
 
             document.getElementById('input-alias-medico').value = '';
@@ -145,19 +206,15 @@
 
         async function cargarMedicosFavoritos() {
             const contenedor = document.getElementById('lista-favoritos');
-            
             const { data: favoritos, error } = await supabaseCliente
                 .from('pacientes_profesionales')
-                .select(`
-                    negocio_id,
-                    negocios ( nombre, rubro )
-                `)
+                .select(`negocio_id, negocios ( nombre, rubro )`)
                 .eq('paciente_id', idPacienteActual);
 
             if (error) return console.error(error);
 
             if (!favoritos || favoritos.length === 0) {
-                contenedor.innerHTML = '<p style="color: #999; text-align:center; padding: 20px 0;">Aún no agregaste códigos. Pedile su código a tu médico para agendarlo acá.</p>';
+                contenedor.innerHTML = '<p style="color: #999; font-size: 14px; text-align: center;">Aún no agregaste códigos. Buscá uno arriba.</p>';
                 return;
             }
 
@@ -168,7 +225,7 @@
                     contenedor.innerHTML += `
                         <button class="btn-medico" onclick="irAlTurneroDelMedico('${fav.negocio_id}')">
                             ${medico.nombre}
-                            <small>⚕️ ${medico.rubro || 'Profesional'}</small>
+                            <small>${medico.rubro || 'Profesional'}</small>
                         </button>
                     `;
                 }
