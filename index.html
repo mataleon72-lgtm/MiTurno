@@ -2,552 +2,256 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mi Turno App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reservar Turno - Mi Turno</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        user-select: none; 
-        -webkit-tap-highlight-color: transparent; 
-    }
-    body {
-        background-color: #e0e0e0; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        overflow: hidden;
-    }
-    #app-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        background-color: #ffffff;
-        overflow: hidden;
-    }
-    @media (min-aspect-ratio: 432/960) {
-        #app-container {
-            width: auto;
-            aspect-ratio: 432/960;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* DISEÑO FLUIDO Y UNIFICADO */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: white; 
         }
-    }
-    .pantalla {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        display: none; 
-        opacity: 0;
-        transition: opacity 0.2s ease-in-out; 
-    }
-    .pantalla.activa {
-        display: block;
-        opacity: 1;
-    }
-    #pantalla-portada { background-image: url('portada.jpg'); }
-    /* 🎨 Añadimos tu nuevo lienzo para seleccionar el lugar de atención */
-    #pantalla-sucursal { background-image: url('sucursal.jpg'); } 
-    #pantalla-seleccion { background-image: url('seleccion.jpg'); }
-    #pantalla-datos { background-image: url('datos.jpg'); }
-    #pantalla-exito { background-image: url('exito.jpg'); }
+        .contenedor { width: 90%; max-width: 400px; padding: 25px 0; }
+        .header-logo { text-align: center; margin-bottom: 15px; }
+        .header-logo img { max-width: 80px; }
+        h2.titulo-medico { text-align: center; font-size: 26px; font-weight: 900; margin-bottom: 5px; margin-top: 5px; }
+        p.rubro-medico { text-align: center; font-size: 16px; margin-top: 0; margin-bottom: 25px; opacity: 0.9; font-weight: 700; color: #F4B41A; }
 
-    .btn-invisible {
-        position: absolute;
-        background: transparent !important; 
-        border: none !important;
-        outline: none !important;
-        cursor: pointer;
-        z-index: 10;
-    }
-    .texto-dinamico {
-        position: absolute;
-        color: #333333; 
-        font-weight: 600;
-        z-index: 5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        background: transparent !important;
-    }
-    .input-invisible {
-        position: absolute;
-        background: transparent !important; 
-        border: none !important;
-        outline: none !important;
-        color: #333 !important;
-        font-size: 18px;
-        font-weight: 600;
-        padding: 5px 10px;
-        z-index: 10;
-        text-align: center;
-        box-shadow: none !important;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-    
-    .input-invisible:focus, .input-invisible:active {
-        background: transparent !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-    .input-invisible:-webkit-autofill,
-    .input-invisible:-webkit-autofill:hover, 
-    .input-invisible:-webkit-autofill:focus {
-        -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-        box-shadow: 0 0 0px 1000px transparent inset !important;
-        -webkit-text-fill-color: #333 !important;
-        transition: background-color 5000s ease-in-out 0s;
-    }
+        .caja-blanca { 
+            background: white; border-radius: 16px; padding: 20px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); margin-bottom: 20px; color: #333;
+        }
+        .caja-blanca label { color: #444; font-weight: 800; display: block; margin-bottom: 8px; font-size: 16px; }
 
-    /* Posiciones de tu Portada */
-    #txt-nombre { top: 58.0%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 22px; color: #fff; justify-content: flex-start; font-weight: bold; }
-    #txt-telefono { top: 65.2%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 18px; color: #fff; justify-content: flex-start; }
-    #txt-direccion { top: 72.5%; left: 23.0%; width: 70.0%; height: 5.0%; font-size: 15px; color: #fff; justify-content: flex-start; text-align: left; } 
-    #btn-comenzar { top: 82.0%; left: 5.0%; width: 90.0%; height: 12.0%; }
-    
-    /* Botones invisibles para las flechas de Volver Atrás */
-    .btn-volver { top: 6.5%; left: 5.5%; width: 15.0%; height: 7.0%; border-radius: 50%; }
+        /* Selectores */
+        select { 
+            width: 100%; background: #F4F4F4; border: 2px solid #F4F4F4; border-radius: 8px; 
+            padding: 12px; margin-bottom: 15px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700; outline: none; color: #333;
+        }
+        select:focus { border-color: #009E9B; }
 
-    /* 🎨 Estilo para el contenedor dinámico de los consultorios en tu lienzo sucursal.jpg */
-    #contenedor-sucursales {
-        position: absolute;
-        top: 30.0%; left: 10.0%; width: 80.0%; height: 55.0%;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        z-index: 10;
-        overflow-y: auto;
-    }
-    /* Botones estilizados para las sucursales (ajustalo como quieras a tu diseño) */
-    .btn-sucursal-opcion {
-        background: #008080;
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .btn-sucursal-opcion small {
-        display: block;
-        font-size: 12px;
-        font-weight: normal;
-        margin-top: 4px;
-        opacity: 0.9;
-    }
+        /* Grilla de Horarios Dinámicos */
+        .grid-horarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .btn-hora { 
+            background: #F4F4F4; border: 2px solid #F4F4F4; border-radius: 8px; padding: 12px 5px; 
+            font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: #333; cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .btn-hora:hover { border-color: #009E9B; }
+        .btn-hora.seleccionado { background: #009E9B; color: white; border-color: #009E9B; }
 
-    /* Estructura de tu Almanaque flotante */
-    #control-mes {
-        position: absolute;
-        top: 14.8%; left: 16.4%; width: 67.1%; height: 4.7%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 10;
-        color: #008080;
-        font-weight: bold;
-        font-size: 18px;
-    }
-    #control-mes button {
-        background: transparent; color: #008080; border: none; 
-        font-size: 20px; font-weight: bold; cursor: pointer;
-        padding: 0 10px;
-    }
-    #contenedor-calendario {
-        position: absolute;
-        top: 33.5%; left: 9.0%; width: 82.0%; height: 26.5%;
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        grid-template-rows: repeat(6, 1fr);
-        gap: 2px;
-        z-index: 10;
-    }
-    #contenedor-horas {
-        position: absolute;
-        top: 69.5%; left: 9.0%; width: 82.0%; height: 25.0%;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
-        align-content: start;
-        overflow-y: auto;
-        z-index: 10;
-    }
-    .celda-dia {
-        background: transparent;
-        border: none;
-        color: #333; 
-        font-weight: bold;
-        font-size: 14px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .celda-dia.dia-vacio {
-        background: transparent;
-        cursor: default;
-    }
-    .celda-dia.seleccionado {
-        background: #333 !important; 
-        color: #fff !important;
-        border-radius: 50%;
-    }
-    .celda-hora {
-        background: #2ecc71; 
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-weight: bold;
-        font-size: 14px;
-        padding: 6px 0;
-        cursor: pointer;
-        text-align: center;
-    }
-    .mensaje-estado {
-        grid-column: span 4;
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 15px;
-        padding: 15px 0;
-        font-weight: 600;
-    }
-
-    /* Cajas de texto invisibles de la Pantalla de Datos */
-    #in-nombre { top: 34.6%; left: 10.5%; width: 79.0%; height: 6.0%; }
-    #in-apellido { top: 47.1%; left: 10.5%; width: 79.0%; height: 6.0%; }
-    #in-dni { top: 59.8%; left: 10.5%; width: 79.0%; height: 6.0%; }
-    #in-telefono { top: 72.3%; left: 10.5%; width: 79.0%; height: 6.0%; }
-    #btn-confirmar { top: 84.2%; left: 14.0%; width: 72.0%; height: 7.5%; }
-
-    /* Reestructuración de Éxito */
-    #txt-exito-fecha { top: 33.3%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 18px; font-weight: bold; color: #333; }
-    #txt-exito-hora { top: 47.9%; left: 14.6%; width: 74.3%; height: 6.7%; font-size: 16px; font-weight: bold; color: #333; }
-    #btn-mapa { top: 65.6%; left: 9.5%; width: 83.3%; height: 26.3%; }
-</style>
+        /* Botón de Confirmación */
+        .btn-confirmar { 
+            width: 100%; background: #F4B41A; color: white; border: none; border-radius: 12px; 
+            padding: 15px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900; 
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s; margin-top: 10px;
+        }
+        .btn-confirmar:active { transform: scale(0.95); }
+    </style>
 </head>
 <body>
-<div id="app-container">
-    
-    <!-- PANTALLA 1: PORTADA -->
-    <div id="pantalla-portada" class="pantalla activa">
-        <div id="txt-nombre" class="texto-dinamico">Cargando...</div>
-        <div id="txt-telefono" class="texto-dinamico">...</div>
-        <div id="txt-direccion" class="texto-dinamico">...</div>
-        <!-- Al hacer clic, ahora va primero a buscar las sucursales -->
-        <button id="btn-comenzar" class="btn-invisible" onclick="buscarSucursalesMedico()"></button>
-    </div>
 
-    <!-- 🎨 NUEVA PANTALLA 1B: SELECCIÓN DE CONSULTORIO -->
-    <div id="pantalla-sucursal" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-portada')"></button>
-        <div id="contenedor-sucursales">
-            <!-- Botones inyectados dinámicamente aquí -->
+    <div class="contenedor">
+        <div class="header-logo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Mano">
+        </div>
+        <h2 id="nombre-medico" class="titulo-medico">Cargando Profesional...</h2>
+        <p id="rubro-medico" class="rubro-medico">...</p>
+
+        <div class="caja-blanca">
+            <label>¿Dónde te querés atender?</label>
+            <select id="select-consultorio" onchange="cargarDiasDisponibles()">
+                <option value="">Seleccioná un consultorio</option>
+            </select>
+
+            <label>Elegí el Día:</label>
+            <select id="select-dia" onchange="generarHorariosDinámicos()" disabled>
+                <option value="">Seleccioná un día</option>
+            </select>
+        </div>
+
+        <div class="caja-blanca" id="bloque-horarios" style="display: none;">
+            <label>Horarios Disponibles:</label>
+            <div id="contenedor-horarios" class="grid-horarios"></div>
+        </div>
+
+        <div class="caja-blanca" id="bloque-confirmacion" style="display: none;">
+            <label style="margin-bottom: 2px;">Reserva para:</label>
+            <p id="texto-paciente-identificado" style="margin: 0; font-size: 18px; font-weight: 800; color: #009E9B;"></p>
+            <p id="texto-dni-identificado" style="margin: 0; font-size: 14px; color: #666;"></p>
+            
+            <button class="btn-confirmar" onclick="confirmarTurnoInmediato()">Agendar Turno</button>
         </div>
     </div>
 
-    <!-- PANTALLA 2: CALENDARIO -->
-    <div id="pantalla-seleccion" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-sucursal')"></button>
-        <div id="control-mes">
-            <button onclick="modificarMes(-1)">◀</button>
-            <span id="nombre-mes">-</span>
-            <button onclick="modificarMes(1)">▶</button>
-        </div>
-        <div id="contenedor-calendario"></div>
-        <div id="contenedor-horas"></div>
-    </div>
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <!-- PANTALLA 3: FORMULARIO -->
-    <div id="pantalla-datos" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="navegarA('pantalla-seleccion')"></button>
-        <input type="text" id="in-nombre" class="input-invisible" placeholder="">
-        <input type="text" id="in-apellido" class="input-invisible" placeholder="">
-        <input type="text" inputmode="numeric" pattern="[0-9]*" id="in-dni" class="input-invisible" placeholder="">
-        <input type="tel" id="in-telefono" class="input-invisible" placeholder="">
-        <button id="btn-confirmar" class="btn-invisible" onclick="confirmarTurno()"></button>
-    </div>
+        // Capturar datos del Profesional por URL
+        const parametros = new URLSearchParams(window.location.search);
+        const idMedico = parametros.get('id');
 
-    <!-- PANTALLA 4: ÉXITO -->
-    <div id="pantalla-exito" class="pantalla">
-        <button class="btn-invisible btn-volver" onclick="cancelarYVolver()"></button>
-        <div id="txt-exito-fecha" class="texto-dinamico">-</div>
-        <div id="txt-exito-hora" class="texto-dinamico">-</div>
-        <button id="btn-mapa" class="btn-invisible" onclick="abrirMapa()"></button>
-    </div>
+        // Datos del Paciente (Leídos de la sesión del Home)
+        let idPaciente = localStorage.getItem('mi_turno_paciente_id');
+        let nombrePaciente = localStorage.getItem('mi_turno_paciente_nombre');
+        let dniPaciente = localStorage.getItem('mi_turno_paciente_dni');
+        let telefonoPaciente = localStorage.getItem('mi_turno_paciente_telefono');
 
-</div>
+        let horaSeleccionada = null;
 
-<script>
-let turnoSeleccionado = { fechaTexto: "", fechaISO: "", hora: "" };
-let idTurnoCreado = null; 
-let fechaNavegacion = new Date();
-const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        async function inicializarTurnero() {
+            if (!idMedico) return alert("Falta el identificador del médico.");
+            
+            // 1. Recuperar datos de sesión si faltaban strings
+            if (idPaciente && (!nombrePaciente || !dniPaciente)) {
+                const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', idPaciente).single();
+                if (data) {
+                    nombrePaciente = data.nombre; dniPaciente = data.dni; telefonoPaciente = data.telefono;
+                }
+            }
 
-const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // Mostrar el cartel inteligente de reserva si está logueado
+            if (idPaciente) {
+                document.getElementById('texto-paciente-identificado').innerText = nombrePaciente;
+                document.getElementById('texto-dni-identificado').innerText = `DNI: ${dniPaciente || 'No cargado'}`;
+                document.getElementById('bloque-confirmacion').style.display = 'block';
+            } else {
+                alert("Para sacar un turno, primero debés ingresar desde tu Home.");
+                window.location.href = "home.html";
+                return;
+            }
 
-// 🌟 AQUÍ ESTÁ EL DETECTOR INTELIGENTE DE ID (Pone esto para reemplazar el ID viejo y estático):
-const urlParams = new URLSearchParams(window.location.search);
-const NEGOCIO_ID = urlParams.get('id'); 
+            // 2. Traer datos del médico
+            const { data: medico } = await supabaseCliente.from('negocios').select('nombre, rubro').eq('id', idMedico).single();
+            if (medico) {
+                document.getElementById('nombre-medico').innerText = medico.nombre;
+                document.getElementById('rubro-medico').innerText = medico.rubro || "Profesional";
+            }
 
-let sucursalSeleccionadaID = null;
-let direccionMapaActual = ""; 
-
-// De acá para abajo el resto de tus funciones sigue exactamente igual...
-async function cargarDatosNegocio() {
-// ...
-    try {
-        const { data: negocio, error } = await supabaseCliente
-            .from('negocios')
-            .select('*')
-            .eq('id', NEGOCIO_ID)
-            .single();
-
-        if (!error && negocio) {
-            document.getElementById('txt-nombre').innerText = negocio.nombre;
-            document.getElementById('txt-telefono').innerText = negocio.rubro || "Kinesiología";
-            document.getElementById('txt-direccion').innerText = "Toca comenzar para ver sedes"; 
+            // 3. Traer consultorios
+            const { data: consultorios } = await supabaseCliente.from('consultorios').select('*').eq('negocio_id', idMedico);
+            const selectCons = document.getElementById('select-consultorio');
+            consultorios?.forEach(c => {
+                selectCons.innerHTML += `<option value="${c.id}">${c.nombre} (${c.direccion})</option>`;
+            });
         }
-    } catch (err) {
-        console.error(err);
-    }
-}
-cargarDatosNegocio();
 
-function navegarA(idDestino) {
-    document.querySelectorAll('.pantalla').forEach(pantalla => {
-        pantalla.classList.remove('activa');
-    });
-    document.getElementById(idDestino).classList.add('activa');
-}
+        async function cargarDiasDisponibles() {
+            const idCons = document.getElementById('select-consultorio').value;
+            const selectDia = document.getElementById('select-dia');
+            selectDia.innerHTML = '<option value="">Seleccioná un día</option>';
+            document.getElementById('bloque-horarios').style.display = 'none';
+            horaSeleccionada = null;
 
-// 🎨 NUEVA FUNCIÓN: Busca los centros médicos y arma los botones flotantes
-async function buscarSucursalesMedico() {
-    const contenedor = document.getElementById('contenedor-sucursales');
-    contenedor.innerHTML = '<p style="text-align:center; color:#666;">Buscando sedes...</p>';
-    navegarA('pantalla-sucursal');
+            if (!idCons) { selectDia.disabled = true; return; }
 
-    const { data: sucursales, error } = await supabaseCliente
-        .from('sucursales')
-        .select('*')
-        .eq('negocio_id', NEGOCIO_ID);
+            // Buscamos las configuraciones de agenda activas para este consultorio
+            const { data: agendas } = await supabaseCliente.from('agenda').select('dia_semana').eq('consultorio_id', idCons);
+            
+            if(!agendas || agendas.length === 0) {
+                alert("Este consultorio aún no tiene horarios configurados.");
+                selectDia.disabled = true;
+                return;
+            }
 
-    if (error || !sucursales || sucursales.length === 0) {
-        contenedor.innerHTML = '<p style="text-align:center; color:#ff4d4d;">Este profesional no tiene consultorios activos.</p>';
-        return;
-    }
+            const diasTexto = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+            
+            // Generar fechas de los próximos 7 días que coincidan con la agenda configurada
+            let encontradas = 0;
+            for (let i = 0; i < 14; i++) {
+                let hoy = new Date();
+                hoy.setDate(hoy.getDate() + i);
+                let numeroDiaSemana = hoy.getDay(); 
 
-    contenedor.innerHTML = "";
-    sucursales.forEach(suc => {
-        contenedor.innerHTML += `
-            <button class="btn-sucursal-opcion" onclick="seleccionarSucursal('${suc.id}', '${suc.direccion}')">
-                ${suc.nombre}
-                <small>📍 ${suc.direccion}</small>
-            </button>
-        `;
-    });
-}
+                let calzaConAgenda = agendas.some(a => parseInt(a.dia_semana) === numeroDiaSemana);
+                if (calzaConAgenda) {
+                    let fechaFormateada = hoy.toISOString().split('T')[0];
+                    let textoOpcion = `${diasTexto[numeroDiaSemana]} ${hoy.getDate()}/${hoy.getMonth()+1}`;
+                    selectDia.innerHTML += `<option value="${fechaFormateada}">${textoOpcion}</option>`;
+                    encontradas++;
+                }
+            }
 
-function seleccionarSucursal(idSucursal, direccion) {
-    sucursalSeleccionadaID = idSucursal;
-    direccionMapaActual = direccion; // Guardamos la calle para el botón de mapas final
-    inicializarCalendario();
-    navegarA('pantalla-seleccion');
-}
-
-function inicializarCalendario() {
-    fechaNavegacion = new Date();
-    construirCalendario();
-}
-
-function modificarMes(direccion) {
-    fechaNavegacion.setMonth(fechaNavegacion.getMonth() + direccion);
-    construirCalendario();
-    document.getElementById('contenedor-horas').innerHTML = '';
-}
-
-function construirCalendario() {
-    const contenedor = document.getElementById('contenedor-calendario');
-    contenedor.innerHTML = '';
-    let año = fechaNavegacion.getFullYear();
-    let mes = fechaNavegacion.getMonth();
-    document.getElementById('nombre-mes').innerText = mesesNombres[mes] + ' ' + año;
-    
-    let primerDiaSemana = new Date(año, mes, 1).getDay();
-    let totalDiasMes = new Date(año, mes + 1, 0).getDate();
-
-    for (let i = 0; i < primerDiaSemana; i++) {
-        let celdaVacia = document.createElement('div');
-        celdaVacia.className = 'celda-dia dia-vacio';
-        contenedor.appendChild(celdaVacia);
-    }
-
-    for (let dia = 1; dia <= totalDiasMes; dia++) {
-        let btnDia = document.createElement('button');
-        btnDia.className = 'celda-dia';
-        btnDia.innerText = dia;
-
-        let fechaObjeto = new Date(Date.UTC(año, mes, dia, 12, 0, 0));
-        let opcionesDiaPalabra = { weekday: 'long', timeZone: 'UTC' };
-        let diaSemanaPalabra = fechaObjeto.toLocaleDateString('es-ES', opcionesDiaPalabra).toLowerCase();
-
-        let fechaFormateadaText = dia + ' de ' + mesesNombres[mes] + ' de ' + año;
-        let fechaISO = año + '-' + String(mes + 1).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
-
-        btnDia.onclick = () => {
-            document.querySelectorAll('.celda-dia').forEach(c => c.classList.remove('seleccionado'));
-            btnDia.classList.add('seleccionado');
-            buscarHorariosReales(diaSemanaPalabra, fechaFormateadaText, fechaISO);
-        };
-        contenedor.appendChild(btnDia);
-    }
-}
-
-// 🌟 FILTRO POR SUCURSAL ACTIVADO
-async function buscarHorariosReales(diaPalabra, fechaTexto, fechaISO) {
-    turnoSeleccionado.fechaTexto = fechaTexto;
-    turnoSeleccionado.fechaISO = fechaISO;
-    const contenedorHoras = document.getElementById('contenedor-horas');
-    contenedorHoras.innerHTML = '<p class="mensaje-estado">Cargando...</p>';
-
-    // Bajamos las agendas pero filtradas por NEGOCIO y SUCURSAL
-    const { data: agenda, error: errAgenda } = await supabaseCliente
-      .from('configuracion_agenda')
-      .select('*')
-      .eq('negocio_id', NEGOCIO_ID)
-      .eq('sucursal_id', sucursalSeleccionadaID);
-
-    function limpiarTexto(texto) {
-        if (!texto) return "";
-        return texto.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }
-
-    const diaCalculadoClean = limpiarTexto(diaPalabra);
-    
-    let agendaDelDia = null;
-    if (agenda) {
-        agendaDelDia = agenda.find(item => limpiarTexto(item.dia_semana) === diaCalculadoClean);
-    }
-
-    if (errAgenda || !agendaDelDia) {
-        contenedorHoras.innerHTML = '<p class="mensaje-estado">Sin turnos para este día acá.</p>';
-        return;
-    }
-
-    // Buscamos turnos ocupados filtrados también por sucursal
-    const { data: ocupados } = await supabaseCliente
-        .from('turnos_activos')
-        .select('hora')
-        .eq('fecha', fechaISO)
-        .eq('sucursal_id', sucursalSeleccionadaID)
-        .eq('estado', 'reservado');
-
-    let listadoOcupados = [];
-    if (ocupados) {
-        listadoOcupados = ocupados.map(o => o.hora.substring(0, 5));
-    }
-    
-    contenedorHoras.innerHTML = '';
-
-    let intervalo = agendaDelDia.duracion_minutos || 30;
-    let [horaActual, minActual] = agendaDelDia.hora_inicio.split(':').map(Number);
-    let [horaFin, minFin] = agendaDelDia.hora_fin.split(':').map(Number);
-    
-    let minutosTotalesInicio = horaActual * 60 + minActual;
-    let minutesTotalesFin = horaFin * 60 + minFin;
-
-    while (minutosTotalesInicio < minutesTotalesFin) {
-        let hStr = String(Math.floor(minutosTotalesInicio / 60)).padStart(2, '0');
-        let mStr = String(minutosTotalesInicio % 60).padStart(2, '0');
-        let horaTexto = hStr + ':' + mStr;
-        
-        if (!listadoOcupados.includes(horaTexto)) {
-            let btnHora = document.createElement('button');
-            btnHora.className = 'celda-hora';
-            btnHora.innerText = horaTexto;
-            btnHora.onclick = () => clickEnHora(horaTexto);
-            contenedorHoras.appendChild(btnHora);
+            selectDia.disabled = false;
         }
-        minutosTotalesInicio += intervalo;
-    }
-    
-    if (contenedorHoras.innerHTML === '') {
-        contenedorHoras.innerHTML = '<p class="mensaje-estado">No quedan horarios.</p>';
-    }
-}
 
-function clickEnHora(horaElegida) {
-    turnoSeleccionado.hora = horaElegida;
-    navegarA('pantalla-datos');
-}
+        async function generarHorariosDinámicos() {
+            const idCons = document.getElementById('select-consultorio').value;
+            const fechaSel = document.getElementById('select-dia').value;
+            const contenedor = document.getElementById('contenedor-horarios');
+            contenedor.innerHTML = "";
+            horaSeleccionada = null;
 
-// 🌟 GUARDADO DE TURNO CON ENLACE A SUCURSAL
-async function confirmarTurno() {
-    let nombre = document.getElementById('in-nombre').value.trim();
-    let apellido = document.getElementById('in-apellido').value.trim();
-    let dni = document.getElementById('in-dni').value.trim();
-    let telefono = document.getElementById('in-telefono').value.trim();
+            if (!idCons || !fechaSel) { document.getElementById('bloque-horarios').style.display = 'none'; return; }
 
-    if(nombre === "" || apellido === "") {
-        alert("Por favor, ingresá tu Nombre y Apellido.");
-        return;
-    }
+            let fechaObjeto = new Date(fechaSel + "T00:00:00");
+            let numeroDiaSemana = fechaObjeto.getDay();
 
-    const { data, error } = await supabaseCliente
-        .from('turnos_activos')
-        .insert([{
-            negocio_id: NEGOCIO_ID,
-            sucursal_id: sucursalSeleccionadaID, // Guardamos la sucursal obligatoria
-            fecha: turnoSeleccionado.fechaISO,
-            hora: turnoSeleccionado.hora + ":00",
-            estado: 'reservado',
-            cliente_nombre: nombre + ' ' + apellido,
-            cliente_telefono: telefono
-        }])
-        .select();
+            // 1. Traer límites de la agenda
+            const { data: agenda } = await supabaseCliente.from('agenda').select('*').eq('consultorio_id', idCons).eq('dia_semana', numeroDiaSemana).single();
+            // 2. Traer turnos ya ocupados ese día
+            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('consultorio_id', idCons).eq('fecha', fechaSel);
 
-    if (error) {
-        alert("Hubo un error al reservar el turno. Por favor reintentá.");
-        return;
-    }
+            if (!agenda) return;
 
-    if (data && data[0]) {
-        idTurnoCreado = data[0].identificacion;
-    }
+            let inicio = parseInt(agenda.hora_inicio.split(":")[0]);
+            let fin = parseInt(agenda.hora_fin.split(":")[0]);
+            let slots = [];
 
-    document.getElementById('txt-exito-fecha').innerText = nombre + ' ' + apellido;
-    document.getElementById('txt-exito-hora').innerText = turnoSeleccionado.fechaTexto + ' - ' + turnoSeleccionado.hora + ' hs';
-    
-    navegarA('pantalla-exito');
-}
+            for (let h = inicio; h < fin; h++) {
+                slots.push(`${h.toString().padStart(2, '0')}:00`);
+                slots.push(`${h.toString().padStart(2, '0')}:30`);
+            }
 
-async function cancelarYVolver() {
-    if (idTurnoCreado) {
-        await supabaseCliente.from('turnos_activos').delete().eq('identificacion', idTurnoCreado);
-        idTurnoCreado = null; 
-    }
-    navegarA('pantalla-seleccion');
-    construirCalendario();
-}
+            document.getElementById('bloque-horarios').style.display = 'block';
 
-function abrirMapa() {
-    // 🌟 Ahora Google Maps abre dinámicamente con la dirección de la sucursal elegida
-    window.open('https://maps.google.com/?q=' + encodeURIComponent(direccionMapaActual), '_blank');
-}
-</script>
+            slots.forEach(slot => {
+                let estaOcupado = ocupados?.some(o => o.hora.substring(0,5) === slot);
+                if (!estaOcupado) {
+                    contenedor.innerHTML += `<div class="btn-hora" onclick="seleccionarHora(this, '${slot}')">${slot}</div>`;
+                }
+            });
+
+            if (contenedor.innerHTML === "") {
+                contenedor.innerHTML = '<p style="grid-column: span 3; color:#ff4444; font-weight:700; text-align:center;">¡Turnos agotados para este día!</p>';
+            }
+        }
+
+        function seleccionarHora(elemento, hora) {
+            document.querySelectorAll('.btn-hora').forEach(b => b.classList.remove('seleccionado'));
+            elemento.classList.add('seleccionado');
+            horaSeleccionada = hora;
+        }
+
+        async function confirmarTurnoInmediato() {
+            const idCons = document.getElementById('select-consultorio').value;
+            const fechaSel = document.getElementById('select-dia').value;
+
+            if (!idCons || !fechaSel || !horaSeleccionada) {
+                return alert("Por favor, seleccioná Consultorio, Día y Horario antes de agendar.");
+            }
+
+            // Guardamos el turno usando la sesión limpia y automática
+            const { error } = await supabaseCliente.from('turnos_activos').insert([{
+                negocio_id: idMedico,
+                consultorio_id: idCons,
+                fecha: fechaSel,
+                hora: horaSeleccionada,
+                paciente_nombre: nombrePaciente,
+                paciente_telefono: telefonoPaciente,
+                paciente_dni: dniPaciente
+            }]);
+
+            if (error) return alert("Error al reservar: " + error.message);
+
+            alert(`¡Turno confirmado con éxito!\n\nFecha: ${fechaSel}\nHora: ${horaSeleccionada}\nPaciente: ${nombrePaciente}`);
+            window.location.href = "home.html"; // Regresa al panel del paciente feliz
+        }
+
+        inicializarTurnero();
+    </script>
 </body>
 </html>
