@@ -13,42 +13,69 @@
             margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; 
         }
         .contenedor { width: 90%; max-width: 360px; text-align: center; }
-        .logo { max-width: 100px; margin-bottom: 20px; }
-        h1 { font-size: 28px; font-weight: 900; margin-bottom: 30px; letter-spacing: -1px; }
+        .logo { max-width: 100px; margin-bottom: 15px; }
+        h1 { font-size: 28px; font-weight: 900; margin-bottom: 25px; letter-spacing: -1px; }
 
-        .caja-login { 
-            background: white; border-radius: 20px; padding: 30px; 
+        /* Tarjetas de login y registro intercambiables */
+        .caja-card { 
+            background: white; border-radius: 20px; padding: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: #333; text-align: left;
+            display: none; animation: slideUp 0.3s ease;
         }
-        label { font-weight: 800; color: #007D82; display: block; margin-bottom: 5px; }
+        .caja-card.activa { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        label { font-weight: 800; color: #007D82; display: block; margin-bottom: 5px; font-size: 14px; }
         input { 
-            width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #EEE; 
-            margin-bottom: 20px; box-sizing: border-box; font-size: 16px; font-weight: 700;
+            width: 100%; padding: 13px; border-radius: 12px; border: 2px solid #EEE; 
+            margin-bottom: 15px; box-sizing: border-box; font-size: 16px; font-weight: 700; font-family: 'Nunito', sans-serif; outline: none;
         }
-        .btn-entrar { 
-            width: 100%; background: #F4B41A; color: white; border: none; padding: 18px; 
-            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        input:focus { border-color: #009E9B; }
+
+        .btn-principal { 
+            width: 100%; background: #F4B41A; color: white; border: none; padding: 16px; 
+            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s; margin-top: 5px;
         }
-        .registro { margin-top: 25px; font-size: 14px; color: white; opacity: 0.9; }
+        .btn-principal:active { transform: scale(0.97); }
+
+        .link-toggle { margin-top: 20px; font-size: 14px; color: white; opacity: 0.9; cursor: pointer; text-decoration: underline; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="contenedor">
         <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" class="logo">
-        <h1>Acceso Profesional</h1>
+        <h1 id="titulo-pantalla">Acceso Profesional</h1>
 
-        <div class="caja-login">
+        <div id="card-login" class="caja-card activa">
             <label>Tu Alias (Código)</label>
             <input type="text" id="login-alias" placeholder="Ej: JULI">
             
             <label>Contraseña</label>
             <input type="password" id="login-pass" placeholder="••••••••">
 
-            <button class="btn-entrar" onclick="ingresar()">Ingresar al Panel</button>
+            <button class="btn-principal" onclick="ingresar()">Ingresar al Panel</button>
         </div>
 
-        <p class="registro">¿Aún no tienes cuenta? <br> <b>Regístrate desde la web oficial</b></p>
+        <div id="card-registro" class="caja-card">
+            <label>Nombre Completo / Centro</label>
+            <input type="text" id="reg-nombre" placeholder="Ej: Dr. Julián Gómez">
+
+            <label>Rubro / Especialidad</label>
+            <input type="text" id="reg-rubro" placeholder="Ej: Kinesiología / Estética">
+
+            <label>Tu Alias Exclusivo (Para tus pacientes)</label>
+            <input type="text" id="reg-alias" placeholder="Ej: JULIGOMEZ">
+            
+            <label>Contraseña de Acceso</label>
+            <input type="password" id="reg-pass" placeholder="Creá una clave segura">
+
+            <button class="btn-principal" onclick="registrarCuenta()">Crear mi Cuenta</button>
+        </div>
+
+        <p id="link-ir-a-registro" class="link-toggle" onclick="irARegistro()">¿No tenés cuenta? Creá una acá</p>
+        <p id="link-ir-a-login" class="link-toggle" onclick="irALogin()" style="display: none;">¿Ya tenés cuenta? Iniciá sesión</p>
     </div>
 
     <script>
@@ -56,15 +83,65 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // NAVEGACIÓN ENTRE LOGIN Y REGISTRO
+        function irARegistro() {
+            document.getElementById('card-login').classList.remove('activa');
+            document.getElementById('card-registro').classList.add('activa');
+            document.getElementById('link-ir-a-registro').style.display = 'none';
+            document.getElementById('link-ir-a-login').style.display = 'block';
+            document.getElementById('titulo-pantalla').innerText = 'Nuevo Profesional';
+        }
+
+        function irALogin() {
+            document.getElementById('card-registro').classList.remove('activa');
+            document.getElementById('card-login').classList.add('activa');
+            document.getElementById('link-ir-a-login').style.display = 'none';
+            document.getElementById('link-ir-a-registro').style.display = 'block';
+            document.getElementById('titulo-pantalla').innerText = 'Acceso Profesional';
+        }
+
+        // MOTOR 1: REGISTRO DE CUENTA NUEVA
+        async function registrarCuenta() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const rubro = document.getElementById('reg-rubro').value.trim();
+            const alias = document.getElementById('reg-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+
+            if(!nombre || !rubro || !alias || !pass) {
+                return alert("Por favor, completá todos los campos para registrarte.");
+            }
+
+            // Insertamos el nuevo profesional en la base de datos
+            const { data, error } = await supabase.from('negocios').insert([
+                { nombre: nombre, rubro: rubro, alias: alias, password: pass }
+            ]).select();
+
+            if (error) {
+                // Si salta este error es porque se activó el candado "Is Unique" que pusimos hoy para los alias repetidos
+                if(error.code === '23505') {
+                    return alert("¡Ese Alias ya está siendo usado por otro profesional! Por favor, elegí uno diferente.");
+                }
+                return alert("Error al registrar: " + error.message);
+            }
+
+            if(data && data.length > 0) {
+                alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
+                // Logueamos automáticamente al usuario recién nacido
+                localStorage.setItem('mi_turno_negocio_id', data[0].id);
+                window.location.href = "dashboard.html";
+            }
+        }
+
+        // MOTOR 2: INGRESO DE USUARIOS EXISTENTES
         async function ingresar() {
             const alias = document.getElementById('login-alias').value.toUpperCase().trim();
             const pass = document.getElementById('login-pass').value.trim();
 
-            if(!alias || !pass) return alert("Completa tus datos");
+            if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
             const { data, error } = await supabase.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
 
-            if(error || !data) return alert("Alias o contraseña incorrectos");
+            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
 
             localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
