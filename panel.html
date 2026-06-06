@@ -108,6 +108,7 @@
         }
 
         // REGISTRAR NEGOCIO NUEVO (CON BLINDAJE DE ESPACIOS)
+        // REGISTRAR NEGOCIO NUEVO (CON REDIRECCIÓN A MERCADO PAGO)
         async function registrarNegocio() {
             const nombre = document.getElementById('reg-nombre').value.trim();
             const alias = document.getElementById('reg-alias').value.trim().toUpperCase(); // Filtro estricto
@@ -117,11 +118,13 @@
 
             if(!nombre || !alias || !password || !rubro) return alert("Nombre, Alias, Rubro y Contraseña son obligatorios.");
 
+            // Guardamos los datos en Supabase primero
             const { error } = await supabaseCliente.from('negocios').insert([{ nombre, alias, rubro, telefono, password }]);
-            if (error) return alert("Supabase dice: " + error.message);
+            if (error) return alert("Error al registrar: " + error.message);
             
-            alert("¡Negocio creado con éxito! Iniciá sesión con tu alias.");
-            navegarA('pantalla-login');
+            // Le avisamos al profesional y lo pateamos a Mercado Pago
+            alert("¡Tus datos se guardaron con éxito! Ahora te redirigiremos a Mercado Pago para activar tu cuenta.");
+            window.location.href = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
         }
 
         // LOGIN AL PANEL (CON BLINDAJE DE ESPACIOS)
