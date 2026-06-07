@@ -354,7 +354,7 @@
             document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column: 1/-1; text-align:center; font-weight:800; font-size:14px; color:#000;">Sin turnos disponibles.</p>';
         }
 
-        // COMENTARIO TÉCNICO: AJUSTE DE COLUMNAS REALES (nombre, telefono, dni) DE LA TABLA turnos_activos
+        // CORRECCIÓN ATÓMICA: ENVIAMOS LAS COLUMNAS ASIGNADAS EXACTAMENTE EN TU POSTGRES
         async function confirmarReserva(horaTurno) {
             const idSuc = document.getElementById('turnero-sucursal').value;
             const fecha = document.getElementById('turnero-fecha').value;
@@ -367,9 +367,9 @@
                     sucursal_id: idSuc,
                     fecha: fecha,
                     hora: horaTurno + ":00",
-                    nombre: pacienteActual.nombre,       // Corregido: antes decía paciente_nombre
-                    telefono: pacienteActual.telefono,   // Corregido: antes decía paciente_telefono
-                    paci_dni: pacienteActual.dni,        // Añadido para cruce de control de DNI
+                    cliente_nombre: pacienteActual.nombre,       // Mapeado a cliente_nombre
+                    cliente_telefono: pacienteActual.telefono,   // Mapeado a cliente_telefono
+                    cliente_identificador: pacienteActual.dni,   // Mapeado a cliente_identificador
                     estado: 'pendiente'
                 }
             ]);
@@ -384,8 +384,8 @@
         async function cargarMisTurnos() {
             const { data } = await supabaseCliente.from('turnos_activos')
                 .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion)')
-                .eq('nombre', pacienteActual.nombre) // Ajustado a la columna limpia
-                .eq('telefono', pacienteActual.telefono) // Ajustado a la columna limpia
+                .eq('cliente_nombre', pacienteActual.nombre) // Mapeado a la lectura correcta
+                .eq('cliente_telefono', pacienteActual.telefono) // Mapeado a la lectura correcta
                 .order('fecha', { ascending: true });
 
             document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
