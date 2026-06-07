@@ -355,28 +355,47 @@
         }
 
         // CORRECCIÓN ATÓMICA: ENVIAMOS LAS COLUMNAS ASIGNADAS EXACTAMENTE EN TU POSTGRES
+        // FUNCIÓN DE RESERVA CORREGIDA CON REDIRECCIÓN A MERCADO PAGO EN UN CLIC
         async function confirmarReserva(horaTurno) {
             const idSuc = document.getElementById('turnero-sucursal').value;
             const fecha = document.getElementById('turnero-fecha').value;
             
             if(!confirm(`¿Querés reservar el turno a las ${horaTurno} hs?`)) return;
 
-            const { error } = await supabaseCliente.from('turnos_activos').insert([
+            // 1. Vamos a buscar el link de Mercado Pago que configuró este médico en su panel
+            const { data: medico, error: errorMed } = await supabaseCliente
+                .from('negocios')
+                .select('mp_link')
+                .eq('id', medicoSeleccionadoId)
+                .single();
+
+            const linkPago = medico?.mp_link || "";
+
+            // 2. Insertamos el turno en la base de datos con las columnas reales de Postgres
+            const { error: errorInsert } = await supabaseCliente.from('turnos_activos').insert([
                 {
                     negocio_id: medicoSeleccionadoId,
                     sucursal_id: idSuc,
                     fecha: fecha,
                     hora: horaTurno + ":00",
-                    cliente_nombre: pacienteActual.nombre,       // Mapeado a cliente_nombre
-                    cliente_telefono: pacienteActual.telefono,   // Mapeado a cliente_telefono
-                    cliente_identificador: pacienteActual.dni,   // Mapeado a cliente_identificador
+                    cliente_nombre: pacienteActual.nombre,       
+                    cliente_telefono: pacienteActual.telefono,   
+                    cliente_identificador: pacienteActual.dni,   
                     estado: 'pendiente'
                 }
             ]);
 
-            if (error) return alert("Error al reservar: " + error.message);
+            if (errorInsert) return alert("Error al apartar el horario: " + errorInsert.message);
 
-            alert("¡Turno apartado con éxito!");
+            // 3. Si el médico tiene su link configurado, disparamos la pasarela de pago al instante
+            if (linkPago) {
+                alert("¡Turno apartado! Ahora te redirigiremos a Mercado Pago para abonar la seña de reserva.");
+                window.open(linkPago, '_blank'); // Abre el Mercado Pago real del kinesiologo en otra solapa
+            } else {
+                alert("¡Turno apartado! Nota: Este profesional aún no vinculó su link de Mercado Pago, recordá coordinar la seña de forma manual.");
+            }
+
+            // 4. Movemos al paciente a su pestaña de control
             document.getElementById('turnero-integrado').style.display = 'none';
             switchModulo('turnos'); 
         }
