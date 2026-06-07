@@ -3,240 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Médicos - Mi Turno</title>
+    <title>Mis Turnos - Paciente</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* DISEÑO FLUIDO Y RESPONSIVE */
         body { 
             font-family: 'Nunito', sans-serif; 
             background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
-            margin: 0; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: white; 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; 
         }
-        .contenedor { 
-            width: 90%; 
-            max-width: 400px; 
-            padding: 30px 0; 
-            display: none; 
-        }
-        .contenedor.activa { 
-            display: block; 
-            animation: fadeIn 0.4s ease;
-        }
+        .contenedor { width: 90%; max-width: 380px; text-align: center; }
+        h1 { font-size: 26px; font-weight: 900; margin-bottom: 20px; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Cabecera y Logos */
-        .header-logo { text-align: center; margin-bottom: 20px; }
-        h2.titulo-pantalla { text-align: center; font-size: 26px; font-weight: 900; margin-bottom: 5px; margin-top: 5px;}
-        p.subtitulo { text-align: center; font-size: 15px; margin-top: 0; margin-bottom: 25px; opacity: 0.9; }
-
-        /* Cajas Blancas */
         .caja-blanca { 
-            background: white; 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-            margin-bottom: 20px;
+            background: white; border-radius: 20px; padding: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); color: #333; text-align: left; margin-bottom: 15px;
         }
-        .caja-blanca label { color: #444; font-weight: 800; display: block; margin-bottom: 6px; font-size: 16px; }
-        .caja-blanca small { color: #888; font-weight: 400; font-size: 13px; display: block; margin-bottom: 8px;}
-        
+        label { font-weight: 800; color: #007D82; display: block; margin-bottom: 5px; font-size: 14px; }
         input { 
-            width: 100%; background: #F4F4F4; border: 2px solid #F4F4F4; border-radius: 8px; 
-            padding: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif; 
-            font-size: 16px; outline: none; transition: all 0.3s;
+            width: 100%; padding: 13px; border-radius: 12px; border: 2px solid #EEE; 
+            margin-bottom: 15px; box-sizing: border-box; font-size: 16px; font-weight: 700; font-family: 'Nunito', sans-serif; outline: none;
         }
-        input:focus { border-color: #009E9B; background: #FFF; }
-
-        /* Botón de Imagen */
-        .btn-img { text-align: center; cursor: pointer; margin-top: 10px; transition: transform 0.2s; }
-        .btn-img:active { transform: scale(0.95); }
-        .btn-img img { max-width: 180px; width: 100%; }
-
-        /* Buscador de Médicos */
-        .caja-busqueda { display: flex; gap: 8px; margin-bottom: 5px; }
-        .caja-busqueda input { margin-bottom: 0; flex: 1; }
         
-        /* BOTÓN AMARILLO */
-        .btn-agregar { 
-            background: #F4B41A; /* Amarillo del diseño */
-            color: white; 
-            border: none; border-radius: 8px; padding: 0 15px; 
-            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px;
-            cursor: pointer; transition: transform 0.2s;
+        .btn-principal { 
+            width: 100%; background: #F4B41A; color: white; border: none; padding: 14px; 
+            border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .btn-agregar:active { transform: scale(0.95); }
+        .btn-cancelar {
+            background: #D9534F; color: white; border: none; padding: 6px 12px; border-radius: 8px;
+            font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 5px;
+        }
 
-        /* Lista de Médicos */
-        .lista-profesionales { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .btn-medico { 
-            background: #f8f9fa; border: 2px solid #e0e0e0; color: #333; padding: 15px; border-radius: 12px; 
-            text-align: left; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; 
-            cursor: pointer; display: flex; flex-direction: column; transition: all 0.2s;
+        .card-turno {
+            background: #F9F9F9; border-left: 4px solid #009E9B; border-radius: 8px;
+            padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: space-between;
         }
-        .btn-medico:active { transform: scale(0.98); border-color: #009E9B; }
-        .btn-medico small { color: #009E9B; font-weight: 700; margin-top: 4px; font-size: 14px; }
+        .card-turno div { font-weight: 700; font-size: 14px; color: #333; }
+        .card-turno small { color: #666; display: block; font-size: 12px; margin-top: 2px; }
     </style>
 </head>
 <body>
 
-    <div id="registro-paciente" class="contenedor">
-        <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20home.png" alt="Bienvenido a" style="max-width: 220px; margin-bottom: 10px;">
-            <br>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Mano" style="max-width: 90px;">
-        </div>
-        <p class="subtitulo" style="margin-top: 15px;">Para empezar a agendar tus turnos, dejanos tu nombre, DNI y teléfono.</p>
-
-        <div class="caja-blanca">
-            <label>Nombre y Apellido</label>
-            <input type="text" id="pac-nombre" placeholder="Ej: Juan Perez">
-            
-            <label>DNI</label>
-            <input type="number" id="pac-dni" placeholder="Sin puntos">
-
-            <label>Teléfono <small style="display:inline;">(Ej: 1122334455)</small></label>
-            <input type="tel" id="pac-telefono" style="margin-bottom: 5px;">
-        </div>
-
-        <div class="btn-img" onclick="registrarNuevoPaciente()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton%20comenzar.png" alt="Comenzar">
-        </div>
-    </div>
-
-    <div id="panel-paciente" class="contenedor">
-        <div class="header-logo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" alt="Mano" style="max-width: 80px;">
-        </div>
-        <h2 id="saludo-paciente" class="titulo-pantalla">¡Hola!</h2>
-        <p class="subtitulo">Gestioná tus profesionales y turnos desde acá.</p>
+    <div class="contenedor">
+        <h1>Mis Turnos Reservados</h1>
         
         <div class="caja-blanca">
-            <label>Agregar Nuevo Profesional:</label>
-            <div class="caja-busqueda">
-                <input type="text" id="input-alias-medico" placeholder="Código (Ej: CHULE)">
-                <button class="btn-agregar" onclick="buscarYAgregarMedico()">Agregar</button>
-            </div>
-            <small style="margin-top: 8px; text-align: center;">Pedile a tu médico su código.</small>
+            <label>Ingresá tu DNI para consultar</label>
+            <input type="number" id="paci-dni" placeholder="Ej: 38444555">
+            <button class="btn-principal" onclick="buscarTurnosPaciente()">Buscar mis Turnos</button>
         </div>
 
-        <div class="caja-blanca">
-            <label>Profesionales agendados:</label>
-            <div id="lista-favoritos" class="lista-profesionales">
-                <p style="color: #999; font-size: 14px; text-align: center;">Cargando tu lista...</p>
-            </div>
+        <div class="caja-blanca" id="bloque-resultados" style="display:none;">
+            <label>Tus próximos turnos:</label>
+            <div id="listado-turnos-paciente" style="margin-top:10px;"></div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let idPacienteActual = localStorage.getItem('mi_turno_paciente_id');
+        async function buscarTurnosPaciente() {
+            const dni = document.getElementById('paci-dni').value.trim();
+            if(!dni) return alert("Por favor, ingresá tu DNI.");
 
-        async function verificarSesionPaciente() {
-            if (!idPacienteActual) {
-                document.getElementById('registro-paciente').classList.add('activa');
-            } else {
-                document.getElementById('panel-paciente').classList.add('activa');
-                await recuperarDatosPaciente();
-                await cargarMedicosFavoritos();
-            }
-        }
+            const { data, error } = await supabaseCliente
+                .from('turnos_activos')
+                .select(`id, fecha, hora, estado, sucursales(nombre, direccion)`)
+                .eq('paciente_dni', dni)
+                .eq('estado', 'confirmado');
 
-        async function registrarNuevoPaciente() {
-            const nombre = document.getElementById('pac-nombre').value.trim();
-            const dni = document.getElementById('pac-dni').value.trim();
-            const telefono = document.getElementById('pac-telefono').value.trim();
+            if(error) return alert("Error al consultar: " + error.message);
 
-            if (!nombre || !telefono || !dni) return alert("Por favor, completá todos los campos.");
+            const contenedor = document.getElementById('listado-turnos-paciente');
+            document.getElementById('bloque-resultados').style.display = 'block';
 
-            // Se guardan los 3 datos en Supabase
-            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
-            if (error) return alert("Error al registrar: " + error.message);
-
-            if (data && data[0]) {
-                localStorage.setItem('mi_turno_paciente_id', data[0].id);
-                // Opcional: guardamos estos datos sueltos en memoria para que el Index los lea rápido después
-                localStorage.setItem('mi_turno_paciente_nombre', nombre);
-                localStorage.setItem('mi_turno_paciente_dni', dni);
-                localStorage.setItem('mi_turno_paciente_telefono', telefono);
-
-                idPacienteActual = data[0].id;
-                
-                document.getElementById('registro-paciente').classList.remove('activa');
-                document.getElementById('panel-paciente').classList.add('activa');
-                await recuperarDatosPaciente();
-                await cargarMedicosFavoritos();
-            }
-        }
-
-        async function recuperarDatosPaciente() {
-            const { data } = await supabaseCliente.from('pacientes').select('nombre').eq('id', idPacienteActual).single();
-            if (data) document.getElementById('saludo-paciente').innerText = `¡Hola, ${data.nombre.split(' ')[0]}!`;
-        }
-
-        async function buscarYAgregarMedico() {
-            const aliasBuscado = document.getElementById('input-alias-medico').value.trim().toUpperCase();
-            if (!aliasBuscado) return alert("Escribí el código del profesional.");
-
-            const { data: medico, error } = await supabaseCliente.from('negocios').select('id, nombre, rubro').ilike('alias', aliasBuscado).single();
-            if (error || !medico) return alert("No se encontró ningún profesional con ese código.");
-
-            const { data: yaExiste } = await supabaseCliente.from('pacientes_profesionales').select('*').eq('paciente_id', idPacienteActual).eq('negocio_id', medico.id);
-            if (yaExiste && yaExiste.length > 0) {
-                alert("Ya tenés a este profesional en tu lista.");
-                document.getElementById('input-alias-medico').value = '';
+            if(!data || data.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; font-size:14px; color:#999;">No tenés turnos activos confirmados.</p>';
                 return;
             }
 
-            const { error: errEnlace } = await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: idPacienteActual, negocio_id: medico.id }]);
-            if (errEnlace) return alert("Error al agendar: " + errEnlace.message);
-
-            document.getElementById('input-alias-medico').value = '';
-            await cargarMedicosFavoritos();
+            contenedor.innerHTML = data.map(t => {
+                const [anio, mes, dia] = t.fecha.split('-');
+                return `
+                    <div class="card-turno">
+                        <div>
+                            Fecha: ${dia}/${mes}/${anio} - Hora: ${t.hora.slice(0,5)} hs
+                            <small>Sede: ${t.sucursales?.nombre} (${t.sucursales?.direccion})</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <button class="btn-cancelar" onclick="cancelarTurnoProcedimiento('${t.id}', '${t.fecha}', '${t.hora}')">Cancelar Turno</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        async function cargarMedicosFavoritos() {
-            const contenedor = document.getElementById('lista-favoritos');
-            const { data: favoritos, error } = await supabaseCliente
-                .from('pacientes_profesionales')
-                .select(`negocio_id, negocios ( nombre, rubro )`)
-                .eq('paciente_id', idPacienteActual);
+        async function cancelarTurnoProcedimiento(idTurno, fechaTurno, horaTurno) {
+            const momentoTurno = new Date(`${fechaTurno}T${horaTurno}`);
+            const momentoActual = new Date();
 
-            if (error) return console.error(error);
+            const diferenciaHoras = (momentoTurno - momentoActual) / (1000 * 60 * 60);
 
-            if (!favoritos || favoritos.length === 0) {
-                contenedor.innerHTML = '<p style="color: #999; font-size: 14px; text-align: center;">Aún no agregaste códigos. Buscá uno arriba.</p>';
-                return;
+            // Bloqueo estricto de las 24 horas acordadas
+            if (diferenciaHoras < 24) {
+                return alert("No es posible cancelar este turno. Las cancelaciones deben realizarse con un mínimo de 24 horas de anticipación. La seña no es reembolsable.");
             }
 
-            contenedor.innerHTML = "";
-            favoritos.forEach(fav => {
-                const medico = fav.negocios;
-                if (medico) {
-                    contenedor.innerHTML += `
-                        <button class="btn-medico" onclick="irAlTurneroDelMedico('${fav.negocio_id}')">
-                            ${medico.nombre}
-                            <small>${medico.rubro || 'Profesional'}</small>
-                        </button>
-                    `;
-                }
-            });
-        }
+            if (!confirm("¿Estás seguro de que deseas cancelar este turno? El horario se liberará inmediatamente.")) return;
 
-        function irAlTurneroDelMedico(idMedico) {
-            window.location.href = `index.html?id=${idMedico}`;
-        }
+            const { error } = await supabaseCliente
+                .from('turnos_activos')
+                .update({ estado: 'cancelado_por_paciente' })
+                .eq('id', idTurno);
 
-        verificarSesionPaciente();
+            if (error) return alert("Error al procesar la cancelación: " + error.message);
+
+            alert("Turno cancelado correctamente. El espacio fue liberado. Recordá comunicarte con el profesional para gestionar la devolución manual de tu seña.");
+            await buscarTurnosPaciente();
+        }
     </script>
 </body>
 </html>

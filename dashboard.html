@@ -19,15 +19,10 @@
         .header-logo { text-align: center; margin-bottom: 10px; }
         .header-logo img { max-width: 240px; width: 100%; }
 
-        /* Contenedor especial con fondo de imagen para la sección de Horarios */
         .contenedor-con-fondo {
             background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
-            background-size: 100% 100%;
-            border-radius: 30px;
-            padding: 30px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            margin-top: 10px;
-            color: #333;
+            background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-top: 10px; color: #333;
         }
         .contenedor-con-fondo label { color: #555; font-weight: 800; display: block; margin-bottom: 6px; font-size: 15px; }
         .contenedor-con-fondo h2 { color: #555; text-align: center; font-weight: 900; margin-top: 0; font-size: 26px; }
@@ -52,7 +47,6 @@
             width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 15px;
         }
         
-        /* Botones de Imagen */
         .btn-img { text-align: center; cursor: pointer; margin: 15px 0; transition: transform 0.2s; }
         .btn-img:active { transform: scale(0.96); }
         .btn-img img { max-width: 240px; width: 100%; }
@@ -62,6 +56,10 @@
             font-weight: 700; color: #333; display: flex; justify-content: space-between; align-items: center;
         }
         .item-lista small { color: #009E9B; display: block; font-size: 13px; font-weight: 800; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; color: white; font-weight: 900; }
+        .badge.ok { background: #009E9B; }
+        .badge.wait { background: #F4B41A; }
+        .badge.cancel { background: #D9534F; }
     </style>
 </head>
 <body>
@@ -70,28 +68,29 @@
         <div class="header-logo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" alt="Mi Agenda">
         </div>
-
         <div class="btn-img" onclick="mostrarPantallaConsultorios()">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/crearconsultorio.png" alt="Crear Sucursal">
         </div>
-
         <div class="caja-blanca">
             <label>Sucursal de atención</label>
             <select id="agenda-sucursal" onchange="cargarTurnos()"></select>
-            
             <label>Fecha</label>
             <input type="date" id="agenda-fecha" onchange="cargarTurnos()">
         </div>
-
+        
         <div class="caja-blanca">
-            <label>Turnos de hoy:</label>
+            <label>Turnos programados:</label>
             <div id="lista-turnos"></div>
+        </div>
+
+        <div class="caja-blanca" style="background: #FFF5F5; border: 1px solid #FFD2D2;">
+            <label style="color: #D9534F;">Turnos Cancelados con Aviso:</label>
+            <div id="lista-cancelados"></div>
         </div>
 
         <div class="btn-img" onclick="mostrarPantallaHorarios()">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/seleccionarfranjahoraria.png" alt="Seleccionar Franja Horaria">
         </div>
-
         <p onclick="cerrarSesion()" style="text-align:center; text-decoration:underline; font-size:14px; cursor:pointer; margin-top: 25px; opacity:0.8;">Cerrar Sesión</p>
     </div>
 
@@ -99,6 +98,13 @@
         <div class="header-logo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mis%20consultorios.png" alt="Sucursales">
         </div>
+        
+        <div class="caja-blanca" style="border: 2px solid #F4B41A;">
+            <label style="color: #F4B41A; font-size: 16px;">Link de Seña (Mercado Pago)</label>
+            <input type="text" id="medico-mp-link" placeholder="Ej: https://mpago.la/xxxxxx">
+            <button class="btn-amarillo" onclick="guardarLinkMP()" style="margin-bottom:0;">Vincular Mercado Pago</button>
+        </div>
+
         <div class="caja-blanca">
             <label>Nombre de Sucursal / Sede</label>
             <input type="text" id="suc-nombre" placeholder="Ej: Consultorio Centro">
@@ -116,11 +122,9 @@
     <div id="seccion-horarios" class="contenedor">
         <div class="contenedor-con-fondo">
             <h2>Mis Horarios</h2>
-            <p class="sub">Cera tus franjas horarias de atención</p>
-
+            <p class="sub">Crea tus franjas horarias de atención</p>
             <label>Seleccioná Sucursal</label>
             <select id="hor-sucursal" onchange="cargarHorarios()"></select>
-            
             <label>Día de la semana</label>
             <select id="hor-dia">
                 <option value="1">Lunes</option><option value="2">Martes</option>
@@ -128,27 +132,23 @@
                 <option value="5">Viernes</option><option value="6">Sábado</option>
                 <option value="0">Domingo</option>
             </select>
-            
             <div style="display:flex; gap:10px;">
                 <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="09:00"></div>
                 <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="18:00"></div>
             </div>
-            
             <button class="btn-amarillo" onclick="guardarHorario()">Asignar Horario</button>
         </div>
-
         <div class="caja-blanca" style="margin-top: 20px;">
             <label>Esquema de atención guardado:</label>
             <div id="lista-horarios"></div>
         </div>
-        
         <button class="btn-amarillo" style="background:#009E9B" onclick="mostrarPantallaAgenda()">Volver a mi Agenda</button>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const idMedico = localStorage.getItem('mi_turno_negocio_id');
 
         document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
@@ -157,20 +157,28 @@
             if(!idMedico) window.location.href = "panel.html";
             await cargarSelectores();
             await cargarSucursalesListado();
+            await cargarDatosMedico();
         }
 
         function mostrarPantallaConsultorios() { switchSeccion('seccion-sucursales'); }
         function mostrarPantallaHorarios() { switchSeccion('seccion-horarios'); cargarSelectores(); }
         function mostrarPantallaAgenda() { switchSeccion('seccion-agenda'); cargarSelectores(); }
-        
-        function switchSeccion(id) { 
-            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); 
-            document.getElementById(id).classList.add('activa'); 
-            window.scrollTo(0,0); 
+        function switchSeccion(id) { document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); document.getElementById(id).classList.add('activa'); window.scrollTo(0,0); }
+
+        async function cargarDatosMedico() {
+            const { data } = await supabaseCliente.from('negocios').select('mp_link').eq('id', idMedico).single();
+            if(data?.mp_link) document.getElementById('medico-mp-link').value = data.mp_link;
+        }
+
+        async function guardarLinkMP() {
+            const link = document.getElementById('medico-mp-link').value.trim();
+            if(!link) return alert("Ingresá un link válido");
+            await supabaseCliente.from('negocios').update({ mp_link: link }).eq('id', idMedico);
+            alert("¡Mercado Pago vinculado con éxito!");
         }
 
         async function cargarSelectores() {
-            const { data } = await supabase.from('sucursales').select('*').eq('negocio_id', idMedico);
+            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico);
             const html = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '<option value="">Crea una sucursal primero</option>';
             document.getElementById('agenda-sucursal').innerHTML = html;
             document.getElementById('hor-sucursal').innerHTML = html;
@@ -182,8 +190,7 @@
             const nombre = document.getElementById('suc-nombre').value.trim();
             const direccion = document.getElementById('suc-dir').value.trim();
             if(!nombre || !direccion) return alert("Completá los datos");
-
-            await supabase.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion }]);
+            await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion }]);
             alert("¡Sucursal guardada!");
             document.getElementById('suc-nombre').value = '';
             document.getElementById('suc-dir').value = '';
@@ -192,19 +199,17 @@
         }
 
         async function cargarSucursalesListado() {
-            const { data } = await supabase.from('sucursales').select('*').eq('negocio_id', idMedico);
+            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico);
             document.getElementById('lista-sucursales').innerHTML = data?.map(s => `<div class="item-lista">${s.nombre} <small>${s.direccion}</small></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No tenés sucursales.</p>';
         }
 
         async function guardarHorario() {
             const idSuc = document.getElementById('hor-sucursal').value;
-            if(!idSuc) return alert("Seleccioná o creá una sucursal");
-            
+            if(!idSuc) return alert("Seleccioná una sucursal");
             const dia = document.getElementById('hor-dia').value;
             const ini = document.getElementById('hor-inicio').value;
             const fin = document.getElementById('hor-fin').value;
-
-            await supabase.from('agenda').insert([{ sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin }]);
+            await supabaseCliente.from('agenda').insert([{ sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin }]);
             alert("¡Horario asignado!");
             await cargarHorarios();
         }
@@ -212,7 +217,7 @@
         async function cargarHorarios() {
             const idSuc = document.getElementById('hor-sucursal').value;
             if(!idSuc) return;
-            const { data } = await supabase.from('agenda').select('*').eq('sucursal_id', idSuc);
+            const { data } = await supabaseCliente.from('agenda').select('*').eq('sucursal_id', idSuc);
             const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
             document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">Sin horarios en esta sede.</p>';
         }
@@ -222,8 +227,38 @@
             const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
 
-            const { data } = await supabase.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
-            document.getElementById('lista-turnos').innerHTML = data?.map(t => `<div class="item-lista"><div>[${t.hora.slice(0,5)}] ${t.paciente_nombre}<small>Tel: ${t.paciente_telefono}</small></div></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No hay turnos agendados.</p>';
+            // Limpieza automática de reservas abandonadas de más de 15 minutos
+            const quinceMinutosAtras = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+            await supabaseCliente.from('turnos_activos').delete().eq('estado', 'pendiente').lt('creado_at', quinceMinutosAtras);
+
+            // Turnos activos válidos
+            const { data: activos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).in('estado', ['pendiente', 'confirmado']).order('hora');
+            
+            document.getElementById('lista-turnos').innerHTML = activos?.map(t => {
+                const esConfirmado = t.estado === 'confirmado';
+                return `
+                    <div class="item-lista">
+                        <div>
+                            [${t.hora.slice(0,5)}] ${t.paciente_nombre}
+                            <small>Tel: ${t.paciente_telefono}</small>
+                        </div>
+                        <span class="badge ${esConfirmado ? 'ok' : 'wait'}">${esConfirmado ? 'CONFIRMADO' : 'PENDIENTE'}</span>
+                    </div>
+                `;
+            }).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No hay turnos agendados.</p>';
+
+            // Turnos cancelados con aviso previo para control de reembolsos
+            const { data: cancelados } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).eq('estado', 'cancelado_por_paciente').order('hora');
+
+            document.getElementById('lista-cancelados').innerHTML = cancelados?.map(c => `
+                <div class="item-lista" style="border-left: 4px solid #D9534F;">
+                    <div>
+                        [${c.hora.slice(0,5)}] ${c.paciente_nombre}
+                        <small>Reembolsar por MP</small>
+                    </div>
+                    <span class="badge cancel">CANCELADO</span>
+                </div>
+            `).join('') || '<p style="text-align:center; color:#999; font-size:13px;">Sin cancelaciones para hoy.</p>';
         }
 
         function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }
