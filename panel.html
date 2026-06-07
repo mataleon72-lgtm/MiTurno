@@ -16,7 +16,6 @@
         .logo { max-width: 100px; margin-bottom: 15px; }
         h1 { font-size: 28px; font-weight: 900; margin-bottom: 25px; letter-spacing: -1px; }
 
-        /* Tarjetas de login y registro intercambiables */
         .caja-card { 
             background: white; border-radius: 20px; padding: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: #333; text-align: left;
@@ -46,6 +45,7 @@
 
     <div class="contenedor">
         <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" class="logo">
+        
         <h1 id="titulo-pantalla">Acceso Profesional</h1>
 
         <div id="card-login" class="caja-card activa">
@@ -83,7 +83,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // NAVEGACIÓN ENTRE LOGIN Y REGISTRO
         function irARegistro() {
             document.getElementById('card-login').classList.remove('activa');
             document.getElementById('card-registro').classList.add('activa');
@@ -100,7 +99,6 @@
             document.getElementById('titulo-pantalla').innerText = 'Acceso Profesional';
         }
 
-        // MOTOR DE REGISTRO OPTIMIZADO
         async function registrarCuenta() {
             const nombre = document.getElementById('reg-nombre').value.trim();
             const rubro = document.getElementById('reg-rubro').value.trim();
@@ -111,7 +109,6 @@
                 return alert("Por favor, completá todos los campos para registrarte.");
             }
 
-            // Guardamos directo sin pedir respuesta compleja
             const { error } = await supabase.from('negocios').insert([
                 { nombre: nombre, rubro: rubro, alias: alias, password: pass }
             ]);
@@ -123,7 +120,6 @@
                 return alert("Error al registrar: " + error.message);
             }
 
-            // Si no dio error, salimos a buscar el ID recién generado usando el Alias limpio
             const { data: medico, error: errorBusqueda } = await supabase
                 .from('negocios')
                 .select('id')
@@ -131,7 +127,7 @@
                 .single();
 
             if (errorBusqueda || !medico) {
-                return alert("Cuenta creada, pero hubo un error al iniciar sesión automáticamente. Por favor, ingresá desde la pantalla de Login.");
+                return alert("Cuenta creada. Iniciá sesión desde la pantalla anterior.");
             }
 
             alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
@@ -139,7 +135,6 @@
             window.location.href = "dashboard.html";
         }
 
-        // MOTOR DE INGRESO
         async function ingresar() {
             const alias = document.getElementById('login-alias').value.toUpperCase().trim();
             const pass = document.getElementById('login-pass').value.trim();
