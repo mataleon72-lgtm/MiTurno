@@ -16,7 +16,6 @@
         .contenedor.activa { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* INSTRUCCIÓN SUPERIOR PARA GENTE MAYOR */
         .texto-instruccion {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
@@ -38,7 +37,6 @@
             margin-left: 4px;
         }
 
-        /* TARJETA BLANCA DE ACCESO */
         .caja-card { 
             background: white; border-radius: 25px; padding: 30px 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #000000; text-align: left;
@@ -64,7 +62,6 @@
         }
         .btn-principal:active { transform: scale(0.97); }
 
-        /* SECCIONES DEL PANEL PRINCIPAL */
         .contenedor-con-fondo {
             background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
             background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
@@ -101,7 +98,6 @@
 <body>
 
     <div id="pantalla-acceso" class="contenedor activa">
-        
         <div id="instruccion-arriba" class="texto-instruccion">
             Si ya tenés cuenta ingresá tu DNI abajo. Si aún no la creaste, presioná <span onclick="irARegistro()">aquí</span>
         </div>
@@ -109,7 +105,6 @@
         <div id="card-login" class="caja-card activa">
             <h2 class="titulo-caja">Ingresá a Mi Turno</h2>
             <p class="subtitulo-caja">Colocá tu DNI para comenzar</p>
-
             <label>Tu número de DNI</label>
             <input type="number" id="login-dni" placeholder="Ej: 38444555">
             <button class="btn-principal" onclick="ingresarPaciente()">Buscar mi Cuenta</button>
@@ -118,16 +113,12 @@
         <div id="card-registro" class="caja-card">
             <h2 class="titulo-caja">Crear mi Cuenta</h2>
             <p class="subtitulo-caja">Completá tus datos por única vez</p>
-
             <label>Nombre y Apellido Completo</label>
             <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez">
-
             <label>Teléfono Celular</label>
             <input type="tel" id="reg-telefono" placeholder="Ej: 1123456789">
-
             <label>Número de DNI</label>
             <input type="number" id="reg-dni" placeholder="Ej: 38444555">
-
             <button class="btn-principal" onclick="registrarPaciente()">Registrarme</button>
         </div>
     </div>
@@ -194,13 +185,8 @@
         async function ingresarPaciente() {
             const dni = document.getElementById('login-dni').value.trim();
             if(!dni) return alert("Por favor, ingresá tu DNI.");
-
             const { data, error } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
-
-            if(error || !data || data.length === 0) {
-                return alert("El DNI ingresado no está registrado. Creá tu cuenta presionando arriba en 'aquí'.");
-            }
-
+            if(error || !data || data.length === 0) return alert("El DNI ingresado no está registrado.");
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
@@ -210,18 +196,11 @@
             const nombre = document.getElementById('reg-nombre').value.trim();
             const telefono = document.getElementById('reg-telefono').value.trim();
             const dni = document.getElementById('reg-dni').value.trim();
-
-            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros para registrarte.");
-
+            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros.");
             const { data: existe } = await supabaseCliente.from('pacientes').select('id').eq('dni', dni);
-            if(existe && existe.length > 0) return alert("Este DNI ya tiene una cuenta creada. Poné ingresar.");
-
-            const { data, error } = await supabaseCliente.from('pacientes').insert([
-                { nombre, telefono, dni }
-            ]).select();
-
+            if(existe && existe.length > 0) return alert("Este DNI ya tiene una cuenta creada.");
+            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
             if(error) return alert("Error al registrar: " + error.message);
-
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
@@ -236,7 +215,6 @@
         function switchModulo(modulo) {
             document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('activo'));
-            
             if (modulo === 'medicos') {
                 document.getElementById('pantalla-medicos').classList.add('activa');
                 document.getElementById('nav-medicos').classList.add('activo');
@@ -251,41 +229,26 @@
 
         async function vincularMedico() {
             const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
-            if (!aliasMed) return alert("Ingresá el Alias del profesional");
-
-            const { data: medico, error } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
-            if (error || !medico || medico.length === 0) {
-                return alert("Alias incorrecto. No se encontró ningún profesional registrado con ese código.");
-            }
-
+            if (!aliasMed) return alert("Ingresá el Alias");
+            const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
+            if (!medico || medico.length === 0) return alert("Alias incorrecto.");
             const idRealMed = medico[0].id;
-
-            const { data: existe } = await supabaseCliente.from('pacientes_profesionales')
-                .select('*').eq('paciente_id', pacienteActual.id).eq('negocio_id', idRealMed);
+            const { data: existe } = await supabaseCliente.from('pacientes_profesionales').select('*').eq('paciente_id', pacienteActual.id).eq('negocio_id', idRealMed);
             if (existe && existe.length > 0) return alert("Ya tenés agendado a este médico.");
-
-            await supabaseCliente.from('pacientes_profesionales').insert([
-                { paciente_id: pacienteActual.id, negocio_id: idRealMed }
-            ]);
-
-            alert("¡Médico agregado a tu lista con éxito!");
+            await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: pacienteActual.id, negocio_id: idRealMed }]);
+            alert("¡Médico agregado con éxito!");
             document.getElementById('input-medico-alias').value = '';
             cargarMisMedicos();
         }
 
         async function cargarMisMedicos() {
-            const { data } = await supabaseCliente.from('pacientes_profesionales')
-                .select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
-
+            const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
             document.getElementById('lista-medicos').innerHTML = data?.map(p => `
                 <div class="item-lista" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')" style="cursor:pointer; background:#FFF;">
-                    <div>
-                        ${p.negocios.nombre}
-                        <small>✨ ${p.negocios.rubro || 'Profesional de la Salud'}</small>
-                    </div>
+                    <div>${p.negocios.nombre}<small>✨ ${p.negocios.rubro || 'Profesional de la Salud'}</small></div>
                     <span style="font-size:18px;">📅</span>
                 </div>
-            `).join('') || '<p style="text-align:center; font-weight:800; font-size:14px; color:#FFF;">Tu listado está vacío. ¡Agregá el alias de tu médico arriba!</p>';
+            `).join('') || '<p style="text-align:center; color:#FFF;">Tu listado está vacío.</p>';
         }
 
         async function abrirTurnero(idMed, nombreMed) {
@@ -294,11 +257,8 @@
             document.getElementById('turnero-integrado').style.display = 'block';
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
-
             const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
-            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + 
-                sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
-            
+            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
             document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -317,9 +277,7 @@
 
             const dateObj = new Date(fechaElegida + "T00:00:00");
             const diaSemana = dateObj.getDay();
-
-            const { data: esquema } = await supabaseCliente.from('configuracion_agenda')
-                .select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
+            const { data: esquema } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
 
             if (!esquema || esquema.length === 0) {
                 document.getElementById('grilla-horas').innerHTML = '';
@@ -327,9 +285,7 @@
                 return alert("El profesional no atiende en esta sede el día elegido.");
             }
 
-            const { data: ocupados } = await supabaseCliente.from('turnos_activos')
-                .select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
-
+            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
             const listaOcupados = ocupados?.map(o => o.hora.slice(0,5)) || [];
             let htmlHoras = '';
 
@@ -342,7 +298,6 @@
                     if (!listaOcupados.includes(actual)) {
                         htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}')">${actual} hs</div>`;
                     }
-                    
                     let [h, m] = actual.split(':').map(Number);
                     m += duracionConfigurada;
                     if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
@@ -351,28 +306,16 @@
             });
 
             document.getElementById('label-horas').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column: 1/-1; text-align:center; font-weight:800; font-size:14px; color:#000;">Sin turnos disponibles.</p>';
+            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1; text-align:center; color:#000;">Sin turnos disponibles.</p>';
         }
 
-        // CORRECCIÓN ATÓMICA: ENVIAMOS LAS COLUMNAS ASIGNADAS EXACTAMENTE EN TU POSTGRES
-        // FUNCIÓN DE RESERVA CORREGIDA CON REDIRECCIÓN A MERCADO PAGO EN UN CLIC
+        // SOLUCIÓN AL PUNTO 2: SOLO CREA EL TURNO Y DEJA QUE EL BOTÓN HAGA EL TRABAJO
         async function confirmarReserva(horaTurno) {
             const idSuc = document.getElementById('turnero-sucursal').value;
             const fecha = document.getElementById('turnero-fecha').value;
-            
             if(!confirm(`¿Querés reservar el turno a las ${horaTurno} hs?`)) return;
 
-            // 1. Vamos a buscar el link de Mercado Pago que configuró este médico en su panel
-            const { data: medico, error: errorMed } = await supabaseCliente
-                .from('negocios')
-                .select('mp_link')
-                .eq('id', medicoSeleccionadoId)
-                .single();
-
-            const linkPago = medico?.mp_link || "";
-
-            // 2. Insertamos el turno en la base de datos con las columnas reales de Postgres
-            const { error: errorInsert } = await supabaseCliente.from('turnos_activos').insert([
+            const { error } = await supabaseCliente.from('turnos_activos').insert([
                 {
                     negocio_id: medicoSeleccionadoId,
                     sucursal_id: idSuc,
@@ -385,36 +328,33 @@
                 }
             ]);
 
-            if (errorInsert) return alert("Error al apartar el horario: " + errorInsert.message);
+            if (error) return alert("Error al reservar: " + error.message);
 
-            // 3. Si el médico tiene su link configurado, disparamos la pasarela de pago al instante
-            if (linkPago) {
-                alert("¡Turno apartado! Ahora te redirigiremos a Mercado Pago para abonar la seña de reserva.");
-                window.open(linkPago, '_blank'); // Abre el Mercado Pago real del kinesiologo en otra solapa
-            } else {
-                alert("¡Turno apartado! Nota: Este profesional aún no vinculó su link de Mercado Pago, recordá coordinar la seña de forma manual.");
-            }
-
-            // 4. Movemos al paciente a su pestaña de control
+            alert("¡Turno apartado con éxito! Pasá a la sección de 'Mis Turnos' para realizar el pago de la seña.");
             document.getElementById('turnero-integrado').style.display = 'none';
             switchModulo('turnos'); 
         }
 
         async function cargarMisTurnos() {
-            // Traemos los turnos y de paso sumamos el mp_link del negocio asociado
+            // CORRECCIÓN CLAVE: Traemos el mp_link DIRECTAMENTE de la sucursal seleccionada
             const { data } = await supabaseCliente.from('turnos_activos')
-                .select('id, fecha, hora, estado, negocios(nombre, mp_link), sucursales(nombre, direccion)')
+                .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion, mp_link)')
                 .eq('cliente_nombre', pacienteActual.nombre) 
                 .eq('cliente_telefono', pacienteActual.telefono) 
                 .order('fecha', { ascending: true });
 
             document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
                 const esConfirmado = t.estado === 'confirmado';
-                const linkPago = t.negocios?.mp_link || "";
+                let linkPago = t.sucursales?.mp_link || ""; // Cambiado para leer desde la sucursal
 
-                // Si está pendiente y el médico tiene link, le clavamos el botón dorado para pagar
+                // Escudo limpiador por si quedó algún texto residual
+                if (linkPago && !linkPago.startsWith('http')) {
+                    const match = linkPago.match(/https?:\/\/[^\s]+/);
+                    if (match) linkPago = match[0];
+                }
+
                 const botonPagoHtml = (!esConfirmado && linkPago) 
-                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#009E9B; color:white; padding:10px; border-radius:8px; font-weight:900; margin-top:10px; font-size:13px; box-shadow: 0 4px 10px rgba(0,158,155,0.2);">💳 Pagar Seña en Mercado Pago</a>` 
+                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:10px; font-weight:900; margin-top:10px; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.15);">💳 Pagar Seña en Mercado Pago</a>` 
                     : '';
 
                 return `
@@ -431,15 +371,13 @@
                                 </span>
                             </div>
                         </div>
-                        
                         ${botonPagoHtml}
-
                         <button onclick="cancelarTurno('${t.id}')" style="background:none; border:none; color:#D9534F; font-weight:900; font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; padding:0; text-align: left; width: fit-content;">
                             Cancelar Turno
                         </button>
                     </div>
                 `;
-            }).join('') || '<p style="text-align:center; font-weight:800; font-size:14px; color:#FFF;">No tenés turnos programados.</p>';
+            }).join('') || '<p style="text-align:center; color:#FFF;">No tenés turnos programados.</p>';
         }
 
         async function cancelarTurno(idTurno) {
