@@ -401,29 +401,42 @@
         }
 
         async function cargarMisTurnos() {
+            // Traemos los turnos y de paso sumamos el mp_link del negocio asociado
             const { data } = await supabaseCliente.from('turnos_activos')
-                .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion)')
-                .eq('cliente_nombre', pacienteActual.nombre) // Mapeado a la lectura correcta
-                .eq('cliente_telefono', pacienteActual.telefono) // Mapeado a la lectura correcta
+                .select('id, fecha, hora, estado, negocios(nombre, mp_link), sucursales(nombre, direccion)')
+                .eq('cliente_nombre', pacienteActual.nombre) 
+                .eq('cliente_telefono', pacienteActual.telefono) 
                 .order('fecha', { ascending: true });
 
             document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
                 const esConfirmado = t.estado === 'confirmado';
+                const linkPago = t.negocios?.mp_link || "";
+
+                // Si está pendiente y el médico tiene link, le clavamos el botón dorado para pagar
+                const botonPagoHtml = (!esConfirmado && linkPago) 
+                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#009E9B; color:white; padding:10px; border-radius:8px; font-weight:900; margin-top:10px; font-size:13px; box-shadow: 0 4px 10px rgba(0,158,155,0.2);">💳 Pagar Seña en Mercado Pago</a>` 
+                    : '';
+
                 return `
-                    <div class="item-lista" style="border-left-color: ${esConfirmado ? '#009E9B' : '#F4B41A'}">
-                        <div>
-                            <strong>${t.negocios.nombre}</strong>
-                            <small>📅 F: ${t.fecha.split('-').reverse().join('/')} - ⏰ H: ${t.hora.slice(0,5)} hs</small>
-                            <small>📍 ${t.sucursales.nombre} (${t.sucursales.direccion})</small>
+                    <div class="item-lista" style="border-left-color: ${esConfirmado ? '#009E9B' : '#F4B41A'}; flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <strong>${t.negocios.nombre}</strong>
+                                <small>📅 F: ${t.fecha.split('-').reverse().join('/')} - ⏰ H: ${t.hora.slice(0,5)} hs</small>
+                                <small>📍 ${t.sucursales.nombre} (${t.sucursales.direccion})</small>
+                            </div>
+                            <div style="text-align:right;">
+                                <span style="font-size:11px; padding:3px 6px; border-radius:4px; color:white; font-weight:900; background:${esConfirmado ? '#009E9B' : '#F4B41A'}">
+                                    ${t.estado.toUpperCase()}
+                                </span>
+                            </div>
                         </div>
-                        <div style="text-align:right;">
-                            <span style="font-size:11px; padding:3px 6px; border-radius:4px; color:white; font-weight:900; background:${esConfirmado ? '#009E9B' : '#F4B41A'}">
-                                ${t.estado.toUpperCase()}
-                            </span>
-                            <button onclick="cancelarTurno('${t.id}')" style="display:block; background:none; border:none; color:#D9534F; font-weight:900; font-size:11px; margin-top:8px; cursor:pointer; text-decoration:underline; padding:0; width:100%;">
-                                Cancelar
-                            </button>
-                        </div>
+                        
+                        ${botonPagoHtml}
+
+                        <button onclick="cancelarTurno('${t.id}')" style="background:none; border:none; color:#D9534F; font-weight:900; font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; padding:0; text-align: left; width: fit-content;">
+                            Cancelar Turno
+                        </button>
                     </div>
                 `;
             }).join('') || '<p style="text-align:center; font-weight:800; font-size:14px; color:#FFF;">No tenés turnos programados.</p>';
