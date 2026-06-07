@@ -44,6 +44,11 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-weight: 900; font-size: 12px; cursor: pointer; width: 50%; text-align: center; }
         .nav-item.activo { color: #009E9B; font-size: 13px; }
         .nav-item span { font-size: 20px; display: block; margin-bottom: 2px; }
+
+        /* Estilo sutil para el cierre de sesión del paciente */
+        .btn-logout-paciente {
+            text-align: center; text-decoration: underline; font-size: 14px; cursor: pointer; margin-top: -10px; margin-bottom: 15px; opacity: 0.8; color: white; font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -73,6 +78,8 @@
     </div>
 
     <div id="pantalla-medicos" class="contenedor" style="margin-bottom: 80px;">
+        <div class="btn-logout-paciente" onclick="cerrarSesionPaciente()">❌ Salir de mi Cuenta / Cambiar DNI</div>
+
         <div class="caja-blanca" style="background:#028482; color:white; border-radius:25px;">
             <h2 style="color:white; text-align:center; font-weight:900; margin-top:0;">Mis Profesionales</h2>
             <label style="color:white;">➕ Vincular Alias de Médico nuevo</label>
@@ -159,6 +166,17 @@
             }
         }
 
+        // NUEVA FUNCIÓN PARA EL CIERRE DE SESIÓN SEGURO DEL PACIENTE
+        function cerrarSesionPaciente() {
+            localStorage.removeItem('mi_turno_paciente_id');
+            window.location.reload();
+        }
+
+        function irARegistro() {
+            document.getElementById('card-login').classList.remove('activa');
+            document.getElementById('card-registro').classList.add('activa');
+        }
+
         async function vincularMedico() {
             const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
             const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
@@ -233,10 +251,9 @@
             const fecha = document.getElementById('turnero-fecha').value;
             if(!confirm(`¿Querés reservar a las ${horaTurno} hs?`)) return;
 
-            // CRUCE PERFECTO DE LLAVES RELACIONALES DE TU BASE DE DATOS
             await supabaseCliente.from('turnos_activos').insert([{
-                negocio_id: medicoSeleccionadoId, // Apesta al ID real del médico
-                sucursal_id: idSuc,             // Apesta al ID real de la sucursal
+                negocio_id: medicoSeleccionadoId, 
+                sucursal_id: idSuc,             
                 fecha: fecha,
                 hora: horaTurno + ":00",
                 cliente_nombre: pacienteActual.nombre,       
@@ -251,7 +268,6 @@
         }
 
         async function cargarMisTurnos() {
-            // Unimos tablas limpias cruzando la sucursal asignada
             const { data } = await supabaseCliente.from('turnos_activos')
                 .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion, link_mercadopago)')
                 .eq('cliente_identificador', pacienteActual.dni) 
