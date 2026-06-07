@@ -45,7 +45,6 @@
 
     <div class="contenedor">
         <img src="https://mataleon72-lgtm.github.io/MiTurno/logotipo%20mi%20turno.png" class="logo">
-        
         <h1 id="titulo-pantalla">Acceso Profesional</h1>
 
         <div id="card-login" class="caja-card activa">
@@ -81,7 +80,9 @@
     <script>
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ACÁ CAMBIAMOS EL NOMBRE A 'supabaseCliente' PARA EVITAR EL CHOQUE
+        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         function irARegistro() {
             document.getElementById('card-login').classList.remove('activa');
@@ -109,7 +110,7 @@
                 return alert("Por favor, completá todos los campos para registrarte.");
             }
 
-            const { error } = await supabase.from('negocios').insert([
+            const { error } = await supabaseCliente.from('negocios').insert([
                 { nombre: nombre, rubro: rubro, alias: alias, password: pass }
             ]);
 
@@ -120,7 +121,7 @@
                 return alert("Error al registrar: " + error.message);
             }
 
-            const { data: medico, error: errorBusqueda } = await supabase
+            const { data: medico, error: errorBusqueda } = await supabaseCliente
                 .from('negocios')
                 .select('id')
                 .eq('alias', alias)
@@ -141,7 +142,7 @@
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            const { data, error } = await supabase.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
+            const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
 
             if(error || !data) return alert("El alias o la contraseña son incorrectos.");
 
