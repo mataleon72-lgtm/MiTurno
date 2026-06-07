@@ -9,65 +9,80 @@
     <style>
         body { 
             font-family: 'Nunito', sans-serif; 
-            background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
-            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: white; 
+            background: #009E9B; 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; 
         }
-        .contenedor { width: 90%; max-width: 400px; padding: 20px 0; display: none; margin-bottom: 80px; }
+        .contenedor { width: 90%; max-width: 400px; padding: 20px 0; display: none; }
         .contenedor.activa { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* TEXTO DE INSTRUCCIÓN SUPERIOR PARA GENTE MAYOR */
+        .texto-instruccion {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.4;
+            color: #FFFFFF;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+        }
+        .texto-instruccion span {
+            color: #F4B41A;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 900;
+            display: inline-block;
+            margin-left: 4px;
+        }
+
+        /* TARJETA BLANCA DE ACCESO RECTANGULAR REDONDEADA (FIEL A TU CAPTURA) */
         .caja-card { 
-            background: white; border-radius: 25px; padding: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25); color: #000000; text-align: left;
-            display: none; animation: slideUp 0.3s ease;
+            background: white; border-radius: 25px; padding: 30px 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #000000; text-align: left;
+            display: none;
         }
         .caja-card.activa { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+        .titulo-caja {
+            color: #007D82; font-size: 24px; font-weight: 900; text-align: center; margin-top: 0; margin-bottom: 8px;
+        }
+        .subtitulo-caja {
+            color: #555555; font-size: 14px; font-weight: 700; text-align: center; margin-top: 0; margin-bottom: 25px;
+        }
+
+        label { font-weight: 900; color: #007D82; display: block; margin-bottom: 8px; font-size: 15px; }
+        input, select { 
+            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #E2E8F0; 
+            margin-bottom: 20px; box-sizing: border-box; font-size: 16px; font-weight: 700; font-family: 'Nunito', sans-serif; outline: none; color: #000000;
+            background: #F8FAFC;
+        }
+        input:focus { border-color: #009E9B; background: white; }
+
+        .btn-principal { 
+            width: 100%; background: #F4B41A; color: white; border: none; padding: 16px; 
+            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(244, 180, 26, 0.3); transition: transform 0.2s; margin-top: 5px;
+        }
+        .btn-principal:active { transform: scale(0.97); }
+
+        /* SECCIONES INTERNAS LUEGO DE LOGUEARSE */
         .contenedor-con-fondo {
             background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
             background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-top: 10px; color: white;
         }
         .contenedor-con-fondo label { color: #FFFFFF; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-
-        .caja-blanca { 
-            background: white; border-radius: 20px; padding: 20px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #000000;
-        }
-        .caja-blanca label { color: #007D82; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; }
-
-        label { font-weight: 900; color: #007D82; display: block; margin-bottom: 5px; font-size: 15px; }
-        input, select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #DDD; 
-            margin-bottom: 15px; box-sizing: border-box; font-size: 16px; font-weight: 900; font-family: 'Nunito', sans-serif; outline: none; color: #000000;
-        }
-        input:focus, select:focus { border-color: #009E9B; }
-
-        .btn-principal { 
-            width: 100%; background: #F4B41A; color: white; border: none; padding: 16px; 
-            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s; margin-top: 5px;
-        }
-        .btn-principal:active { transform: scale(0.97); }
-
-        .link-toggle { margin-top: 25px; font-size: 15px; color: white; opacity: 0.95; cursor: pointer; text-decoration: underline; font-weight: 800; text-align: center; }
-
-        .item-lista {
-            background: #F4F4F4; padding: 16px; border-radius: 12px; margin-bottom: 10px;
-            font-weight: 900; color: #000000; display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid #009E9B; font-size: 16px;
-        }
+        .caja-blanca { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #000000;}
+        .item-lista { background: #F4F4F4; padding: 16px; border-radius: 12px; margin-bottom: 10px; font-weight: 900; color: #000000; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #009E9B; font-size: 16px; }
         .item-lista small { color: #007D82; display: block; font-size: 13px; font-weight: 900; margin-top: 2px; }
-
         .bloque-turnero { background: #EEF7F7; padding: 15px; border-radius: 15px; margin-top: 10px; display: none; border: 1px dashed #009E9B; }
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         .btn-hora { background: white; color: #007D82; border: 2px solid #007D82; padding: 10px; border-radius: 8px; font-weight: 900; text-align: center; cursor: pointer; font-size: 15px; }
 
-        .nav-inferior {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: white;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15); display: flex; justify-content: space-around; align-items: center; z-index: 100;
-        }
+        .nav-inferior { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-weight: 900; font-size: 12px; cursor: pointer; width: 50%; text-align: center; }
         .nav-item.activo { color: #009E9B; font-size: 13px; }
         .nav-item span { font-size: 20px; display: block; margin-bottom: 2px; }
@@ -75,217 +90,20 @@
 </head>
 <body>
 
-    <div id="pantalla-acceso" class="contenedor activa" style="margin-top: 40px;">
-        <h1 style="font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 25px; letter-spacing: -1px;" id="titulo-pantalla">Mis Turnos</h1>
+    <div id="pantalla-acceso" class="contenedor activa">
+        
+        <div id="instruccion-arriba" class="texto-instruccion">
+            Si ya tenés cuenta ingresá tu DNI abajo. Si aún no la creaste, presioná <span onclick="irARegistro()">aquí</span>
+        </div>
 
         <div id="card-login" class="caja-card activa">
-            <label>Ingresá tu DNI</label>
+            <h2 class="titulo-caja">Ingresá a Mi Turno</h2>
+            <p class="subtitulo-caja">Colocá tu DNI para comenzar</p>
+
+            <label>Tu número de DNI</label>
             <input type="number" id="login-dni" placeholder="Ej: 38444555">
-            <button class="btn-principal" onclick="ingresarPaciente()">Ingresar a la App</button>
+            <button class="btn-principal" onclick="ingresarPaciente()">Buscar mi Cuenta</button>
         </div>
 
         <div id="card-registro" class="caja-card">
-            <label>Nombre y Apellido Completo</label>
-            <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez">
-
-            <label>Teléfono Celular</label>
-            <input type="tel" id="reg-telefono" placeholder="Ej: 1123456789">
-
-            <label>Tu número de DNI</label>
-            <input type="number" id="reg-dni" placeholder="Ej: 38444555">
-
-            <button class="btn-principal" onclick="registrarPaciente()">Crear mi Cuenta</button>
-        </div>
-
-        <p id="link-ir-a-registro" class="link-toggle" onclick="irARegistro()">¿No tenés cuenta? Creá una acá</p>
-        <p id="link-ir-a-login" class="link-toggle" onclick="irALogin()" style="display: none;">¿Ya tenés cuenta? Iniciá sesión</p>
-    </div>
-
-    <div id="pantalla-medicos" class="contenedor">
-        <div class="contenedor-con-fondo">
-            <h2 style="text-align:center; font-weight:900; margin-top:0; font-size:26px; text-shadow:2px 2px 4px rgba(0,0,0,0.5);">Mis Profesionales</h2>
-            <label>➕ Vincular Alias de Médico nuevo</label>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <input type="text" id="input-medico-alias" placeholder="Ej: JULIGOMEZ" style="margin-bottom:0; text-transform: uppercase;">
-                <button class="btn-principal" onclick="vincularMedico()" style="width:auto; margin-bottom:0; background:#F4B41A; padding:0 20px;">Agregar</button>
-            </div>
-        </div>
-
-        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px; margin-top: 25px;">Tu listado de profesionales:</h3>
-        <div id="lista-medicos"></div>
-
-        <div id="turnero-integrado" class="caja-blanca bloque-turnero">
-            <h3 id="turnero-medico-nombre" style="margin-top:0; color:#007D82; font-weight:900; text-align:center;"></h3>
-            <label>1. Seleccioná Sede</label>
-            <select id="turnero-sucursal" onchange="cargarFechasDisponibles()"></select>
-            <label>2. Seleccioná Fecha</label>
-            <input type="date" id="turnero-fecha" onchange="cargarHorariosDisponibles()">
-            
-            <label id="label-horas" style="display:none;">3. Seleccioná el Horario:</label>
-            <div id="grilla-horas" class="grilla-horas"></div>
-        </div>
-    </div>
-
-    <div id="pantalla-turnos" class="contenedor">
-        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px; margin-top:10px;">Tus turnos guardados:</h3>
-        <div id="lista-turnos-paciente"></div>
-    </div>
-
-    <div id="menu-inferior" class="nav-inferior" style="display: none;">
-        <div id="nav-medicos" class="nav-item activo" onclick="switchModulo('medicos')">
-            <span>🩺</span>Mis Médicos
-        </div>
-        <div id="nav-turnos" class="nav-item" onclick="switchModulo('turnos')">
-            <span>📅</span>Mis Turnos
-        </div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let pacienteActual = null; 
-        let medicoSeleccionadoId = null; 
-        let duracionConfigurada = 30;
-
-        async function init() {
-            const guardadoId = localStorage.getItem('mi_turno_paciente_id');
-            if (guardadoId) {
-                const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
-                if (data) {
-                    pacienteActual = data;
-                    mostrarAppPrincipal();
-                }
-            }
-        }
-
-        function irARegistro() {
-            document.getElementById('card-login').classList.remove('activa');
-            document.getElementById('card-registro').classList.add('activa');
-            document.getElementById('link-ir-a-registro').style.display = 'none';
-            document.getElementById('link-ir-a-login').style.display = 'block';
-            document.getElementById('titulo-pantalla').innerText = 'Nuevo Paciente';
-        }
-
-        function irALogin() {
-            document.getElementById('card-registro').classList.remove('activa');
-            document.getElementById('card-login').classList.add('activa');
-            document.getElementById('link-ir-a-login').style.display = 'none';
-            document.getElementById('link-ir-a-registro').style.display = 'block';
-            document.getElementById('titulo-pantalla').innerText = 'Mis Turnos';
-        }
-
-        async function ingresarPaciente() {
-            const dni = document.getElementById('login-dni').value.trim();
-            if(!dni) return alert("Por favor, ingresá tu DNI.");
-
-            const { data, error } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
-
-            if(error || !data || data.length === 0) {
-                return alert("El DNI ingresado no está registrado. Creá tu cuenta en el enlace de abajo.");
-            }
-
-            pacienteActual = data[0];
-            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
-            mostrarAppPrincipal();
-        }
-
-        async function registrarPaciente() {
-            const nombre = document.getElementById('reg-nombre').value.trim();
-            const telefono = document.getElementById('reg-telefono').value.trim();
-            const dni = document.getElementById('reg-dni').value.trim();
-
-            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros para registrarte.");
-
-            const { data: existe } = await supabaseCliente.from('pacientes').select('id').eq('dni', dni);
-            if(existe && existe.length > 0) return alert("Este DNI ya tiene una cuenta creada. Iniciá sesión.");
-
-            const { data, error } = await supabaseCliente.from('pacientes').insert([
-                { nombre, telefono, dni }
-            ]).select();
-
-            if(error) return alert("Error al registrar: " + error.message);
-
-            pacienteActual = data[0];
-            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
-            mostrarAppPrincipal();
-        }
-
-        function mostrarAppPrincipal() {
-            document.getElementById('pantalla-acceso').style.display = 'none';
-            document.getElementById('menu-inferior').style.display = 'flex';
-            switchModulo('medicos');
-        }
-
-        function switchModulo(modulo) {
-            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('activo'));
-            
-            if (modulo === 'medicos') {
-                document.getElementById('pantalla-medicos').classList.add('activa');
-                document.getElementById('nav-medicos').classList.add('activo');
-                cargarMisMedicos();
-            } else {
-                document.getElementById('pantalla-turnos').classList.add('activa');
-                document.getElementById('nav-turnos').classList.add('activo');
-                cargarMisTurnos();
-            }
-            window.scrollTo(0,0);
-        }
-
-        // AJUSTE CLAVE: BUSCAMOS EN LA COLUMNA ALIAS EN LUGAR DE ID
-        async function vincularMedico() {
-            const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
-            if (!aliasMed) return alert("Ingresá el Alias del profesional");
-
-            // Buscamos al médico por su alias comercial
-            const { data: medico, error } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
-            
-            if (error || !medico || medico.length === 0) {
-                return alert("Alias incorrecto. No se encontró ningún profesional registrado con ese código.");
-            }
-
-            const idRealMed = medico[0].id; // Extraemos el UUID real
-
-            // Evitamos que lo agregue dos veces
-            const { data: existe } = await supabaseCliente.from('pacientes_profesionales')
-                .select('*').eq('paciente_id', pacienteActual.id).eq('negocio_id', idRealMed);
-            
-            if (existe && existe.length > 0) return alert("Ya tenés agendado a este médico.");
-
-            // Guardamos el enlace firme en la base
-            await supabaseCliente.from('pacientes_profesionales').insert([
-                { paciente_id: pacienteActual.id, negocio_id: idRealMed }
-            ]);
-
-            alert("¡Médico agregado a tu lista con éxito!");
-            document.getElementById('input-medico-alias').value = '';
-            cargarMisMedicos();
-        }
-
-        async function cargarMisMedicos() {
-            const { data } = await supabaseCliente.from('pacientes_profesionales')
-                .select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
-
-            document.getElementById('lista-medicos').innerHTML = data?.map(p => `
-                <div class="item-lista" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')" style="cursor:pointer; background:#FFF;">
-                    <div>
-                        ${p.negocios.nombre}
-                        <small>✨ ${p.negocios.rubro || 'Profesional de la Salud'}</small>
-                    </div>
-                    <span style="font-size:18px;">📅</span>
-                </div>
-            `).join('') || '<p style="text-align:center; font-weight:800; font-size:14px; color:#FFF;">Tu listado está vacío. ¡Agregá el código de tu médico arriba!</p>';
-        }
-
-        async function abrirTurnero(idMed, nombreMed) {
-            medicoSeleccionadoId = idMed;
-            document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
-            document.getElementById('turnero-integrado').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = '';
-            document.getElementById('label-horas').style.display = 'none';
-
-            const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
-            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + 
-                sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+            <h2 class="titulo-caja">
