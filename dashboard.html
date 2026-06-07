@@ -133,8 +133,8 @@
                 <option value="0">Domingo</option>
             </select>
             <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="09:00"></div>
-                <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="18:00"></div>
+                <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="14:00"></div>
+                <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="19:00"></div>
             </div>
             <button class="btn-amarillo" onclick="guardarHorario()">Asignar Horario</button>
         </div>
@@ -203,13 +203,25 @@
             document.getElementById('lista-sucursales').innerHTML = data?.map(s => `<div class="item-lista">${s.nombre} <small>${s.direccion}</small></div>`).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No tenés sucursales.</p>';
         }
 
+        // COMENTARIO TÉCNICO: FUNCIÓN ADAPTADA CON SEGUNDOS PARA EL TIME DE POSTGRES
         async function guardarHorario() {
             const idSuc = document.getElementById('hor-sucursal').value;
             if(!idSuc) return alert("Seleccioná una sucursal");
+            
             const dia = document.getElementById('hor-dia').value;
-            const ini = document.getElementById('hor-inicio').value;
-            const fin = document.getElementById('hor-fin').value;
-            await supabaseCliente.from('agenda').insert([{ sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin }]);
+            let ini = document.getElementById('hor-inicio').value;
+            let fin = document.getElementById('hor-fin').value;
+
+            // Si vienen en formato corto (HH:mm), les clavamos los segundos obligatorios
+            if(ini.length === 5) ini = ini + ":00";
+            if(fin.length === 5) fin = fin + ":00";
+
+            const { error } = await supabaseCliente.from('agenda').insert([
+                { sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin }
+            ]);
+
+            if(error) return alert("Error al guardar horario: " + error.message);
+
             alert("¡Horario asignado!");
             await cargarHorarios();
         }
@@ -227,11 +239,9 @@
             const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
 
-            // Limpieza automática de reservas abandonadas de más de 15 minutos
             const quinceMinutosAtras = new Date(Date.now() - 15 * 60 * 1000).toISOString();
             await supabaseCliente.from('turnos_activos').delete().eq('estado', 'pendiente').lt('creado_at', quinceMinutosAtras);
 
-            // Turnos activos válidos
             const { data: activos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).in('estado', ['pendiente', 'confirmado']).order('hora');
             
             document.getElementById('lista-turnos').innerHTML = activos?.map(t => {
@@ -247,7 +257,6 @@
                 `;
             }).join('') || '<p style="text-align:center; color:#999; font-size:14px;">No hay turnos agendados.</p>';
 
-            // Turnos cancelados con aviso previo para control de reembolsos
             const { data: cancelados } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).eq('estado', 'cancelado_por_paciente').order('hora');
 
             document.getElementById('lista-cancelados').innerHTML = cancelados?.map(c => `
