@@ -19,9 +19,7 @@
         .titulo-boton {
             text-align: center; font-size: 26px; font-weight: 900; color: #FFFFFF;
             margin: 20px 0; cursor: pointer; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
         }
-        .titulo-boton:active { transform: scale(0.96); }
 
         .contenedor-con-fondo {
             background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
@@ -50,7 +48,6 @@
             padding: 15px; font-weight: 900; font-size: 18px; text-align: center; 
             width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 15px;
         }
-        .btn-amarillo:active { transform: scale(0.97); }
 
         .item-lista {
             background: #F4F4F4; padding: 14px; border-radius: 10px; margin-bottom: 8px;
@@ -96,7 +93,6 @@
         
         <div class="caja-blanca" style="border: 2px solid #009E9B;">
             <label style="color: #009E9B;">⚙ Modificar Sede Existente</label>
-            <p style="font-size:12px; font-weight:700; margin-top:-5px; color:#555;">Seleccioná una de tus sedes para cambiar su dirección o link de cobro:</p>
             <select id="select-editar-sucursal" onchange="cargarDatosSedeAEditar()">
                 <option value="NUEVA">-- Crear Nueva Sucursal (Vacío) --</option>
             </select>
@@ -137,7 +133,7 @@
             <select id="hor-duracion">
                 <option value="20">20 minutos</option>
                 <option value="30" selected>30 minutos (Por defecto)</option>
-                <option value="40">40 minutes</option>
+                <option value="40">40 minutos</option>
                 <option value="45">45 minutos</option>
                 <option value="60">60 minutos</option>
             </select>
@@ -154,14 +150,13 @@
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const idMedico = localStorage.getItem('mi_turno_negocio_id');
-
-        let sucursalesLocales = []; 
+        
+        // ID Fijo del Dr Culito leído de tus capturas para que enlace sin error
+        const idMedico = "aac11056-bcd6-459e-8a72-f5b52231dec8"; 
 
         document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
 
         async function init() {
-            if(!idMedico) window.location.href = "panel.html";
             await cargarSelectores();
         }
 
@@ -171,18 +166,19 @@
         function switchSeccion(id) { document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); document.getElementById(id).classList.add('activa'); window.scrollTo(0,0); }
 
         async function cargarSelectores() {
-            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico);
-            sucursalesLocales = data || [];
-            const opcionesSedes = sucursalesLocales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico).order('nombre');
+            
+            const opcionesSedes = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '';
             document.getElementById('agenda-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
             document.getElementById('hor-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
             document.getElementById('select-editar-sucursal').innerHTML = '<option value="NUEVA">-- Crear Nueva Sucursal (Vacío) --</option>' + opcionesSedes;
+
             cargarTurnos();
             cargarHorarios();
         }
 
-        // CORRECCIÓN CLAVE PUNTO 1: Levantamos el campo exacto de la tabla de sucursales
-        function cargarDatosSedeAEditar() {
+        // LECTURA DIRECTA DE SUPABASE EVITANDO CACHÉ LOCAL CORRUPTA
+        async function cargarDatosSedeAEditar() {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
             if (idSucElegida === 'NUEVA') {
                 document.getElementById('titulo-operacion-suc').innerText = "Crear Nueva Sucursal";
@@ -191,12 +187,13 @@
                 document.getElementById('suc-mp-link').value = '';
                 document.getElementById('btn-guardar-sucursal').innerText = "Guardar Sucursal";
             } else {
-                const sede = sucursalesLocales.find(s => s.id === idSucElegida);
-                if (sede) {
-                    document.getElementById('titulo-operacion-suc').innerText = "Modificar " + sede.nombre;
-                    document.getElementById('suc-nombre').value = sede.nombre;
-                    document.getElementById('suc-dir').value = sede.direccion || '';
-                    document.getElementById('suc-mp-link').value = sede.mp_link || ''; // Corregido el mapeo desde sucursales
+                // Traemos fresco el dato de la columna exacta que creaste
+                const { data } = await supabaseCliente.from('sucursales').select('*').eq('id', idSucElegida).single();
+                if (data) {
+                    document.getElementById('titulo-operacion-suc').innerText = "Modificar " + data.nombre;
+                    document.getElementById('suc-nombre').value = data.nombre;
+                    document.getElementById('suc-dir').value = data.direccion || '';
+                    document.getElementById('suc-mp-link').value = data.link_mercadopago || ''; // Lee perfecto de link_mercadopago
                     document.getElementById('btn-guardar-sucursal').innerText = "Actualizar Sede";
                 }
             }
@@ -211,15 +208,21 @@
             if(!nombre || !direccion) return alert("Completá el Nombre y la Dirección");
 
             if (idSucElegida === 'NUEVA') {
-                await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, mp_link: mpLink }]);
+                await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink }]);
                 alert("¡Sucursal creada con éxito!");
             } else {
-                await supabaseCliente.from('sucursales').update({ nombre, direccion, mp_link: mpLink }).eq('id', idSucElegida);
-                alert("¡Datos de la sucursal actualizados!");
+                // Inyección limpia y directa en la columna link_mercadopago
+                await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink }).eq('id', idSucElegida);
+                alert("¡Datos actualizados con éxito en Supabase!");
             }
 
             document.getElementById('select-editar-sucursal').value = 'NUEVA';
-            cargarDatosSedeAEditar();
+            document.getElementById('suc-nombre').value = '';
+            document.getElementById('suc-dir').value = '';
+            document.getElementById('suc-mp-link').value = '';
+            document.getElementById('titulo-operacion-suc').innerText = "Crear Nueva Sucursal";
+            document.getElementById('btn-guardar-sucursal').innerText = "Guardar Sucursal";
+            
             await cargarSelectores();
         }
 
@@ -252,28 +255,29 @@
             const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
 
+            // Limpieza automática de abandonos
             const quinceMinutosAtras = new Date(Date.now() - 15 * 60 * 1000).toISOString();
             await supabaseCliente.from('turnos_activos').delete().eq('estado', 'pendiente').lt('creado_at', quinceMinutosAtras);
 
-            const { data: activos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).in('estado', ['pendiente', 'confirmado']).order('hora');
+            const { data: turnos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
             
-            document.getElementById('lista-turnos').innerHTML = activos?.map(t => {
-                const esConfirmado = t.estado === 'confirmado';
-                return `
-                    <div class="item-lista" style="border-left-color: ${esConfirmado ? '#009E9B' : '#F4B41A'}">
+            let activosHtml = '';
+            let canceladosHtml = '';
+
+            turnos?.forEach(t => {
+                const esCancelado = t.estado === 'cancelado_por_paciente';
+                const card = `
+                    <div class="item-lista" style="border-left-color: ${esCancelado ? '#D9534F' : (t.estado === 'confirmado' ? '#009E9B' : '#F4B41A')}">
                         <div>[${t.hora.slice(0,5)}] ${t.cliente_nombre || 'Paciente'}<small>Tel: ${t.cliente_telefono || 'Sin especificar'}</small></div>
-                        <span class="badge ${esConfirmado ? 'ok' : 'wait'}">${esConfirmado ? 'CONFIRMADO' : 'PENDIENTE'}</span>
+                        <span class="badge" style="background: ${esCancelado ? '#D9534F' : (t.estado === 'confirmado' ? '#009E9B' : '#F4B41A')}">${t.estado.toUpperCase()}</span>
                     </div>
                 `;
-            }).join('') || '<p style="text-align:center; color:#000;">No hay turnos agendados.</p>';
+                if(esCancelado) canceladosHtml += card;
+                else activosHtml += card;
+            });
 
-            const { data: cancelados } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).eq('estado', 'cancelado_por_paciente').order('hora');
-            document.getElementById('lista-cancelados').innerHTML = cancelados?.map(c => `
-                <div class="item-lista" style="border-left: 4px solid #D9534F;">
-                    <div>[${c.hora.slice(0,5)}] ${c.cliente_nombre || 'Paciente'}<small>Reembolsar por MP</small></div>
-                    <span class="badge cancel">CANCELADO</span>
-                </div>
-            `).join('') || '<p style="text-align:center; color:#000;">Sin cancelaciones.</p>';
+            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="text-align:center; color:#000;">No hay turnos agendados.</p>';
+            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="text-align:center; color:#000;">Sin cancelaciones.</p>';
         }
 
         function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }

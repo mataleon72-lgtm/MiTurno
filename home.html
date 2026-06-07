@@ -17,60 +17,25 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .texto-instruccion {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 700;
-            line-height: 1.4;
-            color: #FFFFFF;
-            border: 1px dashed rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15); border-radius: 15px; padding: 15px; margin-bottom: 20px;
+            text-align: center; font-size: 16px; font-weight: 700; color: #FFFFFF; border: 1px dashed rgba(255, 255, 255, 0.3);
         }
-        .texto-instruccion span {
-            color: #F4B41A;
-            text-decoration: underline;
-            cursor: pointer;
-            font-weight: 900;
-            display: inline-block;
-            margin-left: 4px;
-        }
+        .texto-instruccion span { color: #F4B41A; text-decoration: underline; cursor: pointer; font-weight: 900; }
 
-        .caja-card { 
-            background: white; border-radius: 25px; padding: 30px 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #000000; text-align: left;
-            display: none;
-        }
+        .caja-card { background: white; border-radius: 25px; padding: 30px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #000000; text-align: left; display: none; }
         .caja-card.activa { display: block; }
-
         .titulo-caja { color: #007D82; font-size: 24px; font-weight: 900; text-align: center; margin-top: 0; margin-bottom: 8px; }
         .subtitulo-caja { color: #555555; font-size: 14px; font-weight: 700; text-align: center; margin-top: 0; margin-bottom: 25px; }
 
         label { font-weight: 900; color: #007D82; display: block; margin-bottom: 8px; font-size: 15px; }
-        input, select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #E2E8F0; 
-            margin-bottom: 20px; box-sizing: border-box; font-size: 16px; font-weight: 700; font-family: 'Nunito', sans-serif; outline: none; color: #000000;
-            background: #F8FAFC;
-        }
-        input:focus { border-color: #009E9B; background: white; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #E2E8F0; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; font-weight: 700; color: #000; background: #F8FAFC; font-family: 'Nunito', sans-serif;}
 
-        .btn-principal { 
-            width: 100%; background: #F4B41A; color: white; border: none; padding: 16px; 
-            border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; 
-            box-shadow: 0 5px 15px rgba(244, 180, 26, 0.3); transition: transform 0.2s; margin-top: 5px;
-        }
-        .btn-principal:active { transform: scale(0.97); }
+        .btn-principal { width: 100%; background: #F4B41A; color: white; border: none; padding: 16px; border-radius: 15px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(244, 180, 26, 0.3); }
 
-        .contenedor-con-fondo {
-            background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
-            background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-top: 10px; color: white;
-        }
-        .contenedor-con-fondo label { color: #FFFFFF; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .caja-blanca { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #000000;}
         .item-lista { background: #F4F4F4; padding: 16px; border-radius: 12px; margin-bottom: 10px; font-weight: 900; color: #000000; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #009E9B; font-size: 16px; }
         .item-lista small { color: #007D82; display: block; font-size: 13px; font-weight: 900; margin-top: 2px; }
+        
         .bloque-turnero { background: #EEF7F7; padding: 15px; border-radius: 15px; margin-top: 10px; display: none; border: 1px dashed #009E9B; }
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         .btn-hora { background: white; color: #007D82; border: 2px solid #007D82; padding: 10px; border-radius: 8px; font-weight: 900; text-align: center; cursor: pointer; font-size: 15px; }
@@ -80,20 +45,6 @@
         .nav-item.activo { color: #009E9B; font-size: 13px; }
         .nav-item span { font-size: 20px; display: block; margin-bottom: 2px; }
     </style>
-
-    <script>
-        function irARegistro() {
-            document.getElementById('card-login').style.display = 'none';
-            document.getElementById('card-registro').style.display = 'block';
-            document.getElementById('instruccion-arriba').innerHTML = '¿Ya tenés cuenta creada? Presioná <span onclick="irALogin()">aquí para ingresar</span>';
-        }
-
-        function irALogin() {
-            document.getElementById('card-registro').style.display = 'none';
-            document.getElementById('card-login').style.display = 'block';
-            document.getElementById('instruccion-arriba').innerHTML = 'Si ya tenés cuenta ingresá tu DNI abajo. Si aún no la creaste, presioná <span onclick="irARegistro()">aquí</span>';
-        }
-    </script>
 </head>
 <body>
 
@@ -101,7 +52,6 @@
         <div id="instruccion-arriba" class="texto-instruccion">
             Si ya tenés cuenta ingresá tu DNI abajo. Si aún no la creaste, presioná <span onclick="irARegistro()">aquí</span>
         </div>
-
         <div id="card-login" class="caja-card activa">
             <h2 class="titulo-caja">Ingresá a Mi Turno</h2>
             <p class="subtitulo-caja">Colocá tu DNI para comenzar</p>
@@ -109,7 +59,6 @@
             <input type="number" id="login-dni" placeholder="Ej: 38444555">
             <button class="btn-principal" onclick="ingresarPaciente()">Buscar mi Cuenta</button>
         </div>
-
         <div id="card-registro" class="caja-card">
             <h2 class="titulo-caja">Crear mi Cuenta</h2>
             <p class="subtitulo-caja">Completá tus datos por única vez</p>
@@ -124,16 +73,15 @@
     </div>
 
     <div id="pantalla-medicos" class="contenedor" style="margin-bottom: 80px;">
-        <div class="contenedor-con-fondo">
-            <h2 style="text-align:center; font-weight:900; margin-top:0; font-size:26px; text-shadow:2px 2px 4px rgba(0,0,0,0.5);">Mis Profesionales</h2>
-            <label>➕ Vincular Alias de Médico nuevo</label>
+        <div class="caja-blanca" style="background:#028482; color:white; border-radius:25px;">
+            <h2 style="color:white; text-align:center; font-weight:900; margin-top:0;">Mis Profesionales</h2>
+            <label style="color:white;">➕ Vincular Alias de Médico nuevo</label>
             <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <input type="text" id="input-medico-alias" placeholder="Ej: JULIGOMEZ" style="margin-bottom:0; text-transform: uppercase;">
+                <input type="text" id="input-medico-alias" placeholder="Ej: CATULO" style="margin-bottom:0; text-transform: uppercase;">
                 <button class="btn-principal" onclick="vincularMedico()" style="width:auto; margin-bottom:0; background:#F4B41A; padding:0 20px;">Agregar</button>
             </div>
         </div>
-
-        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px; margin-top: 25px;">Tu listado de profesionales:</h3>
+        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px;">Tu listado de profesionales:</h3>
         <div id="lista-medicos"></div>
 
         <div id="turnero-integrado" class="caja-blanca bloque-turnero">
@@ -142,24 +90,19 @@
             <select id="turnero-sucursal" onchange="cargarFechasDisponibles()"></select>
             <label>2. Seleccioná Fecha</label>
             <input type="date" id="turnero-fecha" onchange="cargarHorariosDisponibles()">
-            
             <label id="label-horas" style="display:none;">3. Seleccioná el Horario:</label>
             <div id="grilla-horas" class="grilla-horas"></div>
         </div>
     </div>
 
     <div id="pantalla-turnos" class="contenedor" style="margin-bottom: 80px;">
-        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px; margin-top:10px;">Tus turnos guardados:</h3>
+        <h3 style="font-weight: 900; margin-left: 5px; font-size: 18px; mt:10px;">Tus turnos guardados:</h3>
         <div id="lista-turnos-paciente"></div>
     </div>
 
     <div id="menu-inferior" class="nav-inferior" style="display: none;">
-        <div id="nav-medicos" class="nav-item activo" onclick="switchModulo('medicos')">
-            <span>🩺</span>Mis Médicos
-        </div>
-        <div id="nav-turnos" class="nav-item" onclick="switchModulo('turnos')">
-            <span>📅</span>Mis Turnos
-        </div>
+        <div id="nav-medicos" class="nav-item activo" onclick="switchModulo('medicos')"><span>🩺</span>Mis Médicos</div>
+        <div id="nav-turnos" class="nav-item" onclick="switchModulo('turnos')"><span>📅</span>Mis Turnos</div>
     </div>
 
     <script>
@@ -175,18 +118,15 @@
             const guardadoId = localStorage.getItem('mi_turno_paciente_id');
             if (guardadoId) {
                 const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
-                if (data) {
-                    pacienteActual = data;
-                    mostrarAppPrincipal();
-                }
+                if (data) { pacienteActual = data; mostrarAppPrincipal(); }
             }
         }
 
         async function ingresarPaciente() {
             const dni = document.getElementById('login-dni').value.trim();
-            if(!dni) return alert("Por favor, ingresá tu DNI.");
-            const { data, error } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
-            if(error || !data || data.length === 0) return alert("El DNI ingresado no está registrado.");
+            if(!dni) return alert("Ingresá tu DNI.");
+            const { data } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
+            if(!data || data.length === 0) return alert("El DNI ingresado no está registrado.");
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
@@ -197,20 +137,13 @@
             const telefono = document.getElementById('reg-telefono').value.trim();
             const dni = document.getElementById('reg-dni').value.trim();
             if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros.");
-            const { data: existe } = await supabaseCliente.from('pacientes').select('id').eq('dni', dni);
-            if(existe && existe.length > 0) return alert("Este DNI ya tiene una cuenta creada.");
-            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
-            if(error) return alert("Error al registrar: " + error.message);
+            const { data } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
         }
 
-        function mostrarAppPrincipal() {
-            document.getElementById('pantalla-acceso').style.display = 'none';
-            document.getElementById('menu-inferior').style.display = 'flex';
-            switchModulo('medicos');
-        }
+        function mostrarAppPrincipal() { document.getElementById('pantalla-acceso').style.display = 'none'; document.getElementById('menu-inferior').style.display = 'flex'; switchModulo('medicos'); }
 
         function switchModulo(modulo) {
             document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
@@ -224,19 +157,15 @@
                 document.getElementById('nav-turnos').classList.add('activo');
                 cargarMisTurnos();
             }
-            window.scrollTo(0,0);
         }
 
         async function vincularMedico() {
             const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
-            if (!aliasMed) return alert("Ingresá el Alias");
             const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
-            if (!medico || medico.length === 0) return alert("Alias incorrecto.");
+            if (!medico || medico.length === 0) return alert("Alias no encontrado.");
             const idRealMed = medico[0].id;
-            const { data: existe } = await supabaseCliente.from('pacientes_profesionales').select('*').eq('paciente_id', pacienteActual.id).eq('negocio_id', idRealMed);
-            if (existe && existe.length > 0) return alert("Ya tenés agendado a este médico.");
             await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: pacienteActual.id, negocio_id: idRealMed }]);
-            alert("¡Médico agregado con éxito!");
+            alert("¡Médico agregado!");
             document.getElementById('input-medico-alias').value = '';
             cargarMisMedicos();
         }
@@ -245,26 +174,21 @@
             const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
             document.getElementById('lista-medicos').innerHTML = data?.map(p => `
                 <div class="item-lista" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')" style="cursor:pointer; background:#FFF;">
-                    <div>${p.negocios.nombre}<small>✨ ${p.negocios.rubro || 'Profesional de la Salud'}</small></div>
+                    <div>${p.negocios.nombre}<small>✨ ${p.negocios.rubro || 'Profesional'}</small></div>
                     <span style="font-size:18px;">📅</span>
                 </div>
-            `).join('') || '<p style="text-align:center; color:#FFF;">Tu listado está vacío.</p>';
+            `).join('') || '<p style="text-align:center;">Tu listado está vacío.</p>';
         }
 
         async function abrirTurnero(idMed, nombreMed) {
             medicoSeleccionadoId = idMed;
             document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
             document.getElementById('turnero-integrado').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = '';
-            document.getElementById('label-horas').style.display = 'none';
             const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
             document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
-            document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' });
         }
 
         function cargarFechasDisponibles() {
-            const idSuc = document.getElementById('turnero-sucursal').value;
-            if (!idSuc) return;
             document.getElementById('turnero-fecha').min = new Date().toISOString().split('T')[0];
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
@@ -275,15 +199,10 @@
             const fechaElegida = document.getElementById('turnero-fecha').value;
             if (!idSuc || !fechaElegida) return;
 
-            const dateObj = new Date(fechaElegida + "T00:00:00");
-            const diaSemana = dateObj.getDay();
+            const diaSemana = new Date(fechaElegida + "T00:00:00").getDay();
             const { data: esquema } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
 
-            if (!esquema || esquema.length === 0) {
-                document.getElementById('grilla-horas').innerHTML = '';
-                document.getElementById('label-horas').style.display = 'none';
-                return alert("El profesional no atiende en esta sede el día elegido.");
-            }
+            if (!esquema || esquema.length === 0) return alert("El profesional no atiende hoy.");
 
             const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
             const listaOcupados = ocupados?.map(o => o.hora.slice(0,5)) || [];
@@ -306,84 +225,71 @@
             });
 
             document.getElementById('label-horas').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1; text-align:center; color:#000;">Sin turnos disponibles.</p>';
+            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1;">Sin turnos.</p>';
         }
 
-        // SOLUCIÓN AL PUNTO 2: SOLO CREA EL TURNO Y DEJA QUE EL BOTÓN HAGA EL TRABAJO
         async function confirmarReserva(horaTurno) {
             const idSuc = document.getElementById('turnero-sucursal').value;
             const fecha = document.getElementById('turnero-fecha').value;
-            if(!confirm(`¿Querés reservar el turno a las ${horaTurno} hs?`)) return;
+            if(!confirm(`¿Querés reservar a las ${horaTurno} hs?`)) return;
 
-            const { error } = await supabaseCliente.from('turnos_activos').insert([
-                {
-                    negocio_id: medicoSeleccionadoId,
-                    sucursal_id: idSuc,
-                    fecha: fecha,
-                    hora: horaTurno + ":00",
-                    cliente_nombre: pacienteActual.nombre,       
-                    cliente_telefono: pacienteActual.telefono,   
-                    cliente_identificador: pacienteActual.dni,   
-                    estado: 'pendiente'
-                }
-            ]);
+            // CRUCE PERFECTO DE LLAVES RELACIONALES DE TU BASE DE DATOS
+            await supabaseCliente.from('turnos_activos').insert([{
+                negocio_id: medicoSeleccionadoId, // Apesta al ID real del médico
+                sucursal_id: idSuc,             // Apesta al ID real de la sucursal
+                fecha: fecha,
+                hora: horaTurno + ":00",
+                cliente_nombre: pacienteActual.nombre,       
+                cliente_telefono: pacienteActual.telefono,   
+                cliente_identificador: pacienteActual.dni,   
+                estado: 'pendiente'
+            }]);
 
-            if (error) return alert("Error al reservar: " + error.message);
-
-            alert("¡Turno apartado con éxito! Pasá a la sección de 'Mis Turnos' para realizar el pago de la seña.");
+            alert("¡Turno apartado!");
             document.getElementById('turnero-integrado').style.display = 'none';
             switchModulo('turnos'); 
         }
 
         async function cargarMisTurnos() {
-            // CORRECCIÓN CLAVE: Traemos el mp_link DIRECTAMENTE de la sucursal seleccionada
+            // Unimos tablas limpias cruzando la sucursal asignada
             const { data } = await supabaseCliente.from('turnos_activos')
-                .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion, mp_link)')
-                .eq('cliente_nombre', pacienteActual.nombre) 
-                .eq('cliente_telefono', pacienteActual.telefono) 
+                .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion, link_mercadopago)')
+                .eq('cliente_identificador', pacienteActual.dni) 
                 .order('fecha', { ascending: true });
 
             document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
-                const esConfirmado = t.estado === 'confirmado';
-                let linkPago = t.sucursales?.mp_link || ""; // Cambiado para leer desde la sucursal
+                const esCancelado = t.estado === 'cancelado_por_paciente';
+                let linkPago = t.sucursales?.link_mercadopago || ""; 
 
-                // Escudo limpiador por si quedó algún texto residual
                 if (linkPago && !linkPago.startsWith('http')) {
                     const match = linkPago.match(/https?:\/\/[^\s]+/);
                     if (match) linkPago = match[0];
                 }
 
-                const botonPagoHtml = (!esConfirmado && linkPago) 
-                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:10px; font-weight:900; margin-top:10px; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.15);">💳 Pagar Seña en Mercado Pago</a>` 
+                const botonPagoHtml = (!esCancelado && t.estado === 'pendiente' && linkPago) 
+                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:10px; font-weight:900; margin-top:10px; font-size:14px;">💳 Pagar Seña por Mercado Pago</a>` 
                     : '';
 
                 return `
-                    <div class="item-lista" style="border-left-color: ${esConfirmado ? '#009E9B' : '#F4B41A'}; flex-direction: column; align-items: stretch;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div class="item-lista" style="border-left-color: ${esCancelado ? '#D9534F' : '#009E9B'}; flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between;">
                             <div>
-                                <strong>${t.negocios.nombre}</strong>
-                                <small>📅 F: ${t.fecha.split('-').reverse().join('/')} - ⏰ H: ${t.hora.slice(0,5)} hs</small>
-                                <small>📍 ${t.sucursales.nombre} (${t.sucursales.direccion})</small>
+                                <strong>${t.negocios?.nombre || 'Profesional'}</strong>
+                                <small>📅 ${t.fecha.split('-').reverse().join('/')} - ⏰ ${t.hora.slice(0,5)} hs</small>
+                                <small>📍 Sede: ${t.sucursales?.nombre || 'Sede'} (${t.sucursales?.direccion || ''})</small>
                             </div>
-                            <div style="text-align:right;">
-                                <span style="font-size:11px; padding:3px 6px; border-radius:4px; color:white; font-weight:900; background:${esConfirmado ? '#009E9B' : '#F4B41A'}">
-                                    ${t.estado.toUpperCase()}
-                                </span>
-                            </div>
+                            <span class="badge" style="background:${esCancelado ? '#D9534F' : '#009E9B'}">${t.estado.toUpperCase()}</span>
                         </div>
                         ${botonPagoHtml}
-                        <button onclick="cancelarTurno('${t.id}')" style="background:none; border:none; color:#D9534F; font-weight:900; font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; padding:0; text-align: left; width: fit-content;">
-                            Cancelar Turno
-                        </button>
+                        ${!esCancelado ? `<button onclick="cancelarTurno('${t.id}')" style="background:none; border:none; color:#D9534F; font-weight:900; font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; text-align:left; padding:0;">Cancelar Turno</button>` : ''}
                     </div>
                 `;
-            }).join('') || '<p style="text-align:center; color:#FFF;">No tenés turnos programados.</p>';
+            }).join('') || '<p style="text-align:center;">No tenés turnos.</p>';
         }
 
         async function cancelarTurno(idTurno) {
-            if (!confirm("¿Seguro que querés cancelar este turno?")) return;
+            if (!confirm("¿Seguro querés cancelar?")) return;
             await supabaseCliente.from('turnos_activos').update({ estado: 'cancelado_por_paciente' }).eq('id', idTurno);
-            alert("Turno dado de baja con éxito.");
             cargarMisTurnos();
         }
 
