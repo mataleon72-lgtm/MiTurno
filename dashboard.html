@@ -19,7 +19,6 @@
         .header-logo { text-align: center; margin-bottom: 10px; }
         .header-logo img { max-width: 240px; width: 100%; }
 
-        /* MEJORA DE LEGIBILIDAD EN TARJETA DE HORARIOS */
         .contenedor-con-fondo {
             background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
             background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
@@ -29,7 +28,6 @@
         .contenedor-con-fondo p.sub { color: #FFFFFF; text-align: center; margin-top: -5px; margin-bottom: 25px; font-weight: 800; font-size: 15px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .contenedor-con-fondo label { color: #FFFFFF; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
 
-        /* MEJORA DE LEGIBILIDAD EN CAJAS BLANCAS (TEXTOS OSCUROS BIEN MARCADOS) */
         .caja-blanca { 
             background: white; border-radius: 20px; padding: 20px; 
             box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #000000;
@@ -139,6 +137,16 @@
                 <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="14:00"></div>
                 <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="19:00"></div>
             </div>
+            
+            <label>Duración de cada turno</label>
+            <select id="hor-duracion">
+                <option value="20">20 minutos</option>
+                <option value="30" selected>30 minutos (Por defecto)</option>
+                <option value="40">40 minutos</option>
+                <option value="45">45 minutos</option>
+                <option value="60">60 minutos</option>
+            </select>
+
             <button class="btn-amarillo" onclick="guardarHorario()">Asignar Horario</button>
         </div>
         <div class="caja-blanca" style="margin-top: 20px;">
@@ -206,7 +214,6 @@
             document.getElementById('lista-sucursales').innerHTML = data?.map(s => `<div class="item-lista">${s.nombre} <small>${s.direccion}</small></div>`).join('') || '<p style="text-align:center; color:#000; font-size:14px; font-weight:800;">No tenés sucursales.</p>';
         }
 
-        // CORRECCIÓN PRINCIPAL: CAMBIO DE TABLA A configuracion_agenda E INCLUSIÓN DE CAMPOS OBLIGATORIOS
         async function guardarHorario() {
             const idSuc = document.getElementById('hor-sucursal').value;
             if(!idSuc) return alert("Seleccioná una sucursal");
@@ -214,6 +221,7 @@
             const dia = document.getElementById('hor-dia').value;
             let ini = document.getElementById('hor-inicio').value;
             let fin = document.getElementById('hor-fin').value;
+            const duracion = document.getElementById('hor-duracion').value; // Captura dinámica de los minutos
 
             if(ini.length === 5) ini = ini + ":00";
             if(fin.length === 5) fin = fin + ":00";
@@ -225,8 +233,8 @@
                     dia_semana: parseInt(dia), 
                     hora_inicio: ini, 
                     hora_fin: fin,
-                    duracion_minutos: 30, // Valor base por defecto
-                    cupo_maximo: 1        // Valor base por defecto
+                    duracion_minutos: parseInt(duracion), // Enviamos el valor seleccionado
+                    cupo_maximo: 1
                 }
             ]);
 
@@ -241,7 +249,8 @@
             if(!idSuc) return;
             const { data } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc);
             const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div>`).join('') || '<p style="text-align:center; color:#000; font-size:14px; font-weight:800;">Sin horarios en esta sede.</p>';
+            // Muestra también los minutos dinámicos en el listado
+            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs (${h.duracion_minutos} min)</small></div>`).join('') || '<p style="text-align:center; color:#000; font-size:14px; font-weight:800;">Sin horarios en esta sede.</p>';
         }
 
         async function cargarTurnos() {
