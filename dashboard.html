@@ -59,6 +59,11 @@
         .badge.ok { background: #009E9B; }
         .badge.wait { background: #F4B41A; }
         .badge.cancel { background: #D9534F; }
+
+        /* Estilo sutil para el botón de reciclaje sin alterar el layout */
+        .btn-borrar-horario {
+            background: none; border: none; color: #D9534F; font-size: 16px; cursor: pointer; padding: 0 5px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -151,8 +156,13 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // ID Fijo del Dr Culito leído de tus capturas para que enlace sin error
-        const idMedico = "aac11056-bcd6-459e-8a72-f5b52231dec8"; 
+        // REPARACIÓN ESTRATÉGICA: ID Dinámico basado en la sesión activa del profesional
+        const idMedico = localStorage.getItem('mi_turno_negocio_id'); 
+
+        if (!idMedico) {
+            alert("Tu sesión expiró. Volvé a ingresar desde el panel.");
+            window.location.href = "panel.html";
+        }
 
         document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
 
@@ -177,7 +187,6 @@
             cargarHorarios();
         }
 
-        // LECTURA DIRECTA DE SUPABASE EVITANDO CACHÉ LOCAL CORRUPTA
         async function cargarDatosSedeAEditar() {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
             if (idSucElegida === 'NUEVA') {
@@ -187,13 +196,12 @@
                 document.getElementById('suc-mp-link').value = '';
                 document.getElementById('btn-guardar-sucursal').innerText = "Guardar Sucursal";
             } else {
-                // Traemos fresco el dato de la columna exacta que creaste
                 const { data } = await supabaseCliente.from('sucursales').select('*').eq('id', idSucElegida).single();
                 if (data) {
                     document.getElementById('titulo-operacion-suc').innerText = "Modificar " + data.nombre;
                     document.getElementById('suc-nombre').value = data.nombre;
                     document.getElementById('suc-dir').value = data.direccion || '';
-                    document.getElementById('suc-mp-link').value = data.link_mercadopago || ''; // Lee perfecto de link_mercadopago
+                    document.getElementById('suc-mp-link').value = data.link_mercadopago || '';
                     document.getElementById('btn-guardar-sucursal').innerText = "Actualizar Sede";
                 }
             }
@@ -211,7 +219,6 @@
                 await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink }]);
                 alert("¡Sucursal creada con éxito!");
             } else {
-                // Inyección limpia y directa en la columna link_mercadopago
                 await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink }).eq('id', idSucElegida);
                 alert("¡Datos actualizados con éxito en Supabase!");
             }
@@ -247,7 +254,22 @@
             if(!idSuc) return;
             const { data } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc);
             const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-lista">${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs (${h.duracion_minutos} min)</small></div>`).join('') || '<p style="text-align:center; color:#000;">Sin horarios.</p>';
+            
+            // CIRUGÍA 2: Inyección del botón de borrado sin corromper el layout existente
+            document.getElementById('lista-horarios').innerHTML = data?.map(h => `
+                <div class="item-lista">
+                    <div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs (${h.duracion_minutos} min)</small></div>
+                    <button class="btn-borrar-horario" onclick="eliminarHorario('${h.id}')">🗑️</button>
+                </div>
+            `).join('') || '<p style="text-align:center; color:#000;">Sin horarios.</p>';
+        }
+
+        // NUEVA FUNCIÓN CONTROLADORA DE ELIMINACIÓN DE FRANJAS DE ATENCIÓN
+        async function eliminarHorario(idHorario) {
+            if(!confirm("¿Estás seguro de que querés borrar esta franja horaria?")) return;
+            const { error } = await supabaseCliente.from('configuracion_agenda').delete().eq('id', idHorario);
+            if(error) alert("Error: " + error.message);
+            else cargarHorarios();
         }
 
         async function cargarTurnos() {
@@ -255,7 +277,6 @@
             const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
 
-            // Limpieza automática de abandonos
             const quinceMinutosAtras = new Date(Date.now() - 15 * 60 * 1000).toISOString();
             await supabaseCliente.from('turnos_activos').delete().eq('estado', 'pendiente').lt('creado_at', quinceMinutosAtras);
 
