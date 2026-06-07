@@ -80,9 +80,10 @@
     <script>
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        
-        // ACÁ CAMBIAMOS EL NOMBRE A 'supabaseCliente' PARA EVITAR EL CHOQUE
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // PEGÁ ACÁ ABAJO EL LINK COMPLETO DE TU SUSCRIPCIÓN MENSUAL DE MERCADO PAGO
+        const LINK_SUSCRIPCION_MP = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
 
         function irARegistro() {
             document.getElementById('card-login').classList.remove('activa');
@@ -121,19 +122,15 @@
                 return alert("Error al registrar: " + error.message);
             }
 
-            const { data: medico, error: errorBusqueda } = await supabaseCliente
-                .from('negocios')
-                .select('id')
-                .eq('alias', alias)
-                .single();
-
-            if (errorBusqueda || !medico) {
-                return alert("Cuenta creada. Iniciá sesión desde la pantalla anterior.");
+            // REDIRECCIÓN A LA SUSCRIPCIÓN MENSUAL DE MERCADO PAGO EN EL ALTA
+            if (LINK_SUSCRIPCION_MP && LINK_SUSCRIPCION_MP !== "TU_LINK_DE_SUSCRIPCION_DE_MERCADO_PAGO") {
+                alert("¡Cuenta creada con éxito! Para activar tu membresía y acceder al panel, te redirigiremos a Mercado Pago.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
+            } else {
+                alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
             }
 
-            alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
-            localStorage.setItem('mi_turno_negocio_id', medico.id);
-            window.location.href = "dashboard.html";
+            irALogin(); // Lo manda a loguearse para que entre formalmente con su alias y clave
         }
 
         async function ingresar() {
