@@ -82,7 +82,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // PEGÁ ACÁ ABAJO EL LINK COMPLETO DE TU SUSCRIPCIÓN MENSUAL DE MERCADO PAGO
+        // LINK OFICIAL DE TU SUSCRIPCIÓN MENSUAL DE MERCADO PAGO
         const LINK_SUSCRIPCION_MP = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
 
         function irARegistro() {
@@ -122,15 +122,15 @@
                 return alert("Error al registrar: " + error.message);
             }
 
-            // REDIRECCIÓN A LA SUSCRIPCIÓN MENSUAL DE MERCADO PAGO EN EL ALTA
-            if (LINK_SUSCRIPCION_MP && LINK_SUSCRIPCION_MP !== "TU_LINK_DE_SUSCRIPCION_DE_MERCADO_PAGO") {
+            // REDIRECCIÓN EN EL ALTA
+            if (LINK_SUSCRIPCION_MP) {
                 alert("¡Cuenta creada con éxito! Para activar tu membresía y acceder al panel, te redirigiremos a Mercado Pago.");
                 window.open(LINK_SUSCRIPCION_MP, '_blank');
             } else {
                 alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
             }
 
-            irALogin(); // Lo manda a loguearse para que entre formalmente con su alias y clave
+            irALogin();
         }
 
         async function ingresar() {
@@ -143,6 +143,16 @@
 
             if(error || !data) return alert("El alias o la contraseña son incorrectos.");
 
+            // CIRUGÍA DE SEGURIDAD: Control estricto de la columna de suscripción (mp_link)
+            const estadoPago = data.mp_link ? data.mp_link.trim() : "";
+
+            if (!estadoPago || estadoPago === "") {
+                alert("Tu suscripción no está activa o el pago está pendiente. Por favor, completá tu suscripción en Mercado Pago para activar el panel.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
+                return; // Bloqueo total. No se guarda el localStorage ni pasa a la agenda
+            }
+
+            // Si pagó o tiene la palabra mágica cargada a mano, el candado se abre con éxito
             localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
         }
