@@ -34,10 +34,10 @@
         }
         .app-lienzo::-webkit-scrollbar { display: none; }
 
-        /* CONTENEDORES - Súper subidos para pisar el área gris de tu diseño */
+        /* CONTENEDORES - Ajustados para que el título pise la franja gris de tu fondo */
         .contenedor { 
             width: 85%; 
-            padding-top: 15px; /* Subimos todo el bloque al área del encabezado */
+            padding-top: 35px; /* Sube el título al centro del área gris */
             padding-bottom: 90px; 
             display: none; 
             flex-direction: column;
@@ -49,18 +49,17 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* IMÁGENES DEL DISEÑO */
-        .img-titulo { width: 95%; margin-top: 10px; margin-bottom: 5px; } 
-        .img-puntos { width: 30%; margin-bottom: 30px; } 
+        .img-titulo { width: 95%; margin-top: 0; margin-bottom: 5px; } 
+        /* El margen inferior gigante de los puntos es el que separa el encabezado del resto */
+        .img-puntos { width: 30%; margin-bottom: 45px; } 
         
-        /* Botones con z-index alto para asegurar el CLICK */
         .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
         .btn-img:active { transform: scale(0.96); }
         .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
         .btn-link-img:active { transform: scale(0.96); }
 
         /* TEXTOS DE COREL */
-        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 26px; margin-bottom: 0px; margin-top: 20px; text-align: center; }
-        .texto-instruccion { color: #555; font-weight: 900; font-size: 16px; margin-bottom: 10px; margin-top: 15px; text-align: center;}
+        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 26px; margin-top: 0; margin-bottom: 5px; text-align: center; line-height: 1.1; }
         
         label { font-weight: 900; color: #7A7A7A; font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
         
@@ -145,12 +144,12 @@
             <h2 class="texto-gris-oscuro">Ingresa a tu cuenta</h2>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_1.png" class="img-puntos">
             
-            <div style="width: 100%; margin-top: 10px;">
+            <div style="width: 100%;">
                 <label style="text-align: center;">Coloca tu número de DNI</label>
                 <input type="number" id="login-dni" placeholder="EJ: 3045456565">
             </div>
 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 5px;" onclick="ingresarPaciente()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ingresarPaciente()">
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearcuenta.png" class="btn-link-img" onclick="irARegistro()">
         </div>
@@ -170,18 +169,16 @@
                 <input type="number" id="reg-dni" placeholder="Ej: 3045456565">
             </div>
             
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-img" style="margin-top: 5px;" onclick="registrarPaciente()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-img" onclick="registrarPaciente()">
             
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" style="margin-top: 30px;" onclick="irALogin()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" onclick="irALogin()">
         </div>
 
         <div id="pantalla-agenda" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo" style="margin-bottom: 5px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo" alt="Mi Agenda">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_3.png" class="img-puntos">
             
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_misturnos.png" class="btn-img" style="margin-top: 0; margin-bottom: 25px;" onclick="switchModulo('turnos')">
-
-            <h3 class="texto-gris-oscuro" style="font-size: 20px; margin-top: 0;">Agrega Negocios<br>o Profesionales</h3>
+            <h3 class="texto-gris-oscuro" style="font-size: 20px;">Agrega Negocios<br>o Profesionales</h3>
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" style="width: 80%; margin-top: 15px; margin-bottom: 10px;">
             
@@ -203,16 +200,21 @@
                 <div id="grilla-horas" class="grilla-horas"></div>
             </div>
 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 20px;" onclick="cerrarSesionPaciente()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 30px;" onclick="cerrarSesionPaciente()">
         </div>
 
         <div id="pantalla-turnos" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" class="img-titulo" style="margin-bottom: 5px;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_4.png" class="img-puntos" style="margin-bottom: 30px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_4.png" class="img-puntos">
             
             <div id="lista-turnos-paciente" style="width: 100%;"></div>
 
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" style="margin-top: 30px;" onclick="switchModulo('agenda')">
+        </div>
+
+        <div id="menu-inferior" class="nav-inferior" style="display: none;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" id="nav-medicos" class="nav-item-img activo" onclick="switchModulo('agenda')">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" id="nav-turnos" class="nav-item-img" onclick="switchModulo('turnos')">
         </div>
 
     </div>
@@ -280,16 +282,21 @@
         function mostrarAppPrincipal() { 
             document.getElementById('pantalla-login').classList.remove('activa');
             document.getElementById('pantalla-registro').classList.remove('activa');
+            document.getElementById('menu-inferior').style.display = 'flex';
             switchModulo('agenda'); 
         }
 
         function switchModulo(modulo) {
             document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
+            document.querySelectorAll('.nav-item-img').forEach(n => n.classList.remove('activo'));
+            
             if (modulo === 'agenda') {
                 document.getElementById('pantalla-agenda').classList.add('activa');
+                document.getElementById('nav-medicos').classList.add('activo');
                 cargarMisMedicos();
             } else {
                 document.getElementById('pantalla-turnos').classList.add('activa');
+                document.getElementById('nav-turnos').classList.add('activo');
                 cargarMisTurnos();
             }
             document.querySelector('.app-lienzo').scrollTo({ top: 0, behavior: 'smooth' });
