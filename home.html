@@ -34,11 +34,11 @@
         }
         .app-lienzo::-webkit-scrollbar { display: none; }
 
-        /* CONTENEDORES - Ajustados para que el título pise la franja gris de tu fondo */
+        /* CONTENEDORES DE PANTALLA: Subidos para ocupar la zona gris */
         .contenedor { 
             width: 85%; 
-            padding-top: 35px; /* Sube el título al centro del área gris */
-            padding-bottom: 90px; 
+            padding-top: 30px; /* Sube el título al centro del encabezado gris */
+            padding-bottom: 50px; 
             display: none; 
             flex-direction: column;
             align-items: center;
@@ -48,18 +48,19 @@
         .contenedor.activa { display: flex; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* IMÁGENES DEL DISEÑO */
-        .img-titulo { width: 95%; margin-top: 0; margin-bottom: 5px; } 
-        /* El margen inferior gigante de los puntos es el que separa el encabezado del resto */
-        .img-puntos { width: 30%; margin-bottom: 45px; } 
+        /* IMÁGENES DEL DISEÑO: Ajuste de márgenes para la "línea de guiones" */
+        .img-titulo { width: 95%; margin-top: 0px; margin-bottom: 15px; } 
+        .img-puntos { width: 30%; margin-top: 0px; margin-bottom: 45px; } /* Empuja el resto hacia la zona blanca */
         
-        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
+        /* BOTONES E INPUTS: Con z-index para que funcionen los clics perfectamente */
+        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
         .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
+        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
         .btn-link-img:active { transform: scale(0.96); }
 
         /* TEXTOS DE COREL */
-        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 26px; margin-top: 0; margin-bottom: 5px; text-align: center; line-height: 1.1; }
+        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 22px; margin-top: 0px; margin-bottom: 15px; text-align: center; }
+        .texto-instruccion { color: #555; font-weight: 900; font-size: 16px; margin-bottom: 10px; margin-top: 15px; text-align: center;}
         
         label { font-weight: 900; color: #7A7A7A; font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
         
@@ -73,12 +74,12 @@
         input::placeholder { color: #A0A0A0; font-weight: 800; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
 
-        /* BUSCADOR ALINEADO */
+        /* BUSCADOR ALINEADO (Alias + Botón Agregar) */
         .buscador-row {
             display: flex; width: 100%; gap: 10px; align-items: center; margin-bottom: 20px;
         }
         .buscador-row input { margin-bottom: 0; flex: 1; }
-        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50;}
+        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
         .buscador-row img:active { transform: scale(0.95); }
 
         /* TARJETAS DE PROFESIONALES (Agenda) */
@@ -92,7 +93,7 @@
         .tarjeta-medico p { margin: 3px 0 0 0; color: #007D82; font-size: 13px; font-weight: 800; }
         .icono-calendario { font-size: 24px; color: #555; opacity: 0.8; }
 
-        /* TARJETAS DE MIS TURNOS */
+        /* TARJETAS DE MIS TURNOS (Con franja a la derecha) */
         .tarjeta-turno {
             position: relative; background: #FFFFFF; border-radius: 20px; margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
@@ -111,7 +112,7 @@
 
         .btn-cancelar-turno {
             align-self: flex-start; background: none; border: none; color: #ED3237; font-weight: 900; font-size: 14px; 
-            margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 50;
+            margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 20;
         }
 
         /* TURNERO DESPLEGABLE */
@@ -124,16 +125,6 @@
         .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; }
         .btn-hora:hover { background: #009E9B; color: white; }
 
-        /* MENÚ INFERIOR GRÁFICO */
-        .nav-inferior { 
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 432px; height: 80px; 
-            background: transparent; display: flex; justify-content: space-around; align-items: center; z-index: 100; 
-            padding: 0 10px; box-sizing: border-box;
-        }
-        .nav-item-img { width: 45%; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
-        .nav-item-img.activo { opacity: 1; transform: scale(1.05); }
-        .nav-item-img:active { transform: scale(0.95); }
-
     </style>
 </head>
 <body>
@@ -141,7 +132,7 @@
     <div class="app-lienzo">
         
         <div id="pantalla-login" class="contenedor activa">
-            <h2 class="texto-gris-oscuro">Ingresa a tu cuenta</h2>
+            <h2 class="texto-gris-oscuro" style="font-size: 28px;">Ingresa a tu cuenta</h2>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_1.png" class="img-puntos">
             
             <div style="width: 100%;">
@@ -171,14 +162,16 @@
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-img" onclick="registrarPaciente()">
             
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" onclick="irALogin()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" style="margin-top: 40px;" onclick="irALogin()">
         </div>
 
         <div id="pantalla-agenda" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo" alt="Mi Agenda">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_3.png" class="img-puntos">
             
-            <h3 class="texto-gris-oscuro" style="font-size: 20px;">Agrega Negocios<br>o Profesionales</h3>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_misturnos.png" class="btn-img" style="margin-top: -15px; margin-bottom: 25px;" onclick="switchModulo('turnos')">
+
+            <h3 class="texto-gris-oscuro">Agrega Negocios<br>o Profesionales</h3>
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" style="width: 80%; margin-top: 15px; margin-bottom: 10px;">
             
@@ -200,7 +193,7 @@
                 <div id="grilla-horas" class="grilla-horas"></div>
             </div>
 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 30px;" onclick="cerrarSesionPaciente()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 20px;" onclick="cerrarSesionPaciente()">
         </div>
 
         <div id="pantalla-turnos" class="contenedor">
@@ -210,11 +203,6 @@
             <div id="lista-turnos-paciente" style="width: 100%;"></div>
 
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" style="margin-top: 30px;" onclick="switchModulo('agenda')">
-        </div>
-
-        <div id="menu-inferior" class="nav-inferior" style="display: none;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" id="nav-medicos" class="nav-item-img activo" onclick="switchModulo('agenda')">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" id="nav-turnos" class="nav-item-img" onclick="switchModulo('turnos')">
         </div>
 
     </div>
@@ -229,14 +217,10 @@
         let duracionConfigurada = 30;
 
         async function init() {
-            try {
-                const guardadoId = localStorage.getItem('mi_turno_paciente_id');
-                if (guardadoId) {
-                    const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
-                    if (data) { pacienteActual = data; mostrarAppPrincipal(); }
-                }
-            } catch (e) {
-                console.log("Error en init: ", e);
+            const guardadoId = localStorage.getItem('mi_turno_paciente_id');
+            if (guardadoId) {
+                const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
+                if (data) { pacienteActual = data; mostrarAppPrincipal(); }
             }
         }
 
@@ -252,11 +236,9 @@
 
         async function ingresarPaciente() {
             const dni = document.getElementById('login-dni').value.trim();
-            if(!dni) return alert("Ingresá tu DNI para continuar.");
-            const { data, error } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
-            if(error) return alert("Error al conectar: " + error.message);
-            if(!data || data.length === 0) return alert("El DNI ingresado no está registrado. Tocá en 'Creala aquí'.");
-            
+            if(!dni) return alert("Ingresá tu DNI.");
+            const { data } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
+            if(!data || data.length === 0) return alert("El DNI ingresado no está registrado.");
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
@@ -266,14 +248,8 @@
             const nombre = document.getElementById('reg-nombre').value.trim();
             const telefono = document.getElementById('reg-telefono').value.trim();
             const dni = document.getElementById('reg-dni').value.trim();
-            if(!nombre || !telefono || !dni) return alert("Por favor, completá todos los casilleros.");
-            
-            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
-            if(error) {
-                if(error.code === '23505') return alert("Ese DNI ya está registrado. Tocá en 'Inicia sesión'.");
-                return alert("Error al registrar: " + error.message);
-            }
-            
+            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros.");
+            const { data } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
             pacienteActual = data[0];
             localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
             mostrarAppPrincipal();
@@ -282,21 +258,16 @@
         function mostrarAppPrincipal() { 
             document.getElementById('pantalla-login').classList.remove('activa');
             document.getElementById('pantalla-registro').classList.remove('activa');
-            document.getElementById('menu-inferior').style.display = 'flex';
             switchModulo('agenda'); 
         }
 
         function switchModulo(modulo) {
             document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
-            document.querySelectorAll('.nav-item-img').forEach(n => n.classList.remove('activo'));
-            
             if (modulo === 'agenda') {
                 document.getElementById('pantalla-agenda').classList.add('activa');
-                document.getElementById('nav-medicos').classList.add('activo');
                 cargarMisMedicos();
             } else {
                 document.getElementById('pantalla-turnos').classList.add('activa');
-                document.getElementById('nav-turnos').classList.add('activo');
                 cargarMisTurnos();
             }
             document.querySelector('.app-lienzo').scrollTo({ top: 0, behavior: 'smooth' });
@@ -309,11 +280,8 @@
 
         async function vincularMedico() {
             const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
-            if(!aliasMed) return alert("Escribí el Alias del profesional.");
-            
             const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
-            if (!medico || medico.length === 0) return alert("Alias no encontrado. Verificá que esté bien escrito.");
-            
+            if (!medico || medico.length === 0) return alert("Alias no encontrado.");
             const idRealMed = medico[0].id;
             await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: pacienteActual.id, negocio_id: idRealMed }]);
             alert("¡Profesional agregado a tu lista!");
