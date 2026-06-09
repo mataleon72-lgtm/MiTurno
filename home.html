@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* FONDO GRIS Y LIENZO PRINCIPAL (Misma identidad que el Panel) */
         body { 
             font-family: 'Nunito', sans-serif; 
             background-color: #F8F8F8; 
@@ -38,8 +37,8 @@
         /* CONTENEDORES DE PANTALLA */
         .contenedor { 
             width: 85%; 
-            padding-top: 150px; /* Margen para esquivar la trama del fondo */
-            padding-bottom: 90px; /* Margen para esquivar el menú inferior */
+            padding-top: 60px; 
+            padding-bottom: 50px; 
             display: none; 
             flex-direction: column;
             align-items: center;
@@ -48,91 +47,77 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* IMÁGENES DEL DISEÑO */
-        .img-titulo { width: 95%; margin-bottom: 25px; } 
-        .btn-img { width: 85%; margin-top: 15px; cursor: pointer; transition: transform 0.2s; }
+        .img-titulo { width: 95%; margin-bottom: 10px; } 
+        .img-puntos { width: 30%; margin-bottom: 25px; } 
+        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; }
         .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 55%; margin-top: 30px; cursor: pointer; transition: transform 0.2s; }
+        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; }
         .btn-link-img:active { transform: scale(0.96); }
 
-        /* FORMULARIOS ESTILO COREL (Redondeados, texto gris) */
-        label { 
-            font-weight: 800; color: #7A7A7A; font-size: 13px; 
-            width: 100%; text-align: left; padding-left: 15px; margin-bottom: 5px; display: block;
-        }
+        /* TEXTOS DE COREL */
+        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 22px; margin-bottom: 5px; text-align: center; }
+        .texto-instruccion { color: #555; font-weight: 900; font-size: 16px; margin-bottom: 10px; margin-top: 15px; text-align: center;}
+        
+        label { font-weight: 900; color: #7A7A7A; font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
+        
         input, select { 
-            width: 100%; padding: 16px 20px; border-radius: 25px; border: none; 
+            width: 100%; padding: 16px 20px; border-radius: 20px; border: none; 
             background: #FFFFFF;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.06); 
             margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; color: #555; font-family: 'Nunito', sans-serif; outline: none;
         }
-        input::placeholder { color: #C0C0C0; font-weight: 700; }
+        input::placeholder { color: #A0A0A0; font-weight: 800; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
 
-        /* LISTA DE MÉDICOS (Buscador alineado) */
+        /* BUSCADOR ALINEADO (Alias + Botón Agregar) */
         .buscador-row {
-            display: flex;
-            width: 100%;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 20px;
+            display: flex; width: 100%; gap: 10px; align-items: center; margin-bottom: 20px;
         }
         .buscador-row input { margin-bottom: 0; flex: 1; }
-        .buscador-row .btn-agregar { width: 40%; cursor: pointer; transition: transform 0.2s; }
-        .buscador-row .btn-agregar:active { transform: scale(0.95); }
+        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; }
+        .buscador-row img:active { transform: scale(0.95); }
 
-        /* CAJAS BLANCAS Y TARJETAS (Nuevas tarjetas de "Mis Turnos" con borde derecho) */
-        .item-lista {
-            background: #FFFFFF; padding: 16px; border-radius: 20px; margin-bottom: 12px;
-            font-weight: 900; color: #444; display: flex; justify-content: space-between; align-items: center;
-            font-size: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
-            cursor: pointer;
+        /* TARJETAS DE PROFESIONALES (Agenda) */
+        .tarjeta-medico {
+            background: #FFFFFF; padding: 18px 20px; border-radius: 20px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; cursor: pointer;
         }
-        .item-lista small { color: #888; display: block; font-size: 12px; font-weight: 800; margin-top: 4px; }
+        .tarjeta-medico h4 { margin: 0; color: #444; font-size: 16px; font-weight: 900; }
+        .tarjeta-medico p { margin: 3px 0 0 0; color: #007D82; font-size: 13px; font-weight: 800; }
+        .icono-calendario { font-size: 24px; color: #555; opacity: 0.8; }
 
+        /* TARJETAS DE MIS TURNOS (Con franja a la derecha) */
         .tarjeta-turno {
-            position: relative;
-            background: #FFFFFF; border-radius: 20px; margin-bottom: 15px;
+            position: relative; background: #FFFFFF; border-radius: 20px; margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
-            display: flex; flex-direction: column; overflow: hidden;
-            padding: 20px 20px 20px 20px; /* Más padding para el texto */
+            display: flex; flex-direction: column; overflow: hidden; padding: 20px;
         }
-        
-        /* La franja gruesa a la derecha */
-        .franja-estado {
-            position: absolute;
-            top: 0; right: 0; bottom: 0;
-            width: 15px; /* Grosor de la franja */
-        }
+        .franja-estado { position: absolute; top: 0; right: 0; bottom: 0; width: 15px; }
         .franja-verde { background-color: #6EB64F; }
         .franja-roja { background-color: #ED3237; }
 
-        .tarjeta-turno h4 { margin: 0 0 5px 0; color: #444; font-size: 16px; font-weight: 900; }
-        .tarjeta-turno p { margin: 2px 0; color: #7A7A7A; font-size: 13px; font-weight: 700; }
+        .tarjeta-turno h4 { margin: 0 0 3px 0; color: #444; font-size: 17px; font-weight: 900; }
+        .tarjeta-turno h5 { margin: 0 0 10px 0; color: #007D82; font-size: 14px; font-weight: 800; }
+        .tarjeta-turno p { margin: 4px 0; color: #333; font-size: 14px; font-weight: 900; display: flex; align-items: center; gap: 8px;}
+        .tarjeta-turno p span { color: #555; }
+        
+        .badge-rojo { position: absolute; top: 20px; right: 30px; color: #ED3237; font-weight: 900; font-size: 13px; }
 
         .btn-cancelar-turno {
-            align-self: flex-start;
-            background: none; border: none; color: #ED3237; font-weight: 900; font-size: 12px; 
-            margin-top: 15px; cursor: pointer; text-decoration: underline; padding: 0;
+            align-self: flex-start; background: none; border: none; color: #ED3237; font-weight: 900; font-size: 14px; 
+            margin-top: 15px; cursor: pointer; padding: 0;
         }
 
-        /* TURNERO DESPLEGABLE (Grilla de horas) */
+        /* TURNERO DESPLEGABLE */
         .bloque-turnero { 
-            background: #FFFFFF; padding: 20px; border-radius: 20px; margin-top: 15px; 
+            background: #FFFFFF; padding: 20px; border-radius: 20px; margin-bottom: 20px; 
             display: none; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px dashed #009E9B;
         }
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; box-shadow: inset 0px 2px 5px rgba(0,0,0,0.03); }
+        .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; }
         .btn-hora:hover { background: #009E9B; color: white; }
-
-        /* MENÚ INFERIOR GRÁFICO */
-        .nav-inferior { 
-            position: absolute; bottom: 0; left: 0; right: 0; height: 80px; 
-            background: transparent; display: flex; justify-content: space-around; align-items: center; z-index: 100; 
-            padding: 0 10px;
-        }
-        .nav-item-img { width: 45%; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
-        .nav-item-img.activo { opacity: 1; transform: scale(1.05); }
-        .nav-item-img:active { transform: scale(0.95); }
 
     </style>
 </head>
@@ -140,303 +125,27 @@
 
     <div class="app-lienzo">
         
-        <div id="pantalla-acceso" class="contenedor activa">
+        <div id="pantalla-login" class="contenedor activa">
+            <h2 class="texto-gris-oscuro" style="font-size: 28px; margin-top: 40px;">Ingresa a tu cuenta</h2>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel3.png" class="img-puntos">
             
-            <div id="card-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" class="img-titulo">
-                
-                <label style="text-align: center; margin-bottom: 15px;">Colocá tu DNI para comenzar</label>
-                <input type="number" id="login-dni" placeholder="Ej: 38444555">
-                
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ingresarPaciente()">
-                
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-link-img" onclick="irARegistro()">
+            <div style="width: 100%; margin-top: 10px;">
+                <label style="text-align: center;">Coloca tu número de DNI</label>
+                <input type="number" id="login-dni" placeholder="EJ: 3045456565">
             </div>
 
-            <div id="card-registro" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_registrodeusuario.png" class="img-titulo">
-                
-                <label style="text-align: center; margin-bottom: 15px;">Completá tus datos por única vez</label>
-                
-                <label>Nombre y Apellido Completo</label>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 5px;" onclick="ingresarPaciente()">
+            
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearcuenta.png" class="btn-link-img" onclick="irARegistro()">
+        </div>
+
+        <div id="pantalla-registro" class="contenedor">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_registrodeusuario.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel4.png" class="img-puntos">
+            
+            <div style="width: 100%;">
+                <label>Nombre y Apellido</label>
                 <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez">
                 
                 <label>Teléfono Celular</label>
-                <input type="tel" id="reg-telefono" placeholder="Ej: 1123456789">
-                
-                <label>Número de DNI</label>
-                <input type="number" id="reg-dni" placeholder="Ej: 38444555">
-                
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-img" style="width: 60%; margin-top: 10px;" onclick="registrarPaciente()">
-                
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" onclick="irALogin()">
-            </div>
-        </div>
-
-        <div id="pantalla-medicos" class="contenedor" style="padding-top: 60px;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo" style="width: 80%; margin-bottom: 30px;">
-            
-            <div style="width: 100%;">
-                <label>Vincular Alias de Médico nuevo</label>
-                <div class="buscador-row">
-                    <input type="text" id="input-medico-alias" placeholder="EJ: CATULO" style="text-transform: uppercase;">
-                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_agregar.png" class="btn-agregar" onclick="vincularMedico()">
-                </div>
-            </div>
-
-            <div style="width: 100%; margin-top: 10px;">
-                <label>Tu listado de profesionales:</label>
-                <div id="lista-medicos" style="width: 100%;"></div>
-            </div>
-
-            <div id="turnero-integrado" class="bloque-turnero">
-                <h3 id="turnero-medico-nombre" style="margin-top:0; color:#555; font-weight:900; text-align:center; font-size: 16px;"></h3>
-                <label>1. Seleccioná Sede</label>
-                <select id="turnero-sucursal" onchange="cargarFechasDisponibles()"></select>
-                <label>2. Seleccioná Fecha</label>
-                <input type="date" id="turnero-fecha" onchange="cargarHorariosDisponibles()">
-                <label id="label-horas" style="display:none;">3. Seleccioná el Horario:</label>
-                <div id="grilla-horas" class="grilla-horas"></div>
-            </div>
-            
-            <p onclick="cerrarSesionPaciente()" style="text-align:center; color:#888; text-decoration:underline; font-size:13px; cursor:pointer; margin-top: 30px; font-weight: 800;">Cerrar Sesión</p>
-        </div>
-
-        <div id="pantalla-turnos" class="contenedor" style="padding-top: 60px;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" class="img-titulo" style="width: 80%; margin-bottom: 30px;">
-            
-            <div style="width: 100%;">
-                <label>Tus turnos guardados:</label>
-                <div id="lista-turnos-paciente" style="width: 100%; margin-top: 10px;"></div>
-            </div>
-        </div>
-
-        <div id="menu-inferior" class="nav-inferior" style="display: none;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" id="nav-medicos" class="nav-item-img activo" onclick="switchModulo('medicos')">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" id="nav-turnos" class="nav-item-img" onclick="switchModulo('turnos')">
-        </div>
-
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let pacienteActual = null; 
-        let medicoSeleccionadoId = null; 
-        let duracionConfigurada = 30;
-
-        async function init() {
-            const guardadoId = localStorage.getItem('mi_turno_paciente_id');
-            if (guardadoId) {
-                const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
-                if (data) { pacienteActual = data; mostrarAppPrincipal(); }
-            }
-        }
-
-        function irARegistro() {
-            document.getElementById('card-login').style.display = 'none';
-            document.getElementById('card-registro').style.display = 'flex';
-        }
-
-        function irALogin() {
-            document.getElementById('card-registro').style.display = 'none';
-            document.getElementById('card-login').style.display = 'flex';
-        }
-
-        async function ingresarPaciente() {
-            const dni = document.getElementById('login-dni').value.trim();
-            if(!dni) return alert("Ingresá tu DNI.");
-            const { data } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
-            if(!data || data.length === 0) return alert("El DNI ingresado no está registrado.");
-            pacienteActual = data[0];
-            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
-            mostrarAppPrincipal();
-        }
-
-        async function registrarPaciente() {
-            const nombre = document.getElementById('reg-nombre').value.trim();
-            const telefono = document.getElementById('reg-telefono').value.trim();
-            const dni = document.getElementById('reg-dni').value.trim();
-            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros.");
-            const { data } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
-            pacienteActual = data[0];
-            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
-            mostrarAppPrincipal();
-        }
-
-        function mostrarAppPrincipal() { 
-            document.getElementById('pantalla-acceso').style.display = 'none'; 
-            document.getElementById('menu-inferior').style.display = 'flex'; 
-            switchModulo('medicos'); 
-        }
-
-        function switchModulo(modulo) {
-            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
-            document.querySelectorAll('.nav-item-img').forEach(n => n.classList.remove('activo'));
-            
-            if (modulo === 'medicos') {
-                document.getElementById('pantalla-medicos').classList.add('activa');
-                document.getElementById('nav-medicos').classList.add('activo');
-                cargarMisMedicos();
-            } else {
-                document.getElementById('pantalla-turnos').classList.add('activa');
-                document.getElementById('nav-turnos').classList.add('activo');
-                cargarMisTurnos();
-            }
-        }
-
-        function cerrarSesionPaciente() {
-            localStorage.removeItem('mi_turno_paciente_id');
-            window.location.reload();
-        }
-
-        async function vincularMedico() {
-            const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
-            const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
-            if (!medico || medico.length === 0) return alert("Alias no encontrado.");
-            const idRealMed = medico[0].id;
-            await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: pacienteActual.id, negocio_id: idRealMed }]);
-            alert("¡Médico agregado!");
-            document.getElementById('input-medico-alias').value = '';
-            cargarMisMedicos();
-        }
-
-        async function cargarMisMedicos() {
-            const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
-            document.getElementById('lista-medicos').innerHTML = data?.map(p => `
-                <div class="item-lista" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')">
-                    <div>${p.negocios.nombre}<small>✨ ${p.negocios.rubro || 'Profesional'}</small></div>
-                    <span style="font-size:20px;">🗓️</span>
-                </div>
-            `).join('') || '<p style="text-align:center; color:#888; font-size:14px;">Aún no agregaste profesionales.</p>';
-        }
-
-        async function abrirTurnero(idMed, nombreMed) {
-            medicoSeleccionadoId = idMed;
-            document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
-            document.getElementById('turnero-integrado').style.display = 'block';
-            
-            // Scroll suave hacia el turnero
-            setTimeout(() => { document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' }); }, 100);
-            
-            const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
-            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
-            
-            document.getElementById('turnero-fecha').value = "";
-            document.getElementById('grilla-horas').innerHTML = '';
-            document.getElementById('label-horas').style.display = 'none';
-        }
-
-        function cargarFechasDisponibles() {
-            document.getElementById('turnero-fecha').min = new Date().toISOString().split('T')[0];
-            document.getElementById('grilla-horas').innerHTML = '';
-            document.getElementById('label-horas').style.display = 'none';
-        }
-
-        async function cargarHorariosDisponibles() {
-            const idSuc = document.getElementById('turnero-sucursal').value;
-            const fechaElegida = document.getElementById('turnero-fecha').value;
-            if (!idSuc || !fechaElegida) return;
-
-            const diaSemana = new Date(fechaElegida + "T00:00:00").getDay();
-            const { data: esquema } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
-
-            if (!esquema || esquema.length === 0) {
-                document.getElementById('label-horas').style.display = 'none';
-                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional no atiende en esta fecha.</p>';
-                return;
-            }
-
-            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
-            const listaOcupados = ocupados?.map(o => o.hora.slice(0,5)) || [];
-            let htmlHoras = '';
-
-            esquema.forEach(slot => {
-                let actual = slot.hora_inicio.slice(0,5);
-                const fin = slot.hora_fin.slice(0,5);
-                duracionConfigurada = slot.duracion_minutos; 
-
-                while (actual < fin) {
-                    if (!listaOcupados.includes(actual)) {
-                        htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}')">${actual} hs</div>`;
-                    }
-                    let [h, m] = actual.split(':').map(Number);
-                    m += duracionConfigurada;
-                    if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
-                    actual = String(h).padStart(2, '0') + ":" + String(m).padStart(2, '0');
-                }
-            });
-
-            document.getElementById('label-horas').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1; color:#888; font-weight:800; font-size:14px; text-align:center;">No hay turnos disponibles para esta fecha.</p>';
-        }
-
-        async function confirmarReserva(horaTurno) {
-            const idSuc = document.getElementById('turnero-sucursal').value;
-            const fecha = document.getElementById('turnero-fecha').value;
-            if(!confirm(`¿Querés confirmar tu turno a las ${horaTurno} hs?`)) return;
-
-            await supabaseCliente.from('turnos_activos').insert([{
-                negocio_id: medicoSeleccionadoId, 
-                sucursal_id: idSuc,             
-                fecha: fecha,
-                hora: horaTurno + ":00",
-                cliente_nombre: pacienteActual.nombre,       
-                cliente_telefono: pacienteActual.telefono,   
-                cliente_identificador: pacienteActual.dni,   
-                estado: 'pendiente'
-            }]);
-
-            alert("¡Turno guardado con éxito!");
-            document.getElementById('turnero-integrado').style.display = 'none';
-            switchModulo('turnos'); 
-        }
-
-        async function cargarMisTurnos() {
-            const { data } = await supabaseCliente.from('turnos_activos')
-                .select('id, fecha, hora, estado, negocios(nombre), sucursales(nombre, direccion, link_mercadopago)')
-                .eq('cliente_identificador', pacienteActual.dni) 
-                .order('fecha', { ascending: true });
-
-            document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
-                const esCancelado = t.estado === 'cancelado_por_paciente';
-                const colorFranja = esCancelado ? 'franja-roja' : 'franja-verde';
-                
-                let linkPago = t.sucursales?.link_mercadopago || ""; 
-                if (linkPago && !linkPago.startsWith('http')) {
-                    const match = linkPago.match(/https?:\/\/[^\s]+/);
-                    if (match) linkPago = match[0];
-                }
-
-                const botonPagoHtml = (!esCancelado && t.estado === 'pendiente' && linkPago) 
-                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:15px; font-weight:900; margin-top:10px; font-size:14px; box-shadow: 0 4px 10px rgba(244,180,26,0.3);">💳 Pagar Seña</a>` 
-                    : '';
-
-                return `
-                    <div class="tarjeta-turno">
-                        <div class="franja-estado ${colorFranja}"></div>
-                        <h4>${t.negocios?.nombre || 'Profesional'}</h4>
-                        <p>📅 Fecha: ${t.fecha.split('-').reverse().join('/')}</p>
-                        <p>⏰ Horario: ${t.hora.slice(0,5)} hs</p>
-                        <p>📍 Sede: ${t.sucursales?.nombre || 'Sede'} (${t.sucursales?.direccion || ''})</p>
-                        
-                        ${botonPagoHtml}
-                        
-                        ${!esCancelado ? `<button class="btn-cancelar-turno" onclick="cancelarTurno('${t.id}')">Cancelar Turno</button>` : `<p style="color:#ED3237; font-weight:900; margin-top:10px; font-size:12px;">TURNO CANCELADO</p>`}
-                    </div>
-                `;
-            }).join('') || '<p style="text-align:center; color:#888; font-size:14px;">No tenés turnos guardados.</p>';
-        }
-
-        async function cancelarTurno(idTurno) {
-            if (!confirm("¿Seguro querés cancelar este turno? El profesional será notificado.")) return;
-            await supabaseCliente.from('turnos_activos').update({ estado: 'cancelado_por_paciente' }).eq('id', idTurno);
-            cargarMisTurnos();
-        }
-
-        init();
-    </script>
-</body>
-</html>
+                <input type="tel
