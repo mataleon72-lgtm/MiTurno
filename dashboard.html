@@ -9,190 +9,146 @@
     <style>
         body { 
             font-family: 'Nunito', sans-serif; 
-            background-color: #F8F8F8; 
-            margin: 0; min-height: 100vh; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            background: linear-gradient(180deg, #009E9B 0%, #007D82 100%); 
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: white; 
         }
-
-        /* LIENZO SIN BARRA DE SCROLL VISIBLE */
-        .app-lienzo {
-            position: relative;
-            width: 100%;
-            max-width: 432px;
-            height: 960px; 
-            background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png');
-            background-size: cover;
-            background-position: top center;
-            background-repeat: no-repeat;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow-y: auto; 
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Magia para ocultar el scrollbar manteniendo la función */
-            -ms-overflow-style: none;  /* IE y Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        .app-lienzo::-webkit-scrollbar { 
-            display: none; /* Chrome, Safari y Opera */
-        }
-
-        /* CONTENEDORES CON EL MARGEN SUPERIOR CORREGIDO */
-        .contenedor { 
-            width: 85%; 
-            padding-top: 50px; /* Sube para pisar la trama gris clara del fondo */
-            padding-bottom: 50px;
-            display: none; 
-            flex-direction: column;
-            align-items: center;
-        }
-        .contenedor.activa { display: flex; animation: fadeIn 0.4s ease; }
+        .contenedor { width: 90%; max-width: 400px; padding: 20px 0; display: none; }
+        .contenedor.activa { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* IMÁGENES DEL DISEÑO */
-        .img-titulo { width: 95%; margin-bottom: 5px; } 
-        .img-puntos { width: 30%; margin-bottom: 30px; } 
-        .btn-img { width: 85%; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s; }
-        .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 55%; margin-top: 10px; cursor: pointer; transition: transform 0.2s; }
-        .btn-link-img:active { transform: scale(0.96); }
-
-        /* ETIQUETAS E INPUTS ESTILO COREL (Blancos redondos con sombra sutil) */
-        label { 
-            font-weight: 800; color: #7A7A7A; font-size: 13px; 
-            width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block;
+        .titulo-boton {
+            text-align: center; font-size: 26px; font-weight: 900; color: #FFFFFF;
+            margin: 20px 0; cursor: pointer; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        input, select { 
-            width: 100%; padding: 15px 20px; border-radius: 25px; border: none; 
-            background: #FFFFFF;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.06); 
-            margin-bottom: 20px; box-sizing: border-box; font-size: 14px; font-weight: 800; color: #7A7A7A; font-family: 'Nunito', sans-serif; outline: none;
-        }
-        input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
 
-        /* CAJAS BLANCAS PARA LOS TURNOS */
+        .contenedor-con-fondo {
+            background: url('https://mataleon72-lgtm.github.io/MiTurno/configurar%20horarios.png') no-repeat center top;
+            background-size: 100% 100%; border-radius: 30px; padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-top: 10px; color: white;
+        }
+        .contenedor-con-fondo h2 { color: #FFFFFF; text-align: center; font-weight: 900; margin-top: 0; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .contenedor-con-fondo p.sub { color: #FFFFFF; text-align: center; margin-top: -5px; margin-bottom: 25px; font-weight: 800; font-size: 15px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .contenedor-con-fondo label { color: #FFFFFF; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+
         .caja-blanca { 
-            width: 100%; background: #FFFFFF; border-radius: 20px; padding: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; box-sizing: border-box;
-            min-height: 60px;
+            background: white; border-radius: 20px; padding: 20px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15); margin-bottom: 20px; color: #000000;
         }
-        .linea-color { width: 25px; height: 4px; border-radius: 2px; margin-bottom: 5px; margin-left: 5px;}
+        .caja-blanca label { color: #007D82; font-weight: 900; display: block; margin-bottom: 6px; font-size: 16px; }
+        
+        input, select { 
+            width: 100%; background: #F8F8F8; border: 2px solid #DDD; border-radius: 10px; 
+            padding: 12px; margin-bottom: 15px; box-sizing: border-box; font-family: 'Nunito', sans-serif; 
+            font-size: 16px; outline: none; color: #000000; font-weight: 900;
+        }
+        input:focus, select:focus { border-color: #009E9B; background: #FFF; }
 
-        /* ITEMS INTERNOS DE LAS LISTAS */
-        .item-turno {
-            padding: 10px 0; border-bottom: 1px solid #F0F0F0;
-            font-weight: 800; color: #555; display: flex; justify-content: space-between; align-items: center;
-            font-size: 13px;
+        .btn-amarillo { 
+            background: #F4B41A; color: white; border: none; border-radius: 12px; 
+            padding: 15px; font-weight: 900; font-size: 18px; text-align: center; 
+            width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 15px;
         }
-        .item-turno:last-child { border-bottom: none; }
-        .item-turno small { color: #999; display: block; font-size: 11px; font-weight: 800; margin-top: 2px; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; color: white; font-weight: 900; }
-        .badge.ok { background: #6EB64F; }
-        .badge.cancel { background: #ED3237; }
-        .btn-borrar-horario { background: none; border: none; color: #ED3237; font-size: 16px; cursor: pointer; padding: 0; margin-left: 10px; }
+
+        .item-lista {
+            background: #F4F4F4; padding: 14px; border-radius: 10px; margin-bottom: 8px;
+            font-weight: 900; color: #000000; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid #009E9B; font-size: 15px;
+        }
+        .item-lista small { color: #007D82; display: block; font-size: 13px; font-weight: 900; margin-top: 2px; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; color: white; font-weight: 900; }
+        .badge.ok { background: #009E9B; }
+        .badge.wait { background: #F4B41A; }
+        .badge.cancel { background: #D9534F; }
+
+        /* Estilo sutil para el botón de reciclaje sin alterar el layout */
+        .btn-borrar-horario {
+            background: none; border: none; color: #D9534F; font-size: 16px; cursor: pointer; padding: 0 5px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-lienzo">
+    <div id="seccion-agenda" class="contenedor activa">
+        <div class="titulo-boton" style="font-size: 32px; cursor: default;">Mi Agenda 🖐</div>
+        <div class="titulo-boton" onclick="mostrarPantallaConsultorios()">Crear / Configurar Consultorio 🖐</div>
         
-        <div id="seccion-agenda" class="contenedor activa">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" class="img-titulo" alt="Mi Agenda">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel3.png" class="img-puntos">
-            
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearsucursal.png" class="btn-img" onclick="mostrarPantallaSucursales()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" onclick="mostrarPantallaHorarios()">
-            
-            <div style="width: 100%; margin-top: 5px;">
-                <label>Sucursal</label>
-                <select id="agenda-sucursal" onchange="cargarTurnos()"></select>
-                
-                <label>Fecha</label>
-                <input type="date" id="agenda-fecha" onchange="cargarTurnos()">
-                
-                <div class="linea-color" style="background-color: #6EB64F;"></div>
-                <label>Turnos programados</label>
-                <div class="caja-blanca" id="lista-turnos"></div>
-
-                <div class="linea-color" style="background-color: #ED3237;"></div>
-                <label>Turnos cancelados</label>
-                <div class="caja-blanca" id="lista-cancelados"></div>
-            </div>
-
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="width: 45%; margin-top: 5px;" onclick="cerrarSesion()">
+        <div class="caja-blanca">
+            <label>Sucursal de atención</label>
+            <select id="agenda-sucursal" onchange="cargarTurnos()"></select>
+            <label>Fecha</label>
+            <input type="date" id="agenda-fecha" onchange="cargarTurnos()">
+        </div>
+        
+        <div class="caja-blanca">
+            <label>Turnos programados:</label>
+            <div id="lista-turnos"></div>
         </div>
 
-        <div id="seccion-sucursales" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_missucursales.png" class="img-titulo" onerror="this.style.display='none'"> 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel5.png" class="img-puntos">
-            
-            <div style="width: 100%;">
-                <select id="select-editar-sucursal" onchange="cargarDatosSucursalAEditar()" style="background:#F0F0F0; font-size: 12px; margin-bottom: 25px; padding: 10px 20px;">
-                    <option value="NUEVA">-- Crear Nueva Sucursal --</option>
-                </select>
-
-                <label>Crear sucursal</label>
-                <input type="text" id="suc-nombre" placeholder="Nombre de la sucursal">
-                
-                <input type="text" id="suc-dir" placeholder="Dirección de la sucursal" style="margin-top: -5px;">
-                
-                <label>Cobro de seña / Mercado Pago</label>
-                <input type="text" id="suc-mp-link" placeholder="EJ:http://mpago.la//xxxxx">
-            </div>
-
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_guardar.png" class="btn-img" style="margin-top: 5px;" onclick="guardarOActualizarSucursal()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
+        <div class="caja-blanca" style="background: #FFF5F5; border: 1px solid #FFD2D2;">
+            <label style="color: #D9534F;">Turnos Cancelados con Aviso:</label>
+            <div id="lista-cancelados"></div>
         </div>
 
-        <div id="seccion-horarios" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_mishorarios.png" class="img-titulo" onerror="this.style.display='none'">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel4.png" class="img-puntos">
-            
-            <div style="width: 100%;">
-                <label style="text-align: center; margin-bottom: 20px; font-size: 14px; font-weight: 900; color: #555;">Crea tus franjas de atención</label>
-                
-                <label>Seleccionar Sucursal</label>
-                <select id="hor-sucursal" onchange="cargarHorarios()"></select>
-                
-                <label>Día de la semana</label>
-                <select id="hor-dia">
-                    <option value="1">Lunes</option><option value="2">Martes</option>
-                    <option value="3">Miércoles</option><option value="4">Jueves</option>
-                    <option value="5">Viernes</option><option value="6">Sábado</option>
-                    <option value="0">Domingo</option>
-                </select>
-                
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1">
-                        <label>Desde</label>
-                        <input type="time" id="hor-inicio" value="08:00">
-                    </div>
-                    <div style="flex:1">
-                        <label>Hasta</label>
-                        <input type="time" id="hor-fin" value="20:00">
-                    </div>
-                </div>
-                
-                <label>Duración de cada Turno</label>
-                <select id="hor-duracion">
-                    <option value="20">20 Minutos</option>
-                    <option value="30" selected>30 Minutos por Defecto</option>
-                    <option value="40">40 Minutos</option>
-                    <option value="60">60 Minutos</option>
-                </select>
-            </div>
+        <div class="titulo-boton" onclick="mostrarPantallaHorarios()">Configurar mis horarios 🖐</div>
+        <p onclick="cerrarSesion()" style="text-align:center; text-decoration:underline; font-size:14px; cursor:pointer; margin-top: 25px; opacity:0.8;">Cerrar Sesión</p>
+    </div>
 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignarhorarios.png" class="btn-img" style="margin-top: 10px;" onclick="guardarHorario()">
-            
-            <div style="width: 100%; margin-top: 15px;">
-                <label>Mis Horarios</label>
-                <div class="caja-blanca" id="lista-horarios" style="padding: 10px 15px;"></div>
-            </div>
-
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
+    <div id="seccion-sucursales" class="contenedor">
+        <div class="titulo-boton" style="cursor:default;">Configurar Sucursales</div>
+        
+        <div class="caja-blanca" style="border: 2px solid #009E9B;">
+            <label style="color: #009E9B;">⚙ Modificar Sede Existente</label>
+            <select id="select-editar-sucursal" onchange="cargarDatosSedeAEditar()">
+                <option value="NUEVA">-- Crear Nueva Sucursal (Vacío) --</option>
+            </select>
         </div>
 
+        <div class="caja-blanca">
+            <h3 id="titulo-operacion-suc" style="margin-top:0; color:#007D82; font-weight:900;">Crear Nueva Sucursal</h3>
+            <label>Nombre de la Sede</label>
+            <input type="text" id="suc-nombre" placeholder="Ej: Consultorio Centro">
+            <label>Dirección Completa</label>
+            <input type="text" id="suc-dir" placeholder="Ej: Av. Rivadavia 1420">
+            <label style="color: #F4B41A;">Link de Mercado Pago para esta Sede</label>
+            <input type="text" id="suc-mp-link" placeholder="Ej: https://mpago.la/xxxxxx" style="border-color:#F4B41A;">
+            <button class="btn-amarillo" id="btn-guardar-sucursal" onclick="guardarOActualizarSucursal()">Guardar Sucursal</button>
+        </div>
+
+        <button class="btn-amarillo" style="background:#009E9B" onclick="mostrarPantallaAgenda()">Volver a mi Agenda</button>
+    </div>
+
+    <div id="seccion-horarios" class="contenedor">
+        <div class="contenedor-con-fondo">
+            <h2>Mis Horarios</h2>
+            <p class="sub">Crea tus franjas horarias de atención</p>
+            <label>Seleccioná Sucursal</label>
+            <select id="hor-sucursal" onchange="cargarHorarios()"></select>
+            <label>Día de la semana</label>
+            <select id="hor-dia">
+                <option value="1">Lunes</option><option value="2">Martes</option>
+                <option value="3">Miércoles</option><option value="4">Jueves</option>
+                <option value="5">Viernes</option><option value="6">Sábado</option>
+                <option value="0">Domingo</option>
+            </select>
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="14:00"></div>
+                <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="19:00"></div>
+            </div>
+            <label>Duración de cada turno</label>
+            <select id="hor-duracion">
+                <option value="20">20 minutos</option>
+                <option value="30" selected>30 minutos (Por defecto)</option>
+                <option value="40">40 minutos</option>
+                <option value="45">45 minutos</option>
+                <option value="60">60 minutos</option>
+            </select>
+            <button class="btn-amarillo" onclick="guardarHorario()">Asignar Horario</button>
+        </div>
+        <div class="caja-blanca" style="margin-top: 20px;">
+            <label>Esquema de atención guardado:</label>
+            <div id="lista-horarios"></div>
+        </div>
+        <button class="btn-amarillo" style="background:#009E9B" onclick="mostrarPantallaAgenda()">Volver a mi Agenda</button>
     </div>
 
     <script>
@@ -200,6 +156,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
+        // REPARACIÓN ESTRATÉGICA: ID Dinámico basado en la sesión activa del profesional
         const idMedico = localStorage.getItem('mi_turno_negocio_id'); 
 
         if (!idMedico) {
@@ -213,14 +170,10 @@
             await cargarSelectores();
         }
 
-        function mostrarPantallaSucursales() { switchSeccion('seccion-sucursales'); }
+        function mostrarPantallaConsultorios() { switchSeccion('seccion-sucursales'); }
         function mostrarPantallaHorarios() { switchSeccion('seccion-horarios'); cargarSelectores(); }
         function mostrarPantallaAgenda() { switchSeccion('seccion-agenda'); cargarSelectores(); }
-        function switchSeccion(id) { 
-            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); 
-            document.getElementById(id).classList.add('activa'); 
-            document.querySelector('.app-lienzo').scrollTo({ top: 0, behavior: 'smooth' }); 
-        }
+        function switchSeccion(id) { document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); document.getElementById(id).classList.add('activa'); window.scrollTo(0,0); }
 
         async function cargarSelectores() {
             const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico).order('nombre');
@@ -228,24 +181,28 @@
             const opcionesSedes = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '';
             document.getElementById('agenda-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
             document.getElementById('hor-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
-            document.getElementById('select-editar-sucursal').innerHTML = '<option value="NUEVA">-- Crear Nueva Sucursal --</option>' + opcionesSedes;
+            document.getElementById('select-editar-sucursal').innerHTML = '<option value="NUEVA">-- Crear Nueva Sucursal (Vacío) --</option>' + opcionesSedes;
 
             cargarTurnos();
             cargarHorarios();
         }
 
-        async function cargarDatosSucursalAEditar() {
+        async function cargarDatosSedeAEditar() {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
             if (idSucElegida === 'NUEVA') {
+                document.getElementById('titulo-operacion-suc').innerText = "Crear Nueva Sucursal";
                 document.getElementById('suc-nombre').value = '';
                 document.getElementById('suc-dir').value = '';
                 document.getElementById('suc-mp-link').value = '';
+                document.getElementById('btn-guardar-sucursal').innerText = "Guardar Sucursal";
             } else {
                 const { data } = await supabaseCliente.from('sucursales').select('*').eq('id', idSucElegida).single();
                 if (data) {
+                    document.getElementById('titulo-operacion-suc').innerText = "Modificar " + data.nombre;
                     document.getElementById('suc-nombre').value = data.nombre;
                     document.getElementById('suc-dir').value = data.direccion || '';
                     document.getElementById('suc-mp-link').value = data.link_mercadopago || '';
+                    document.getElementById('btn-guardar-sucursal').innerText = "Actualizar Sede";
                 }
             }
         }
@@ -270,6 +227,8 @@
             document.getElementById('suc-nombre').value = '';
             document.getElementById('suc-dir').value = '';
             document.getElementById('suc-mp-link').value = '';
+            document.getElementById('titulo-operacion-suc').innerText = "Crear Nueva Sucursal";
+            document.getElementById('btn-guardar-sucursal').innerText = "Guardar Sucursal";
             
             await cargarSelectores();
         }
@@ -296,14 +255,16 @@
             const { data } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc);
             const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
             
+            // CIRUGÍA 2: Inyección del botón de borrado sin corromper el layout existente
             document.getElementById('lista-horarios').innerHTML = data?.map(h => `
-                <div class="item-turno">
-                    <div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div>
+                <div class="item-lista">
+                    <div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs (${h.duracion_minutos} min)</small></div>
                     <button class="btn-borrar-horario" onclick="eliminarHorario('${h.id}')">🗑️</button>
                 </div>
-            `).join('') || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">Sin horarios asignados.</p>';
+            `).join('') || '<p style="text-align:center; color:#000;">Sin horarios.</p>';
         }
 
+        // NUEVA FUNCIÓN CONTROLADORA DE ELIMINACIÓN DE FRANJAS DE ATENCIÓN
         async function eliminarHorario(idHorario) {
             if(!confirm("¿Estás seguro de que querés borrar esta franja horaria?")) return;
             const { error } = await supabaseCliente.from('configuracion_agenda').delete().eq('id', idHorario);
@@ -327,17 +288,17 @@
             turnos?.forEach(t => {
                 const esCancelado = t.estado === 'cancelado_por_paciente';
                 const card = `
-                    <div class="item-turno">
+                    <div class="item-lista" style="border-left-color: ${esCancelado ? '#D9534F' : (t.estado === 'confirmado' ? '#009E9B' : '#F4B41A')}">
                         <div>[${t.hora.slice(0,5)}] ${t.cliente_nombre || 'Paciente'}<small>Tel: ${t.cliente_telefono || 'Sin especificar'}</small></div>
-                        <span class="badge ${esCancelado ? 'cancel' : 'ok'}">${esCancelado ? 'CANCELADO' : 'CONFIRMADO'}</span>
+                        <span class="badge" style="background: ${esCancelado ? '#D9534F' : (t.estado === 'confirmado' ? '#009E9B' : '#F4B41A')}">${t.estado.toUpperCase()}</span>
                     </div>
                 `;
                 if(esCancelado) canceladosHtml += card;
                 else activosHtml += card;
             });
 
-            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">No hay turnos agendados.</p>';
-            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">Sin cancelaciones.</p>';
+            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="text-align:center; color:#000;">No hay turnos agendados.</p>';
+            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="text-align:center; color:#000;">Sin cancelaciones.</p>';
         }
 
         function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }
