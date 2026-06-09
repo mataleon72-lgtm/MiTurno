@@ -34,77 +34,78 @@
         }
         .app-lienzo::-webkit-scrollbar { display: none; }
 
-        /* CONTENEDORES DE PANTALLA: Subidos para ocupar la zona gris */
+        /* CONTENEDORES DE PANTALLA */
         .contenedor { 
             width: 85%; 
-            padding-top: 30px; /* Sube el título al centro del encabezado gris */
+            padding-top: 40px; 
             padding-bottom: 50px; 
             display: none; 
             flex-direction: column;
             align-items: center;
-            position: relative;
-            z-index: 10;
         }
         .contenedor.activa { display: flex; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* IMÁGENES DEL DISEÑO: Ajuste de márgenes para la "línea de guiones" */
-        .img-titulo { width: 95%; margin-top: 0px; margin-bottom: 15px; } 
-        .img-puntos { width: 30%; margin-top: 0px; margin-bottom: 45px; } /* Empuja el resto hacia la zona blanca */
+        /* IMÁGENES DEL DISEÑO */
+        .img-titulo { width: 95%; margin-top: 0; margin-bottom: 40px; } 
+        .img-puntos { width: 30%; margin-top: 0; margin-bottom: 25px; } 
         
-        /* BOTONES E INPUTS: Con z-index para que funcionen los clics perfectamente */
-        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
+        /* Ajuste específico para centrar el texto de login en la grilla y empujar los puntos */
+        .texto-gris-oscuro-login { color: #555; font-weight: 900; font-size: 28px; margin-top: 10px; margin-bottom: 43px; text-align: center; } 
+        
+        /* Botones clickeables con z-index */
+        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
+        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .btn-link-img:active { transform: scale(0.96); }
 
-        /* TEXTOS DE COREL */
-        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 22px; margin-top: 0px; margin-bottom: 15px; text-align: center; }
-        .texto-instruccion { color: #555; font-weight: 900; font-size: 16px; margin-bottom: 10px; margin-top: 15px; text-align: center;}
-        
+        /* TEXTOS SECUNDARIOS */
+        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 22px; margin-bottom: 5px; text-align: center; }
         label { font-weight: 900; color: #7A7A7A; font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
         
+        /* INPUTS Y SELECTS */
         input, select { 
             width: 100%; padding: 16px 20px; border-radius: 20px; border: none; 
             background: #FFFFFF;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.06); 
             margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; color: #555; font-family: 'Nunito', sans-serif; outline: none;
-            position: relative; z-index: 20;
+            position: relative; z-index: 10;
         }
         input::placeholder { color: #A0A0A0; font-weight: 800; }
-        input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
+        input:focus, select:focus { box-shadow: 0px 4px 12px rgba(9, 105, 145, 0.2); }
 
-        /* BUSCADOR ALINEADO (Alias + Botón Agregar) */
+        /* BUSCADOR ALINEADO */
         .buscador-row {
             display: flex; width: 100%; gap: 10px; align-items: center; margin-bottom: 20px;
         }
         .buscador-row input { margin-bottom: 0; flex: 1; }
-        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 20; }
+        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .buscador-row img:active { transform: scale(0.95); }
 
-        /* TARJETAS DE PROFESIONALES (Agenda) */
+        /* TARJETAS DE PROFESIONALES */
         .tarjeta-medico {
             background: #FFFFFF; padding: 18px 20px; border-radius: 20px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; cursor: pointer;
-            position: relative; z-index: 20;
+            position: relative; z-index: 10;
         }
         .tarjeta-medico h4 { margin: 0; color: #444; font-size: 16px; font-weight: 900; }
-        .tarjeta-medico p { margin: 3px 0 0 0; color: #007D82; font-size: 13px; font-weight: 800; }
+        .tarjeta-medico p { margin: 3px 0 0 0; color: #096991; font-size: 13px; font-weight: 800; } 
         .icono-calendario { font-size: 24px; color: #555; opacity: 0.8; }
 
-        /* TARJETAS DE MIS TURNOS (Con franja a la derecha) */
+        /* TARJETAS DE MIS TURNOS */
         .tarjeta-turno {
             position: relative; background: #FFFFFF; border-radius: 20px; margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
             display: flex; flex-direction: column; overflow: hidden; padding: 20px;
+            position: relative; z-index: 10;
         }
         .franja-estado { position: absolute; top: 0; right: 0; bottom: 0; width: 15px; }
         .franja-verde { background-color: #6EB64F; }
         .franja-roja { background-color: #ED3237; }
 
         .tarjeta-turno h4 { margin: 0 0 3px 0; color: #444; font-size: 17px; font-weight: 900; }
-        .tarjeta-turno h5 { margin: 0 0 10px 0; color: #007D82; font-size: 14px; font-weight: 800; }
+        .tarjeta-turno h5 { margin: 0 0 10px 0; color: #096991; font-size: 14px; font-weight: 800; } 
         .tarjeta-turno p { margin: 4px 0; color: #333; font-size: 14px; font-weight: 900; display: flex; align-items: center; gap: 8px;}
         .tarjeta-turno p span { color: #555; }
         
@@ -112,18 +113,18 @@
 
         .btn-cancelar-turno {
             align-self: flex-start; background: none; border: none; color: #ED3237; font-weight: 900; font-size: 14px; 
-            margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 20;
+            margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 10;
         }
 
         /* TURNERO DESPLEGABLE */
         .bloque-turnero { 
             background: #FFFFFF; padding: 20px; border-radius: 20px; margin-bottom: 20px; 
             display: none; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 2px dashed #009E9B; position: relative; z-index: 20;
+            border: none; position: relative; z-index: 10;
         }
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; }
-        .btn-hora:hover { background: #009E9B; color: white; }
+        .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; position: relative; z-index: 10; }
+        .btn-hora:hover { background: #096991; color: white; }
 
     </style>
 </head>
@@ -132,7 +133,7 @@
     <div class="app-lienzo">
         
         <div id="pantalla-login" class="contenedor activa">
-            <h2 class="texto-gris-oscuro" style="font-size: 28px;">Ingresa a tu cuenta</h2>
+            <h2 class="texto-gris-oscuro-login">Ingresa a tu cuenta</h2>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_1.png" class="img-puntos">
             
             <div style="width: 100%;">
@@ -171,7 +172,7 @@
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_misturnos.png" class="btn-img" style="margin-top: -15px; margin-bottom: 25px;" onclick="switchModulo('turnos')">
 
-            <h3 class="texto-gris-oscuro">Agrega Negocios<br>o Profesionales</h3>
+            <h3 class="texto-gris-oscuro" style="font-size: 20px; margin-top: 0;">Agrega Negocios<br>o Profesionales</h3>
             
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" style="width: 80%; margin-top: 15px; margin-bottom: 10px;">
             
@@ -184,7 +185,7 @@
             <div id="lista-medicos" style="width: 100%;"></div>
 
             <div id="turnero-integrado" class="bloque-turnero">
-                <h3 id="turnero-medico-nombre" style="margin-top:0; color:#007D82; font-weight:900; text-align:center;"></h3>
+                <h3 id="turnero-medico-nombre" style="margin-top:0; color:#096991; font-weight:900; text-align:center;"></h3>
                 <label>1. Seleccioná Sede</label>
                 <select id="turnero-sucursal" onchange="cargarFechasDisponibles()"></select>
                 <label>2. Seleccioná Fecha</label>
@@ -399,7 +400,7 @@
                 }
 
                 const botonPagoHtml = (!esCancelado && t.estado === 'pendiente' && linkPago) 
-                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:15px; font-weight:900; margin-top:10px; font-size:14px; box-shadow: 0 4px 10px rgba(244,180,26,0.3);">💳 Pagar Seña</a>` 
+                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:15px; font-weight:900; margin-top:10px; font-size:14px; box-shadow: 0 4px 10px rgba(244,180,26,0.3); position: relative; z-index: 10;">💳 Pagar Seña</a>` 
                     : '';
 
                 return `
