@@ -34,28 +34,32 @@
         }
         .app-lienzo::-webkit-scrollbar { display: none; }
 
-        /* CONTENEDORES DE PANTALLA */
+        /* CONTENEDORES - Súper subidos para pisar el área gris de tu diseño */
         .contenedor { 
             width: 85%; 
-            padding-top: 60px; 
-            padding-bottom: 50px; 
+            padding-top: 15px; /* Subimos todo el bloque al área del encabezado */
+            padding-bottom: 90px; 
             display: none; 
             flex-direction: column;
             align-items: center;
+            position: relative;
+            z-index: 10;
         }
         .contenedor.activa { display: flex; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* IMÁGENES DEL DISEÑO */
-        .img-titulo { width: 95%; margin-bottom: 10px; } 
-        .img-puntos { width: 30%; margin-bottom: 25px; } 
-        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; }
+        .img-titulo { width: 95%; margin-top: 10px; margin-bottom: 5px; } 
+        .img-puntos { width: 30%; margin-bottom: 30px; } 
+        
+        /* Botones con z-index alto para asegurar el CLICK */
+        .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
         .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; }
+        .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50; }
         .btn-link-img:active { transform: scale(0.96); }
 
         /* TEXTOS DE COREL */
-        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 22px; margin-bottom: 5px; text-align: center; }
+        .texto-gris-oscuro { color: #555; font-weight: 900; font-size: 26px; margin-bottom: 0px; margin-top: 20px; text-align: center; }
         .texto-instruccion { color: #555; font-weight: 900; font-size: 16px; margin-bottom: 10px; margin-top: 15px; text-align: center;}
         
         label { font-weight: 900; color: #7A7A7A; font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
@@ -65,16 +69,17 @@
             background: #FFFFFF;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.06); 
             margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; color: #555; font-family: 'Nunito', sans-serif; outline: none;
+            position: relative; z-index: 20;
         }
         input::placeholder { color: #A0A0A0; font-weight: 800; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
 
-        /* BUSCADOR ALINEADO (Alias + Botón Agregar) */
+        /* BUSCADOR ALINEADO */
         .buscador-row {
             display: flex; width: 100%; gap: 10px; align-items: center; margin-bottom: 20px;
         }
         .buscador-row input { margin-bottom: 0; flex: 1; }
-        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; }
+        .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 50;}
         .buscador-row img:active { transform: scale(0.95); }
 
         /* TARJETAS DE PROFESIONALES (Agenda) */
@@ -82,12 +87,13 @@
             background: #FFFFFF; padding: 18px 20px; border-radius: 20px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; cursor: pointer;
+            position: relative; z-index: 20;
         }
         .tarjeta-medico h4 { margin: 0; color: #444; font-size: 16px; font-weight: 900; }
         .tarjeta-medico p { margin: 3px 0 0 0; color: #007D82; font-size: 13px; font-weight: 800; }
         .icono-calendario { font-size: 24px; color: #555; opacity: 0.8; }
 
-        /* TARJETAS DE MIS TURNOS (Con franja a la derecha) */
+        /* TARJETAS DE MIS TURNOS */
         .tarjeta-turno {
             position: relative; background: #FFFFFF; border-radius: 20px; margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
@@ -106,18 +112,28 @@
 
         .btn-cancelar-turno {
             align-self: flex-start; background: none; border: none; color: #ED3237; font-weight: 900; font-size: 14px; 
-            margin-top: 15px; cursor: pointer; padding: 0;
+            margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 50;
         }
 
         /* TURNERO DESPLEGABLE */
         .bloque-turnero { 
             background: #FFFFFF; padding: 20px; border-radius: 20px; margin-bottom: 20px; 
             display: none; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 2px dashed #009E9B;
+            border: 2px dashed #009E9B; position: relative; z-index: 20;
         }
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         .btn-hora { background: #F8F8F8; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; text-align: center; cursor: pointer; font-size: 14px; }
         .btn-hora:hover { background: #009E9B; color: white; }
+
+        /* MENÚ INFERIOR GRÁFICO */
+        .nav-inferior { 
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 432px; height: 80px; 
+            background: transparent; display: flex; justify-content: space-around; align-items: center; z-index: 100; 
+            padding: 0 10px; box-sizing: border-box;
+        }
+        .nav-item-img { width: 45%; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
+        .nav-item-img.activo { opacity: 1; transform: scale(1.05); }
+        .nav-item-img:active { transform: scale(0.95); }
 
     </style>
 </head>
@@ -126,8 +142,8 @@
     <div class="app-lienzo">
         
         <div id="pantalla-login" class="contenedor activa">
-            <h2 class="texto-gris-oscuro" style="font-size: 28px; margin-top: 40px;">Ingresa a tu cuenta</h2>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel3.png" class="img-puntos">
+            <h2 class="texto-gris-oscuro">Ingresa a tu cuenta</h2>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_1.png" class="img-puntos">
             
             <div style="width: 100%; margin-top: 10px;">
                 <label style="text-align: center;">Coloca tu número de DNI</label>
@@ -141,11 +157,301 @@
 
         <div id="pantalla-registro" class="contenedor">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_registrodeusuario.png" class="img-titulo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel4.png" class="img-puntos">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_2.png" class="img-puntos">
             
             <div style="width: 100%;">
                 <label>Nombre y Apellido</label>
                 <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez">
                 
                 <label>Teléfono Celular</label>
-                <input type="tel
+                <input type="tel" id="reg-telefono" placeholder="Ej: 1123456789">
+                
+                <label>Número de DNI</label>
+                <input type="number" id="reg-dni" placeholder="Ej: 3045456565">
+            </div>
+            
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_registrarme.png" class="btn-img" style="margin-top: 5px;" onclick="registrarPaciente()">
+            
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-link-img" style="margin-top: 30px;" onclick="irALogin()">
+        </div>
+
+        <div id="pantalla-agenda" class="contenedor">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo" style="margin-bottom: 5px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_3.png" class="img-puntos">
+            
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_misturnos.png" class="btn-img" style="margin-top: 0; margin-bottom: 25px;" onclick="switchModulo('turnos')">
+
+            <h3 class="texto-gris-oscuro" style="font-size: 20px; margin-top: 0;">Agrega Negocios<br>o Profesionales</h3>
+            
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" style="width: 80%; margin-top: 15px; margin-bottom: 10px;">
+            
+            <div class="buscador-row">
+                <input type="text" id="input-medico-alias" placeholder="EJ: Mild" style="text-transform: uppercase;">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_agregar.png" onclick="vincularMedico()">
+            </div>
+
+            <label style="font-size: 16px; margin-bottom: 10px;">Tu Lista</label>
+            <div id="lista-medicos" style="width: 100%;"></div>
+
+            <div id="turnero-integrado" class="bloque-turnero">
+                <h3 id="turnero-medico-nombre" style="margin-top:0; color:#007D82; font-weight:900; text-align:center;"></h3>
+                <label>1. Seleccioná Sede</label>
+                <select id="turnero-sucursal" onchange="cargarFechasDisponibles()"></select>
+                <label>2. Seleccioná Fecha</label>
+                <input type="date" id="turnero-fecha" onchange="cargarHorariosDisponibles()">
+                <label id="label-horas" style="display:none;">3. Seleccioná el Horario:</label>
+                <div id="grilla-horas" class="grilla-horas"></div>
+            </div>
+
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 20px;" onclick="cerrarSesionPaciente()">
+        </div>
+
+        <div id="pantalla-turnos" class="contenedor">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" class="img-titulo" style="margin-bottom: 5px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_4.png" class="img-puntos" style="margin-bottom: 30px;">
+            
+            <div id="lista-turnos-paciente" style="width: 100%;"></div>
+
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" style="margin-top: 30px;" onclick="switchModulo('agenda')">
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let pacienteActual = null; 
+        let medicoSeleccionadoId = null; 
+        let duracionConfigurada = 30;
+
+        async function init() {
+            try {
+                const guardadoId = localStorage.getItem('mi_turno_paciente_id');
+                if (guardadoId) {
+                    const { data } = await supabaseCliente.from('pacientes').select('*').eq('id', guardadoId).single();
+                    if (data) { pacienteActual = data; mostrarAppPrincipal(); }
+                }
+            } catch (e) {
+                console.log("Error en init: ", e);
+            }
+        }
+
+        function irARegistro() {
+            document.getElementById('pantalla-login').classList.remove('activa');
+            document.getElementById('pantalla-registro').classList.add('activa');
+        }
+
+        function irALogin() {
+            document.getElementById('pantalla-registro').classList.remove('activa');
+            document.getElementById('pantalla-login').classList.add('activa');
+        }
+
+        async function ingresarPaciente() {
+            const dni = document.getElementById('login-dni').value.trim();
+            if(!dni) return alert("Ingresá tu DNI para continuar.");
+            const { data, error } = await supabaseCliente.from('pacientes').select('*').eq('dni', dni);
+            if(error) return alert("Error al conectar: " + error.message);
+            if(!data || data.length === 0) return alert("El DNI ingresado no está registrado. Tocá en 'Creala aquí'.");
+            
+            pacienteActual = data[0];
+            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
+            mostrarAppPrincipal();
+        }
+
+        async function registrarPaciente() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const telefono = document.getElementById('reg-telefono').value.trim();
+            const dni = document.getElementById('reg-dni').value.trim();
+            if(!nombre || !telefono || !dni) return alert("Por favor, completá todos los casilleros.");
+            
+            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
+            if(error) {
+                if(error.code === '23505') return alert("Ese DNI ya está registrado. Tocá en 'Inicia sesión'.");
+                return alert("Error al registrar: " + error.message);
+            }
+            
+            pacienteActual = data[0];
+            localStorage.setItem('mi_turno_paciente_id', pacienteActual.id);
+            mostrarAppPrincipal();
+        }
+
+        function mostrarAppPrincipal() { 
+            document.getElementById('pantalla-login').classList.remove('activa');
+            document.getElementById('pantalla-registro').classList.remove('activa');
+            switchModulo('agenda'); 
+        }
+
+        function switchModulo(modulo) {
+            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa'));
+            if (modulo === 'agenda') {
+                document.getElementById('pantalla-agenda').classList.add('activa');
+                cargarMisMedicos();
+            } else {
+                document.getElementById('pantalla-turnos').classList.add('activa');
+                cargarMisTurnos();
+            }
+            document.querySelector('.app-lienzo').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cerrarSesionPaciente() {
+            localStorage.removeItem('mi_turno_paciente_id');
+            window.location.reload();
+        }
+
+        async function vincularMedico() {
+            const aliasMed = document.getElementById('input-medico-alias').value.toUpperCase().trim();
+            if(!aliasMed) return alert("Escribí el Alias del profesional.");
+            
+            const { data: medico } = await supabaseCliente.from('negocios').select('id').eq('alias', aliasMed);
+            if (!medico || medico.length === 0) return alert("Alias no encontrado. Verificá que esté bien escrito.");
+            
+            const idRealMed = medico[0].id;
+            await supabaseCliente.from('pacientes_profesionales').insert([{ paciente_id: pacienteActual.id, negocio_id: idRealMed }]);
+            alert("¡Profesional agregado a tu lista!");
+            document.getElementById('input-medico-alias').value = '';
+            cargarMisMedicos();
+        }
+
+        async function cargarMisMedicos() {
+            const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
+            document.getElementById('lista-medicos').innerHTML = data?.map(p => `
+                <div class="tarjeta-medico" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')">
+                    <div>
+                        <h4>${p.negocios.nombre}</h4>
+                        <p>${p.negocios.rubro || 'Profesional'}</p>
+                    </div>
+                    <span class="icono-calendario">🗓️</span>
+                </div>
+            `).join('') || '<p style="text-align:center; color:#888; font-size:14px;">Aún no agregaste profesionales.</p>';
+        }
+
+        async function abrirTurnero(idMed, nombreMed) {
+            medicoSeleccionadoId = idMed;
+            document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
+            document.getElementById('turnero-integrado').style.display = 'block';
+            
+            setTimeout(() => { document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' }); }, 100);
+            
+            const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
+            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+            
+            document.getElementById('turnero-fecha').value = "";
+            document.getElementById('grilla-horas').innerHTML = '';
+            document.getElementById('label-horas').style.display = 'none';
+        }
+
+        function cargarFechasDisponibles() {
+            document.getElementById('turnero-fecha').min = new Date().toISOString().split('T')[0];
+            document.getElementById('grilla-horas').innerHTML = '';
+            document.getElementById('label-horas').style.display = 'none';
+        }
+
+        async function cargarHorariosDisponibles() {
+            const idSuc = document.getElementById('turnero-sucursal').value;
+            const fechaElegida = document.getElementById('turnero-fecha').value;
+            if (!idSuc || !fechaElegida) return;
+
+            const diaSemana = new Date(fechaElegida + "T00:00:00").getDay();
+            const { data: esquema } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
+
+            if (!esquema || esquema.length === 0) {
+                document.getElementById('label-horas').style.display = 'none';
+                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional no atiende en esta fecha.</p>';
+                return;
+            }
+
+            const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
+            const listaOcupados = ocupados?.map(o => o.hora.slice(0,5)) || [];
+            let htmlHoras = '';
+
+            esquema.forEach(slot => {
+                let actual = slot.hora_inicio.slice(0,5);
+                const fin = slot.hora_fin.slice(0,5);
+                duracionConfigurada = slot.duracion_minutos; 
+
+                while (actual < fin) {
+                    if (!listaOcupados.includes(actual)) {
+                        htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}')">${actual}</div>`;
+                    }
+                    let [h, m] = actual.split(':').map(Number);
+                    m += duracionConfigurada;
+                    if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
+                    actual = String(h).padStart(2, '0') + ":" + String(m).padStart(2, '0');
+                }
+            });
+
+            document.getElementById('label-horas').style.display = 'block';
+            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1; color:#888; font-weight:800; font-size:14px; text-align:center;">No hay turnos disponibles para esta fecha.</p>';
+        }
+
+        async function confirmarReserva(horaTurno) {
+            const idSuc = document.getElementById('turnero-sucursal').value;
+            const fecha = document.getElementById('turnero-fecha').value;
+            if(!confirm(`¿Querés confirmar tu turno a las ${horaTurno} hs?`)) return;
+
+            await supabaseCliente.from('turnos_activos').insert([{
+                negocio_id: medicoSeleccionadoId, 
+                sucursal_id: idSuc,             
+                fecha: fecha,
+                hora: horaTurno + ":00",
+                cliente_nombre: pacienteActual.nombre,       
+                cliente_telefono: pacienteActual.telefono,   
+                cliente_identificador: pacienteActual.dni,   
+                estado: 'pendiente'
+            }]);
+
+            alert("¡Turno guardado con éxito!");
+            document.getElementById('turnero-integrado').style.display = 'none';
+            switchModulo('turnos'); 
+        }
+
+        async function cargarMisTurnos() {
+            const { data } = await supabaseCliente.from('turnos_activos')
+                .select('id, fecha, hora, estado, negocios(nombre, rubro), sucursales(nombre, direccion, link_mercadopago)')
+                .eq('cliente_identificador', pacienteActual.dni) 
+                .order('fecha', { ascending: true });
+
+            document.getElementById('lista-turnos-paciente').innerHTML = data?.map(t => {
+                const esCancelado = t.estado === 'cancelado_por_paciente';
+                const colorFranja = esCancelado ? 'franja-roja' : 'franja-verde';
+                
+                let linkPago = t.sucursales?.link_mercadopago || ""; 
+                if (linkPago && !linkPago.startsWith('http')) {
+                    const match = linkPago.match(/https?:\/\/[^\s]+/);
+                    if (match) linkPago = match[0];
+                }
+
+                const botonPagoHtml = (!esCancelado && t.estado === 'pendiente' && linkPago) 
+                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:15px; font-weight:900; margin-top:10px; font-size:14px; box-shadow: 0 4px 10px rgba(244,180,26,0.3);">💳 Pagar Seña</a>` 
+                    : '';
+
+                return `
+                    <div class="tarjeta-turno">
+                        <div class="franja-estado ${colorFranja}"></div>
+                        ${esCancelado ? '<div class="badge-rojo">CANCELADO</div>' : ''}
+                        
+                        <h4>${t.negocios?.nombre || 'Profesional'}</h4>
+                        <h5>${t.negocios?.rubro || 'Especialidad'}</h5>
+                        <p>📅 <span>${t.fecha.split('-').reverse().join('-')}</span> ⏰ <span>${t.hora.slice(0,5)}</span></p>
+                        <p>📍 <span>Sucursal: ${t.sucursales?.nombre || 'Sede'} (${t.sucursales?.direccion || ''})</span></p>
+                        
+                        ${botonPagoHtml}
+                        
+                        ${!esCancelado ? `<button class="btn-cancelar-turno" onclick="cancelarTurno('${t.id}')">CANCELAR TURNO</button>` : ''}
+                    </div>
+                `;
+            }).join('') || '<p style="text-align:center; color:#888; font-size:14px; font-weight:800;">No tenés turnos guardados.</p>';
+        }
+
+        async function cancelarTurno(idTurno) {
+            if (!confirm("¿Seguro querés cancelar este turno?")) return;
+            await supabaseCliente.from('turnos_activos').update({ estado: 'cancelado_por_paciente' }).eq('id', idTurno);
+            cargarMisTurnos();
+        }
+
+        init();
+    </script>
+</body>
+</html>
