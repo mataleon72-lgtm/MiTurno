@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Mi Turno</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* FONDO GLOBAL */
@@ -53,7 +53,7 @@
         }
         
         /* BOTONES */
-        .btn-img { width: 180px; cursor: pointer; transition: transform 0.2s; margin-top: 10px; position: relative; z-index: 1000; }
+        .btn-img { width: 180px; cursor: pointer; transition: transform 0.2s; margin-top: 10px; position: relative; z-index: 1000; display: block; }
         .btn-img:active { transform: scale(0.95); }
         
         .link-text { 
@@ -131,7 +131,7 @@
                 <input type="text" id="login-usuario" class="input-clasico" placeholder="EJ: JULI">
                 <label>Contraseña</label>
                 <input type="password" id="login-clave" class="input-clasico" placeholder="********">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarLogin()">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarLogin(event)">
             </div>
             <div class="link-text" onclick="cambiarPantalla('pantalla-registro')">¿no tenes cuenta? creala aquí 👈</div>
         </div>
@@ -147,7 +147,7 @@
                 <label>Tu Nombre Real</label><input type="text" id="reg-nombre" class="input-clasico" placeholder="EJ: Maria">
                 <label>Alias Usuario Nuevo</label><input type="text" id="reg-usuario" class="input-clasico" placeholder="EJ: maria">
                 <label>Contraseña</label><input type="password" id="reg-clave" class="input-clasico" placeholder="********">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarRegistro()"> 
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarRegistro(event)"> 
             </div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-img" style="margin-top: 40px; width: 150px;" onclick="cambiarPantalla('pantalla-login')">
         </div>
@@ -318,19 +318,25 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         
         let miSupabase;
+
+        // Aseguramos inicialización limpia
         if (window.supabase) {
             miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        // MEMORIA GLOBAL
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
 
-        // 1. REGISTRO CORREGIDO (Alineado con tu captura de columnas)
-        async function ejecutarRegistro() {
+        // REGISTRO TOTALMENTE BLINDADO CONTRA SUBMIT NATIVO
+        async function ejecutarRegistro(e) {
+            if(e) e.preventDefault(); // Cortamos cualquier recarga del navegador de raíz
+            
             try {
-                if (!miSupabase) return;
+                if (!miSupabase && window.supabase) {
+                    miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                }
+
                 const negocio = document.getElementById('reg-negocio').value.trim().toUpperCase();
                 const nombre = document.getElementById('reg-nombre').value.trim();
                 const usuario = document.getElementById('reg-usuario').value.trim().toLowerCase();
@@ -348,21 +354,27 @@
                         nombre_usuario: nombre, 
                         alias_usuario: usuario, 
                         password: clave 
-                    }]);
+                    }])
+                    .select();
 
                 if (error) throw error;
 
-                alert("🎉 ¡Cuenta creada con éxito! Ahora podés iniciar sesión.");
+                alert("🎉 ¡Cuenta creada con éxito! Pasemos al login.");
                 cambiarPantalla('pantalla-login');
             } catch (error) {
-                alert("❌ Error: " + error.message);
+                console.error(error);
+                alert("❌ Problema del Servidor: " + error.message);
             }
         }
 
-        // 2. LOGIN CORREGIDO (Usa alias_usuario y password)
-        async function ejecutarLogin() {
+        async function ejecutarLogin(e) {
+            if(e) e.preventDefault();
+            
             try {
-                if (!miSupabase) return;
+                if (!miSupabase && window.supabase) {
+                    miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                }
+
                 const usuarioInput = document.getElementById('login-usuario').value.trim().toLowerCase();
                 const claveInput = document.getElementById('login-clave').value.trim();
 
@@ -386,71 +398,58 @@
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     cambiarPantalla('pantalla-elegir');
                 } else {
-                    alert("❌ Usuario o contraseña incorrectos. Revisa los datos.");
+                    alert("❌ Usuario o contraseña incorrectos.");
                 }
             } catch (error) {
                 alert("❌ Error: " + error.message);
             }
         }
 
-        // 3. SELECCIÓN DE PROFESIONAL
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
-            if(!prof) {
-                alert("⚠️ Por favor ingresá el alias del profesional.");
-                return;
-            }
+            if(!prof) { alert("⚠️ Ingresa el profesional."); return; }
             profesionalActual = prof;
             cambiarPantalla('pantalla-dia');
         }
 
-        // 4. GUARDAR NOTAS
         async function guardarNota() {
             try {
                 const fechaNota = document.getElementById('nota-fecha').value;
                 const tituloNota = document.getElementById('nota-titulo').value;
                 const contenidoNota = document.getElementById('nota-contenido').value;
-
-                if(!fechaNota || !tituloNota || !contenidoNota) { alert("⚠️ Completa los campos."); return; }
+                if(!fechaNota || !tituloNota || !contenidoNota) return;
 
                 const { error } = await miSupabase
                     .from('notas')
                     .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
-
                 if (error) throw error;
                 alert("✅ ¡Nota guardada!");
                 document.getElementById('nota-fecha').value = ""; document.getElementById('nota-titulo').value = ""; document.getElementById('nota-contenido').value = "";
             } catch (error) { alert("❌ Error: " + error.message); }
         }
 
-        // 5. GUARDAR VACACIONES
         async function guardarBloqueoVacaciones() {
             try {
                 const inicio = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
-                if(!inicio || !fin) { alert("⚠️ Completa las fechas."); return; }
-
+                if(!inicio || !fin) return;
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: inicio, fecha_fin: fin }]);
-
                 if (error) throw error;
                 alert("✅ Rango de vacaciones bloqueado.");
             } catch (error) { alert("❌ Error: " + error.message); }
         }
 
-        // 6. GUARDAR CANCELACIÓN
         async function guardarCancelacionHora() {
             try {
                 const dia = document.getElementById('cancelar-dia').value;
                 const desde = document.getElementById('cancelar-desde').value;
                 const hasta = document.getElementById('cancelar-hasta').value;
-                if(!dia || !desde || !hasta) { alert("⚠️ Completa día y horas."); return; }
-
+                if(!dia || !desde || !hasta) return;
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: desde, hora_fin: hasta }]);
-
                 if (error) throw error;
                 alert("✅ Horarios cancelados.");
             } catch (error) { alert("❌ Error: " + error.message); }
