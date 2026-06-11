@@ -197,7 +197,7 @@
 
         let pacienteActual = null; 
         let medicoSeleccionadoId = null; 
-        let aliasMedicoActualParaFiltro = ""; // Memoria técnica del alias activo
+        let aliasMedicoActualParaFiltro = ""; 
         let duracionConfigurada = 30;
 
         async function init() {
@@ -288,7 +288,7 @@
 
         async function abrirTurnero(idMed, nombreMed, aliasMed) {
             medicoSeleccionadoId = idMed;
-            aliasMedicoActualParaFiltro = aliasMed; // Mantenemos el alias para cruzar con la tabla bloqueos
+            aliasMedicoActualParaFiltro = aliasMed; 
 
             document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
             document.getElementById('turnero-integrado').style.display = 'block';
@@ -296,7 +296,6 @@
             setTimeout(() => { document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' }); }, 100);
             
             const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
-            // El valor del select pasa a ser el NOMBRE de la sucursal para que machee directo con la tabla bloqueos
             document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.nombre}">${s.nombre}</option>`).join('');
             
             document.getElementById('turnero-fecha').value = "";
@@ -310,13 +309,17 @@
             document.getElementById('label-horas').style.display = 'none';
         }
 
-        // CONTROLADOR REESTRUCTURADO CON ESCUDO DE BLOQUEOS REALES
+        // CONTROLADOR CORREGIDO: LIMPIA ESTADOS PREVIOS EN CADA CLICK DEL CALENDARIO
         async function cargarHorariosDisponibles() {
-            const nombreSucursal = document.getElementById('turnero-sucursal').value; // Toma el texto plano
+            const nombreSucursal = document.getElementById('turnero-sucursal').value; 
             const fechaElegida = document.getElementById('turnero-fecha').value;
             if (!nombreSucursal || !fechaElegida) return;
 
-            // 1. LEER BLOQUEOS DE LA BASE DE DATOS (Cruzando estrictamente por las columnas exactas)
+            // --- REESTABLECER EL LIENZO ANTES DE EVALUAR LA NUEVA FECHA ---
+            document.getElementById('grilla-horas').innerHTML = '';
+            document.getElementById('label-horas').style.display = 'none';
+
+            // 1. LEER BLOQUEOS DE LA BASE DE DATOS
             const { data: bloqueosExistentes } = await supabaseCliente
                 .from('bloqueos')
                 .select('*')
@@ -343,14 +346,14 @@
                 });
             }
 
-            // Si está de vacaciones, frena el turnero acá mismo
+            // Si está de vacaciones, frena el flujo e informa
             if (estaDeVacaciones) {
                 document.getElementById('label-horas').style.display = 'none';
                 document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional se encuentra de vacaciones en este rango de fechas.</p>';
                 return;
             }
 
-            // Para leer la configuración habitual necesitamos encontrar el sucursal_id real por el nombre
+            // Conseguir el UUID real para consultar la grilla horaria habitual
             const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id_sucursal').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id_sucursal;
@@ -376,7 +379,6 @@
                 duracionConfigurada = slot.duracion_minutos; 
 
                 while (actual < fin) {
-                    // Verificamos si la hora actual está dentro de una cancelación horaria
                     let horaEstaCancelada = false;
                     horasCanceladasEnElDia.forEach(rango => {
                         if (actual >= rango.desde && actual < rango.hasta) {
@@ -384,7 +386,6 @@
                         }
                     });
 
-                    // Renderizamos solo si está 100% libre de turnos y bloqueos
                     if (!listaOcupados.includes(actual) && !horaEstaCancelada) {
                         htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}', '${uuidSucursalReal}')">${actual}</div>`;
                     }
