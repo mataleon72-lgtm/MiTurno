@@ -127,11 +127,11 @@
         <div class="panel-izquierdo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-top: 20px;">
             <div style="width: 100%; max-width: 250px; margin-top: 40px;">
-                <label>Tu Alias</label>
-                <input type="text" class="input-clasico" placeholder="EJ: JULI">
+                <label>Tu Alias de Usuario</label>
+                <input type="text" id="login-usuario" class="input-clasico" placeholder="EJ: JULI">
                 <label>Contraseña</label>
-                <input type="password" class="input-clasico" placeholder="********">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="cambiarPantalla('pantalla-elegir')">
+                <input type="password" id="login-clave" class="input-clasico" placeholder="********">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarLogin()">
             </div>
             <div class="link-text" onclick="cambiarPantalla('pantalla-registro')">¿no tenes cuenta? creala aquí 👈</div>
         </div>
@@ -143,11 +143,11 @@
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 20px;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_nuevousuario.png" class="img-titulo-modulo" style="align-self: center;">
             <div style="width: 100%; max-width: 250px;">
-                <label>Alias Negocio</label><input type="text" class="input-clasico">
-                <label>Tu Nombre</label><input type="text" class="input-clasico">
-                <label>Alias Usuario Nuevo</label><input type="text" class="input-clasico">
-                <label>Contraseña</label><input type="password" class="input-clasico">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="cambiarPantalla('pantalla-login')"> 
+                <label>Alias Negocio</label><input type="text" id="reg-negocio" class="input-clasico" placeholder="EJ: CLINICA_DENTAL">
+                <label>Tu Nombre Real</label><input type="text" id="reg-nombre" class="input-clasico" placeholder="EJ: Maria">
+                <label>Alias Usuario Nuevo</label><input type="text" id="reg-usuario" class="input-clasico" placeholder="EJ: MARIA123">
+                <label>Contraseña</label><input type="password" id="reg-clave" class="input-clasico" placeholder="********">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarRegistro()"> 
             </div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-img" style="margin-top: 40px; width: 150px;" onclick="cambiarPantalla('pantalla-login')">
         </div>
@@ -158,11 +158,11 @@
         <div class="panel-izquierdo"></div>
         <div class="panel-derecho" style="align-items: center; justify-content: center;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-grande">
-            <h1>Buen día María!!</h1>
+            <h1 id="saludo-secretaria">Buen día Secretaria!!</h1>
             <div style="width: 100%; max-width: 350px; text-align: center; margin-top: 30px;">
-                <label style="text-align: center;">Que agenda usaras hoy? Ingresa el Alias</label>
-                <input type="text" class="input-clasico" placeholder="EJ: Juli" style="text-align: center;">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 20px;" onclick="cambiarPantalla('pantalla-dia')">
+                <label style="text-align: center;">Que agenda usaras hoy? Ingresa el Alias del Profesional</label>
+                <input type="text" id="elegir-profesional" class="input-clasico" placeholder="EJ: Juli" style="text-align: center;">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 20px;" onclick="seleccionarAgenda()">
             </div>
         </div>
     </div>
@@ -202,9 +202,6 @@
                 <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
                     <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
                 </div>
-                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
-                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Buscar nuevos sillones</p>
-                </div>
             </div>
         </div>
 
@@ -213,14 +210,8 @@
             <div id="modulo-dia" class="contenedor-modulo activo">
                 <div class="header-dia">22/06/2026</div>
                 <div class="grilla-turnos">
-                    <div class="tarjeta-turno cancelado"><p>⏰ 08:00 &nbsp; Gaston Romanutti</p><p class="estado-rojo">CANCELADO</p></div>
                     <div class="tarjeta-turno disponible"><p>⏰ 08:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno ocupado"><p>⏰ 09:00 &nbsp; Gaston Romanutti</p></div>
                     <div class="tarjeta-turno disponible"><p>⏰ 09:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno disponible"><p>⏰ 10:00 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno ocupado"><p>⏰ 10:30 &nbsp; Gaston Romanutti</p></div>
-                    <div class="tarjeta-turno ocupado"><p>⏰ 11:00 &nbsp; Gaston Romanutti</p></div>
-                    <div class="tarjeta-turno ocupado"><p>⏰ 11:30 &nbsp; Gaston Romanutti</p></div>
                 </div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
@@ -231,39 +222,12 @@
 
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
-                
                 <div style="display: flex; gap: 60px; margin-top: 10px;">
                     <div style="width: 250px;">
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
-                        
-                        <label style="margin-bottom: 15px;">Elegir fecha</label>
-                        <div class="calendario-header" style="margin-bottom: 10px;">
-                            <h3 style="font-size: 16px;">Junio 2026</h3>
-                            <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
-                        </div>
-                        <div class="dias-semana">
-                            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
-                        </div>
-                        <div class="grilla-dias">
-                            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-                            <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-                            <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
-                            <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-                            <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div>
-                        </div>
-                    </div>
-                    
-                    <div style="flex: 1; padding-top: 50px;">
-                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 320px;">
-                            <h3 style="margin: 0; color: #333; font-weight: 900; font-size: 16px;">Dra Garcia</h3>
-                            <p style="margin: 0 0 10px 0; color: #096991; font-weight: 900; font-size: 12px;">Odontología</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">Sucursal: Centro (Miro<br>1122 C.A.B.A.)</p>
-                        </div>
                     </div>
                 </div>
-
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -272,21 +236,18 @@
             <div id="modulo-notas" class="contenedor-modulo">
                 <div style="display: flex; flex-direction: column; width: 100%; max-width: 800px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
-                    
                     <div class="fila-flex" style="margin-bottom: 20px;">
                         <div style="width: 150px;">
                             <label>Fecha</label>
-                            <input type="date" id="nota-fecha" class="input-suave" style="width: 100%; box-sizing: border-box;">
+                            <input type="date" id="nota-fecha" class="input-suave" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <label>Título</label>
-                            <input type="text" id="nota-titulo" class="input-suave" style="width: 100%; box-sizing: border-box;">
+                            <input type="text" id="nota-titulo" class="input-suave" style="width: 100%;">
                         </div>
                     </div>
-                    
                     <label>Notas</label>
-                    <textarea id="nota-contenido" class="input-suave" style="height: 250px; width: 100%; box-sizing: border-box; resize: none; border-radius: 15px; padding: 20px;"></textarea>
-                    
+                    <textarea id="nota-contenido" class="input-suave" style="height: 250px; width: 100%; resize: none; border-radius: 15px; padding: 20px;"></textarea>
                     <div class="contenedor-volver" style="margin-top: 20px;">
                         <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                         <button class="btn-guardar" onclick="guardarNota()">guardar</button>
@@ -295,51 +256,26 @@
             </div>
 
             <div id="modulo-bloqueos" class="contenedor-modulo">
-                
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
-                    <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
                 </div>
-                
                 <div class="fila-flex" style="margin-bottom: 25px; margin-left: 20px;">
-                    <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
-                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px; text-align: center;">
-                    
-                    <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
-                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px; text-align: center;">
-                    
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
+                    <span class="texto-bold">Bloquear desde</span>
+                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px;">
+                    <span class="texto-bold">Hasta</span>
+                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px;">
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
                 </div>
-
                 <hr style="border: 0; border-top: 1px solid #DDD; margin: 40px 0;">
-
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
-                    <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
                 </div>
-
-                <div class="fila-flex" style="margin-bottom: 15px; align-items: flex-start; margin-left: 20px;">
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
-                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px; text-align: center;">
-                    </div>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="texto-bold" style="width: 85px;">Desde las</span>
-                            <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px; text-align: center;">
-                            <span class="texto-bold">hs</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="texto-bold" style="width: 85px;">Hasta las</span>
-                            <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px; text-align: center;">
-                            <span class="texto-bold">hs</span>
-                        </div>
-                    </div>
-                    
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 40px; align-self: center;" onclick="guardarCancelacionHora()">guardar horas</button>
+                <div class="fila-flex" style="margin-bottom: 15px; margin-left: 20px;">
+                    <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px;">
+                    <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px;">
+                    <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px;">
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px;" onclick="guardarCancelacionHora()">guardar horas</button>
                 </div>
-
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -386,108 +322,136 @@
             miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        let aliasNegocioActual = "TEST_CLINICA"; 
+        // MEMORIA GLOBAL DEL SISTEMA
+        let aliasNegocioActual = ""; 
+        let usuarioActual = "";
+        let profesionalActual = "";
 
-        // 1. GUARDAR NOTAS
+        // 1. REGISTRO REAL EN SUPABASE
+        async function ejecutarRegistro() {
+            try {
+                if (!miSupabase) return;
+                const negocio = document.getElementById('reg-negocio').value.trim().toUpperCase();
+                const nombre = document.getElementById('reg-nombre').value.trim();
+                const usuario = document.getElementById('reg-usuario').value.trim().toLowerCase();
+                const clave = document.getElementById('reg-clave').value.trim();
+
+                if(!negocio || !nombre || !usuario || !clave) {
+                    alert("⚠️ Por favor completa todos los datos para registrar la cuenta.");
+                    return;
+                }
+
+                const { data, error } = await miSupabase
+                    .from('usuarios_panel')
+                    .insert([{ alias_negocio: negocio, nombre: nombre, usuario: usuario, contrasena: clave }]);
+
+                if (error) throw error;
+
+                alert("🎉 ¡Cuenta creada con éxito! Ya podés iniciar sesión.");
+                cambiarPantalla('pantalla-login');
+            } catch (error) {
+                alert("❌ No se pudo crear el usuario: " + error.message);
+            }
+        }
+
+        // 2. LOGIN REAL VALIDANDO EN SUPABASE
+        async function ejecutarLogin() {
+            try {
+                if (!miSupabase) return;
+                const usuarioInput = document.getElementById('login-usuario').value.trim().toLowerCase();
+                const claveInput = document.getElementById('login-clave').value.trim();
+
+                if(!usuarioInput || !claveInput) {
+                    alert("⚠️ Introduce tu usuario y contraseña.");
+                    return;
+                }
+
+                const { data, error } = await miSupabase
+                    .from('usuarios_panel')
+                    .select('*')
+                    .eq('usuario', usuarioInput)
+                    .eq('contrasena', claveInput);
+
+                if (error) throw error;
+
+                if(data && data.length > 0) {
+                    // Guardamos la info del usuario en memoria
+                    aliasNegocioActual = data[0].alias_negocio;
+                    usuarioActual = data[0].usuario;
+                    
+                    // Modificamos el saludo dinámicamente
+                    document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre + "!!";
+                    
+                    cambiarPantalla('pantalla-elegir');
+                } else {
+                    alert("❌ Usuario o contraseña incorrectos. Revisa los datos.");
+                }
+            } catch (error) {
+                alert("❌ Error al conectar: " + error.message);
+            }
+        }
+
+        // 3. SELECCIÓN DE PROFESIONAL
+        function seleccionarAgenda() {
+            const prof = document.getElementById('elegir-profesional').value.trim();
+            if(!prof) {
+                alert("⚠️ Por favor ingresá el alias del profesional para abrir su agenda.");
+                return;
+            }
+            profesionalActual = prof;
+            cambiarPantalla('pantalla-dia');
+        }
+
+        // 4. GUARDAR NOTAS (Impactando con el negocio real logueado)
         async function guardarNota() {
             try {
-                if (!miSupabase) { alert("❌ Error de conexión."); return; }
-
                 const fechaNota = document.getElementById('nota-fecha').value;
                 const tituloNota = document.getElementById('nota-titulo').value;
                 const contenidoNota = document.getElementById('nota-contenido').value;
 
-                if(!fechaNota || !tituloNota || !contenidoNota) {
-                    alert("⚠️ Por favor completá todos los campos.");
-                    return;
-                }
+                if(!fechaNota || !tituloNota || !contenidoNota) { alert("⚠️ Completa los campos."); return; }
 
-                const { data, error } = await miSupabase
+                const { error } = await miSupabase
                     .from('notas')
                     .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
 
                 if (error) throw error;
-
-                alert("✅ ¡Nota guardada con éxito!");
-                document.getElementById('nota-fecha').value = "";
-                document.getElementById('nota-titulo').value = "";
-                document.getElementById('nota-contenido').value = "";
-
-            } catch (error) {
-                alert("❌ Problema al guardar nota: " + error.message);
-            }
+                alert("✅ ¡Nota guardada!");
+                document.getElementById('nota-fecha').value = ""; document.getElementById('nota-titulo').value = ""; document.getElementById('nota-contenido').value = "";
+            } catch (error) { alert("❌ Error: " + error.message); }
         }
 
-        // 2. GUARDAR VACACIONES (RANGO)
+        // 5. GUARDAR VACACIONES
         async function guardarBloqueoVacaciones() {
             try {
-                if (!miSupabase) { alert("❌ Error de conexión."); return; }
-
                 const inicio = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
+                if(!inicio || !fin) { alert("⚠️ Completa las fechas."); return; }
 
-                if(!inicio || !fin) {
-                    alert("⚠️ Por favor completá las fechas de inicio y fin del bloqueo.");
-                    return;
-                }
-
-                const { data, error } = await miSupabase
+                const { error } = await miSupabase
                     .from('bloqueos')
-                    .insert([{
-                        alias_negocio: aliasNegocioActual,
-                        tipo_bloqueo: 'vacaciones',
-                        fecha_inicio: inicio,
-                        fecha_fin: fin,
-                        hora_inicio: null, // No aplica a vacaciones
-                        hora_fin: null
-                    }]);
+                    .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: inicio, fecha_fin: fin }]);
 
                 if (error) throw error;
-
-                alert("✅ ¡Rango de vacaciones bloqueado con éxito!");
-                document.getElementById('bloqueo-inicio').value = "";
-                document.getElementById('bloqueo-fin').value = "";
-
-            } catch (error) {
-                alert("❌ Error de Supabase: " + error.message);
-            }
+                alert("✅ Rango de vacaciones bloqueado.");
+            } catch (error) { alert("❌ Error: " + error.message); }
         }
 
-        // 3. GUARDAR CANCELACIÓN (HORAS ESPECÍFICAS)
+        // 6. GUARDAR CANCELACIÓN
         async function guardarCancelacionHora() {
             try {
-                if (!miSupabase) { alert("❌ Error de conexión."); return; }
-
                 const dia = document.getElementById('cancelar-dia').value;
                 const desde = document.getElementById('cancelar-desde').value;
                 const hasta = document.getElementById('cancelar-hasta').value;
+                if(!dia || !desde || !hasta) { alert("⚠️ Completa día y horas."); return; }
 
-                if(!dia || !desde || !hasta) {
-                    alert("⚠️ Por favor completá el día y las horas de la cancelación.");
-                    return;
-                }
-
-                const { data, error } = await miSupabase
+                const { error } = await miSupabase
                     .from('bloqueos')
-                    .insert([{
-                        alias_negocio: aliasNegocioActual,
-                        tipo_bloqueo: 'cancelacion',
-                        fecha_inicio: dia,
-                        fecha_fin: dia, // Al ser un solo día, el fin es el mismo día
-                        hora_inicio: desde,
-                        hora_fin: hasta
-                    }]);
+                    .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: desde, hora_fin: hasta }]);
 
                 if (error) throw error;
-
-                alert("✅ ¡Horarios cancelados con éxito!");
-                document.getElementById('cancelar-dia').value = "";
-                document.getElementById('cancelar-desde').value = "";
-                document.getElementById('cancelar-hasta').value = "";
-
-            } catch (error) {
-                alert("❌ Error de Supabase: " + error.message);
-            }
+                alert("✅ Horarios cancelados.");
+            } catch (error) { alert("❌ Error: " + error.message); }
         }
     </script>
 </body>
