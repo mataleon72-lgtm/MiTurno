@@ -133,7 +133,7 @@
     <div id="pantalla-registro" class="pantalla">
         <div class="panel-izquierdo" style="padding-top: 20px;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 20px;">
-            <img src="https://mataleon72-lgtm.github.io/main/titulo_nuevousuario.png" class="img-titulo-modulo" style="align-self: center;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_nuevousuario.png" class="img-titulo-modulo" style="align-self: center;">
             <div style="width: 100%; max-width: 250px;">
                 <label>Alias Negocio</label><input type="text" class="input-clasico">
                 <label>Tu Nombre</label><input type="text" class="input-clasico">
@@ -195,7 +195,13 @@
                 <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
                     <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
                 </div>
+                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
+                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Buscar nuevos sillones</p>
                 </div>
+                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
+                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">23/06/2026 &nbsp; Devolver llamada a José</p>
+                </div>
+            </div>
         </div>
 
         <div class="panel-derecho">
@@ -330,16 +336,6 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURACIÓN DE SUPABASE ---
-        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-        // Usamos la llave pública de la etapa 1
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Simulamos que estamos logueados en un negocio para poder guardar datos
-        let aliasNegocioActual = "TEST_CLINICA"; 
-
-        // --- 2. FUNCIONES VISUALES (Las que ya teníamos) ---
         function cambiarPantalla(idPantalla) {
             const pantallas = document.querySelectorAll('.pantalla');
             pantallas.forEach(p => p.classList.remove('activa'));
@@ -351,6 +347,7 @@
             modulos.forEach(m => m.classList.remove('activo'));
             document.getElementById(idModulo).classList.add('activo');
 
+            // Logica para cambiar los Sidebars Izquierdos
             document.getElementById('sidebar-dia').style.display = 'none';
             document.getElementById('sidebar-notas').style.display = 'none';
 
@@ -360,38 +357,44 @@
                 document.getElementById('sidebar-notas').style.display = 'block';
             }
         }
+    </script>
 
-        // --- 3. FUNCIONES DE BASE DE DATOS ---
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        
+        let supabase;
+        // Solo iniciamos Supabase si el navegador logró cargar el código externo
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        let aliasNegocioActual = "TEST_CLINICA"; 
+
         async function guardarNota() {
-            // Agarramos lo que el usuario escribió
+            if (!supabase) {
+                alert("Error de conexión a la base de datos.");
+                return;
+            }
+
             const fechaNota = document.getElementById('nota-fecha').value;
             const tituloNota = document.getElementById('nota-titulo').value;
             const contenidoNota = document.getElementById('nota-contenido').value;
 
-            // Validación básica
             if(!fechaNota || !tituloNota || !contenidoNota) {
                 alert("Por favor completá la fecha, el título y la nota antes de guardar.");
                 return;
             }
 
-            // Enviamos a Supabase
             const { data, error } = await supabase
                 .from('notas')
-                .insert([
-                    { 
-                        alias_negocio: aliasNegocioActual, 
-                        fecha: fechaNota, 
-                        titulo: tituloNota, 
-                        contenido: contenidoNota 
-                    }
-                ]);
+                .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
 
             if(error) {
                 console.error("Error guardando:", error);
                 alert("Hubo un problema al guardar la nota.");
             } else {
                 alert("¡Nota guardada con éxito en la base de datos!");
-                // Limpiamos el formulario para que quede listo para otra nota
                 document.getElementById('nota-fecha').value = "";
                 document.getElementById('nota-titulo').value = "";
                 document.getElementById('nota-contenido').value = "";
