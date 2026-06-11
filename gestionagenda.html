@@ -25,7 +25,7 @@
         .pantalla.activa { display: flex; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PANELES TRANSPARENTES */
+        /* PANELES */
         .panel-izquierdo {
             width: 30%; height: 100%; background: transparent; display: flex;
             flex-direction: column; align-items: center; padding: 40px 30px; box-sizing: border-box;
@@ -36,7 +36,7 @@
             flex-direction: column; padding: 40px 50px; box-sizing: border-box; position: relative; z-index: 5;
         }
 
-        /* ELEMENTOS GRÁFICOS */
+        /* LOGOS Y TITULOS */
         .logo-chico { width: 100%; max-width: 180px; margin-bottom: 40px; display: block; }
         .logo-grande { width: 100%; max-width: 220px; margin-bottom: 20px; }
         .img-titulo-modulo { height: 45px; width: auto; align-self: flex-start; margin-bottom: 30px; display: block; }
@@ -79,46 +79,40 @@
         .contenedor-modulo { display: none; width: 100%; height: 100%; flex-direction: column; }
         .contenedor-modulo.activo { display: flex; animation: fadeIn 0.2s ease; }
 
-        /* GRILLA DÍA EN CURSO */
+        /* GRILLA PRINCIPAL */
         .header-dia { font-size: 32px; font-weight: 900; color: #444; margin-bottom: 30px; }
         .grilla-turnos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 100px; }
         .tarjeta-turno {
             background: #FFF; border-radius: 12px; padding: 12px 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; align-items: center; border-top: 5px solid #CCC;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; align-items: center; border-top: 5px solid #6EB64F;
         }
-        .tarjeta-turno.disponible { border-top-color: #6EB64F; }
-        .tarjeta-turno.cancelado { border-top-color: #ED3237; }
-        .tarjeta-turno.ocupado { border-top-color: #CCC; }
         .tarjeta-turno p { margin: 0; font-size: 11px; font-weight: 900; color: #555; }
-        .tarjeta-turno p.estado-rojo { color: #ED3237; font-size: 9px; margin-left: auto; }
 
-        /* BOTONERA INFERIOR FIJA */
+        /* BOTONERA INFERIOR */
         .botonera-inferior { position: absolute; bottom: 40px; left: 50px; display: flex; gap: 20px; align-items: center; z-index: 1000; }
         .btn-modulo { height: 60px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1000; }
         .btn-modulo:active { transform: scale(0.95); }
 
-        /* ESTILOS DE INPUTS */
+        /* ESTILOS INTERNOS DE MÓDULOS */
         .input-suave {
             background: #FFF; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            border-radius: 12px; padding: 10px 15px; font-weight: 900; color: #555;
-            font-family: 'Nunito', sans-serif; outline: none; font-size: 14px; position: relative; z-index: 100;
+            border-radius: 12px; padding: 14px 20px; font-weight: 900; color: #555;
+            font-family: 'Nunito', sans-serif; outline: none; font-size: 15px; position: relative; z-index: 100; box-sizing: border-box;
         }
-        ::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
         .texto-bold { font-weight: 900; color: #666; font-size: 16px; }
         .texto-desc { font-weight: 800; color: #777; font-size: 14px; margin-left: 15px; }
         .fila-flex { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
         
         .contenedor-volver { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 800px; }
-        .btn-volver-agenda { height: 30px; cursor: pointer; transition: transform 0.2s; align-self: flex-start; position: relative; z-index: 1000; }
+        .btn-volver-agenda { height: 35px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1000; }
         .btn-volver-agenda:active { transform: scale(0.95); }
 
-        .btn-guardar {
+        .btn-guardar-estilo {
             background-color: #007D82; color: white; padding: 12px 35px; border-radius: 12px; 
             font-weight: 900; font-size: 20px; border: none; cursor: pointer; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; position: relative; z-index: 1000;
         }
-        .btn-guardar:active { transform: scale(0.95); background-color: #006064; }
-
+        .btn-guardar-estilo:active { transform: scale(0.95); background-color: #006064; }
     </style>
 </head>
 <body>
@@ -149,7 +143,7 @@
                 <label>Contraseña</label><input type="password" id="reg-clave" class="input-clasico" placeholder="********">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarRegistro(event)"> 
             </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-img" style="margin-top: 40px; width: 150px;" onclick="cambiarPantalla('pantalla-login')">
+            <div class="link-text" onclick="cambiarPantalla('pantalla-login')">ya tenes cuenta - Inicia sesión 👈</div>
         </div>
         <div class="panel-derecho"></div>
     </div>
@@ -162,7 +156,7 @@
             <div style="width: 100%; max-width: 350px; text-align: center; margin-top: 30px;">
                 <label style="text-align: center;">Que agenda usaras hoy? Ingresa el Alias del Profesional</label>
                 <input type="text" id="elegir-profesional" class="input-clasico" placeholder="EJ: Juli" style="text-align: center;">
-                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 20px;" onclick="seleccionarAgenda()">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 20px; display:inline-block;" onclick="seleccionarAgenda()">
             </div>
         </div>
     </div>
@@ -185,22 +179,21 @@
                     <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
                     <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
                     <div>22</div><div>23</div><div style="background:#009E9B; color:white;">24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-                    <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div><div class="inactivo">4</div><div class="inactivo">5</div>
+                    <div>29</div><div>30</div>
                 </div>
                 <div style="margin-top: 40px; text-align: center;">
                     <label style="text-align: center; font-size: 13px;">Cambiar de Sucursales</label>
-                    <select class="input-clasico" style="margin-bottom: 10px; padding: 10px;">
-                        <option>Centro (Miro 1122)</option>
-                        <option>Norte (Av. Sol 44)</option>
+                    <select id="select-sucursal-global" class="input-clasico" style="margin-bottom: 10px; padding: 10px;">
+                        <option value="Centro">Centro (Miro 1122)</option>
+                        <option value="Norte">Norte (Av. Sol 44)</option>
                     </select>
-                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_ir.png" style="width: 50px; cursor: pointer;" onclick="cambiarModulo('modulo-dia')">
                 </div>
             </div>
 
             <div id="sidebar-notas">
-                <h2 style="color: #555; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%; text-align: left;">Notas</h2>
-                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
-                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
+                <h2 style="color: #555; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%;">Notas</h2>
+                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
+                    <p style="margin:0; font-size: 11px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
                 </div>
             </div>
         </div>
@@ -210,10 +203,10 @@
             <div id="modulo-dia" class="contenedor-modulo activo">
                 <div class="header-dia">22/06/2026</div>
                 <div class="grilla-turnos">
-                    <div class="tarjeta-turno disponible"><p>⏰ 08:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno disponible"><p>⏰ 09:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno disponible"><p>⏰ 10:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno disponible"><p>⏰ 11:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno"><p>⏰ 08:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno"><p>⏰ 09:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno"><p>⏰ 10:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno"><p>⏰ 11:30 &nbsp; Disponible</p></div>
                 </div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
@@ -224,113 +217,82 @@
 
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
-                
-                <div style="display: flex; gap: 60px; margin-top: 10px;">
-                    <div style="width: 250px;">
+                <div style="display: flex; gap: 40px; width: 100%;">
+                    <div style="width: 260px; display:flex; flex-direction:column;">
                         <label>Número de DNI</label>
-                        <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
+                        <input type="number" class="input-suave" style="width: 100%; margin-bottom: 25px;" placeholder="DNI Paciente">
                         
-                        <label style="margin-bottom: 15px;">Elegir fecha</label>
-                        <div class="calendario-header" style="margin-bottom: 10px;">
-                            <h3>Junio 2026</h3>
-                            <div><span><</span> &nbsp; <span>></span></div>
+                        <label style="margin-bottom: 10px;">Elegir fecha</label>
+                        <div class="calendario-header">
+                            <h3 style="font-size:15px;">Junio 2026</h3>
                         </div>
-                        <div class="dias-semana">
-                            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
-                        </div>
-                        <div class="grilla-dias">
-                            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-                            <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-                            <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
-                            <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-                            <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div>
+                        <div class="grilla-dias" style="font-size:14px; gap:8px;">
+                            <div>1</div><div>2</div><div>3</div>
                         </div>
                     </div>
-                    
-                    <div style="flex: 1; padding-top: 50px;">
-                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 320px;">
-                            <h3 style="margin: 0; color: #333; font-weight: 900; font-size: 16px;">Dra Garcia</h3>
+                    <div style="flex: 1; padding-top: 25px;">
+                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 300px;">
+                            <h3 style="margin: 0; font-weight: 900; font-size: 16px; color:#333;">Dra Garcia</h3>
                             <p style="margin: 0 0 10px 0; color: #096991; font-weight: 900; font-size: 12px;">Odontología</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">Sucursal: Centro (Miro<br>1122 C.A.B.A.)</p>
+                            <p style="margin: 5px 0; color: #555; font-weight: 800; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
                         </div>
                     </div>
                 </div>
-
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
             </div>
 
             <div id="modulo-notas" class="contenedor-modulo">
-                <div style="display: flex; flex-direction: column; width: 100%; max-width: 800px;">
-                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
-                    <div class="fila-flex" style="margin-bottom: 20px;">
-                        <div style="width: 150px;">
-                            <label>Fecha</label>
-                            <input type="date" id="nota-fecha" class="input-suave" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <label>Título</label>
-                            <input type="text" id="nota-titulo" class="input-suave" style="width: 100%;">
-                        </div>
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
+                <div style="width: 100%; max-width: 650px;">
+                    <div class="fila-flex">
+                        <div style="width: 180px;"><label>Fecha</label><input type="date" id="nota-fecha" class="input-suave" style="width:100%;"></div>
+                        <div style="flex:1;"><label>Título</label><input type="text" id="nota-titulo" class="input-suave" style="width:100%;" placeholder="Título de la nota"></div>
                     </div>
-                    <label>Notas</label>
-                    <textarea id="nota-contenido" class="input-suave" style="height: 250px; width: 100%; resize: none; border-radius: 15px; padding: 20px;"></textarea>
+                    <label>Contenido de la Nota</label>
+                    <textarea id="nota-contenido" class="input-suave" style="height: 180px; width: 100%; resize: none; border-radius: 15px; padding: 15px;" placeholder="Escribí los detalles aquí..."></textarea>
                     <div class="contenedor-volver" style="margin-top: 20px;">
                         <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
-                        <button class="btn-guardar" onclick="guardarNota()">guardar</button>
+                        <button class="btn-guardar-estilo" onclick="guardarNota()">guardar</button>
                     </div>
                 </div>
             </div>
 
             <div id="modulo-bloqueos" class="contenedor-modulo">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom:10px;">
+                <p class="texto-desc" style="margin:0 0 20px 0;">Selecciona entre qué fechas estará cerrado por vacaciones</p>
                 
                 <div class="fila-flex" style="margin-bottom: 30px;">
-                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
-                    <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
+                    <span class="texto-bold">Desde</span>
+                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 160px;">
+                    <span class="texto-bold">Hasta</span>
+                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 160px;">
+                    <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
                 </div>
+
+                <hr style="border:0; border-top:1px solid #EAEAEA; margin:20px 0; width:100%; max-width:650px;">
+
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom:10px;">
+                <p class="texto-desc" style="margin:0 0 20px 0;">Cancela un bloque de horarios para un día específico</p>
                 
-                <div class="fila-flex" style="margin-bottom: 40px; margin-left: 20px;">
-                    <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
-                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px; text-align: center;">
-                    
-                    <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
-                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px; text-align: center;">
-                    
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
-                </div>
-
-                <hr style="border: 0; border-top: 1px solid #DDD; margin: 40px 0;">
-
-                <div class="fila-flex" style="margin-bottom: 30px;">
-                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
-                    <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
-                </div>
-
-                <div class="fila-flex" style="margin-bottom: 15px; align-items: flex-start; margin-left: 20px;">
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
-                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px; text-align: center;">
+                <div class="fila-flex" style="align-items: flex-end;">
+                    <div>
+                        <label>Día a Cancelar</label>
+                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 160px;">
                     </div>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="texto-bold" style="width: 85px;">Desde las</span>
-                            <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px; text-align: center;">
-                            <span class="texto-bold">hs</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="texto-bold" style="width: 85px;">Hasta las</span>
-                            <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px; text-align: center;">
-                            <span class="texto-bold">hs</span>
-                        </div>
+                    <div style="margin-left:20px;">
+                        <label>Desde las hs</label>
+                        <input type="time" id="cancelar-desde" class="input-suave" style="width: 120px;">
                     </div>
-                    
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 40px; align-self: center;" onclick="guardarCancelacionHora()">guardar horas</button>
+                    <div style="margin-left:10px;">
+                        <label>Hasta las hs</label>
+                        <input type="time" id="cancelar-hasta" class="input-suave" style="width: 120px;">
+                    </div>
+                    <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px; margin-left:20px;" onclick="guardarCancelacionHora()">guardar horas</button>
                 </div>
 
-                <div class="contenedor-volver">
+                <div class="contenedor-volver" style="margin-top:auto;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
             </div>
@@ -340,26 +302,20 @@
 
     <script>
         function cambiarPantalla(idPantalla) {
-            var pantallas = document.querySelectorAll('.pantalla');
-            for(var i = 0; i < pantallas.length; i++) {
-                pantallas[i].classList.remove('activa');
-            }
-            var destino = document.getElementById(idPantalla);
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            const destino = document.getElementById(idPantalla);
             if(destino) destino.classList.add('activa');
         }
 
         function cambiarModulo(idModulo) {
-            var modulos = document.querySelectorAll('.contenedor-modulo');
-            for(var i = 0; i < modulos.length; i++) {
-                modulos[i].classList.remove('activo');
-            }
-            var destino = document.getElementById(idModulo);
+            document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
+            const destino = document.getElementById(idModulo);
             if(destino) destino.classList.add('activo');
 
             document.getElementById('sidebar-dia').style.display = 'none';
             document.getElementById('sidebar-notas').style.display = 'none';
 
-            if (idModulo === 'modulo-dia') {
+            if (idModulo === 'modulo-dia' || idModulo === 'modulo-darturno' || idModulo === 'modulo-bloqueos') {
                 document.getElementById('sidebar-dia').style.display = 'block';
             } else if (idModulo === 'modulo-notas') {
                 document.getElementById('sidebar-notas').style.display = 'block';
@@ -371,93 +327,63 @@
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         
-        let miSupabase;
+        const miSupabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-        if (window.supabase) {
-            miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-
-        // MEMORIA GLOBAL DINÁMICA
+        // Variables de Estado Global en Memoria
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
 
-        // 1. REGISTRO DE USUARIOS
-        async function ejecutarRegistro(e) {
-            if(e) e.preventDefault();
-            try {
-                if (!miSupabase && window.supabase) {
-                    miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                }
-
-                const negocio = document.getElementById('reg-negocio').value.trim().toUpperCase();
-                const nombre = document.getElementById('reg-nombre').value.trim();
-                const usuario = document.getElementById('reg-usuario').value.trim().toLowerCase();
-                const clave = document.getElementById('reg-clave').value.trim();
-
-                if(!negocio || !nombre || !usuario || !clave) {
-                    alert("⚠️ Por favor completa todos los campos.");
-                    return;
-                }
-
-                const { data, error } = await miSupabase
-                    .from('usuarios_panel')
-                    .insert([{ 
-                        alias_negocio: negocio, 
-                        nombre_usuario: nombre, 
-                        alias_usuario: usuario, 
-                        password: clave 
-                    }])
-                    .select();
-
-                if (error) throw error;
-
-                alert("🎉 ¡Cuenta creada con éxito! Pasemos al login.");
-                cambiarPantalla('pantalla-login');
-            } catch (error) {
-                alert("❌ Problema del Servidor: " + error.message);
-            }
-        }
-
-        // 2. LOGIN DE USUARIOS
+        // LOGIN
         async function ejecutarLogin(e) {
             if(e) e.preventDefault();
             try {
-                if (!miSupabase && window.supabase) {
-                    miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                }
+                const usr = document.getElementById('login-usuario').value.trim().toLowerCase();
+                const clv = document.getElementById('login-clave').value.trim();
 
-                const usuarioInput = document.getElementById('login-usuario').value.trim().toLowerCase();
-                const claveInput = document.getElementById('login-clave').value.trim();
-
-                if(!usuarioInput || !claveInput) {
-                    alert("⚠️ Introduce tu usuario y contraseña.");
-                    return;
-                }
+                if(!usr || !clv) { alert("⚠️ Introduce tu usuario y contraseña."); return; }
 
                 const { data, error } = await miSupabase
                     .from('usuarios_panel')
                     .select('*')
-                    .eq('alias_usuario', usuarioInput)
-                    .eq('password', claveInput);
+                    .eq('alias_usuario', usr)
+                    .eq('password', clv);
 
                 if (error) throw error;
 
                 if(data && data.length > 0) {
                     aliasNegocioActual = data[0].alias_negocio;
                     usuarioActual = data[0].alias_usuario;
-                    
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     cambiarPantalla('pantalla-elegir');
                 } else {
-                    alert("❌ Usuario o contraseña incorrectos.");
+                    alert("❌ Credenciales incorrectas.");
                 }
-            } catch (error) {
-                alert("❌ Error: " + error.message);
-            }
+            } catch (err) { alert("❌ Error: " + err.message); }
         }
 
-        // 3. SELECCIÓN DE PROFESIONAL
+        // REGISTRO
+        async function ejecutarRegistro(e) {
+            if(e) e.preventDefault();
+            try {
+                const neg = document.getElementById('reg-negocio').value.trim().toUpperCase();
+                const nom = document.getElementById('reg-nombre').value.trim();
+                const usr = document.getElementById('reg-usuario').value.trim().toLowerCase();
+                const clv = document.getElementById('reg-clave').value.trim();
+
+                if(!neg || !nom || !usr || !clv) { alert("⚠️ Completa todos los campos."); return; }
+
+                const { error } = await miSupabase
+                    .from('usuarios_panel')
+                    .insert([{ alias_negocio: neg, nombre_usuario: nom, alias_usuario: usr, password: clv }]);
+
+                if (error) throw error;
+                alert("🎉 ¡Cuenta creada con éxito!");
+                cambiarPantalla('pantalla-login');
+            } catch (err) { alert("❌ Servidor: " + err.message); }
+        }
+
+        // SELECCIÓN DE PROFESIONAL
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) { alert("⚠️ Ingresa el profesional."); return; }
@@ -465,54 +391,60 @@
             cambiarPantalla('pantalla-dia');
         }
 
-        // 4. GUARDAR NOTAS DINÁMICAS
+        // GUARDAR NOTAS
         async function guardarNota() {
             try {
-                const fechaNota = document.getElementById('nota-fecha').value;
-                const tituloNota = document.getElementById('nota-titulo').value;
-                const contenidoNota = document.getElementById('nota-contenido').value;
-                if(!fechaNota || !tituloNota || !contenidoNota) { alert("⚠️ Completa los campos."); return; }
+                const f = document.getElementById('nota-fecha').value;
+                const t = document.getElementById('nota-titulo').value;
+                const c = document.getElementById('nota-contenido').value;
+                if(!f || !t || !c) { alert("⚠️ Completa todos los campos."); return; }
 
                 const { error } = await miSupabase
                     .from('notas')
-                    .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
+                    .insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
                 if (error) throw error;
-                alert("✅ ¡Nota guardada con éxito!");
-                document.getElementById('nota-fecha').value = ""; document.getElementById('nota-titulo').value = ""; document.getElementById('nota-contenido').value = "";
-            } catch (error) { alert("❌ Error: " + error.message); }
+                alert("✅ Nota guardada.");
+                document.getElementById('nota-fecha').value=""; document.getElementById('nota-titulo').value=""; document.getElementById('nota-contenido').value="";
+            } catch (err) { alert("❌ Error: " + err.message); }
         }
 
-        // 5. GUARDAR VACACIONES DINÁMICAS (TABLA BLOQUEOS)
+        // GUARDAR VACACIONES (CRUCE PERFECTO)
         async function guardarBloqueoVacaciones() {
             try {
-                const inicio = document.getElementById('bloqueo-inicio').value;
+                const ini = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
-                if(!inicio || !fin) { alert("⚠️ Completa las fechas de vacaciones."); return; }
+                const suc = document.getElementById('select-sucursal-global').value;
+
+                if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas."); return; }
 
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ 
                         alias_negocio: aliasNegocioActual, 
                         tipo_bloqueo: 'vacaciones', 
-                        fecha_inicio: inicio, 
+                        fecha_inicio: ini, 
                         fecha_fin: fin,
                         hora_inicio: null,
-                        hora_fin: null
+                        hora_fin: null,
+                        alias_profesional: profesionalActual, // NUEVA COLUMNA
+                        id_sucursal: suc                      // NUEVA COLUMNA
                     }]);
 
                 if (error) throw error;
-                alert("✅ Rango de vacaciones bloqueado en la base de datos.");
+                alert("✅ Vacaciones registradas con éxito para " + profesionalActual + " en Sucursal " + suc);
                 document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
-            } catch (error) { alert("❌ Error de Supabase: " + error.message); }
+            } catch (err) { alert("❌ Error de Supabase: " + err.message); }
         }
 
-        // 6. GUARDAR CANCELACIÓN DINÁMICA (TABLA BLOQUEOS)
+        // GUARDAR CANCELACIÓN (CRUCE PERFECTO)
         async function guardarCancelacionHora() {
             try {
                 const dia = document.getElementById('cancelar-dia').value;
-                const desde = document.getElementById('cancelar-desde').value;
-                const hasta = document.getElementById('cancelar-hasta').value;
-                if(!dia || !desde || !hasta) { alert("⚠️ Completa el día y las horas de corte."); return; }
+                const des = document.getElementById('cancelar-desde').value;
+                const has = document.getElementById('cancelar-hasta').value;
+                const suc = document.getElementById('select-sucursal-global').value;
+
+                if(!dia || !des || !has) { alert("⚠️ Completa el día y los rangos de horas."); return; }
 
                 const { error } = await miSupabase
                     .from('bloqueos')
@@ -521,14 +453,16 @@
                         tipo_bloqueo: 'cancelacion', 
                         fecha_inicio: dia, 
                         fecha_fin: dia, 
-                        hora_inicio: desde, 
-                        hora_fin: hasta 
+                        hora_inicio: des, 
+                        hora_fin: has,
+                        alias_profesional: profesionalActual, // NUEVA COLUMNA
+                        id_sucursal: suc                      // NUEVA COLUMNA
                     }]);
 
                 if (error) throw error;
-                alert("✅ Horarios cancelados con éxito.");
+                alert("✅ Bloqueo horario guardado con éxito.");
                 document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
-            } catch (error) { alert("❌ Error de Supabase: " + error.message); }
+            } catch (err) { alert("❌ Error de Supabase: " + err.message); }
         }
     </script>
 </body>
