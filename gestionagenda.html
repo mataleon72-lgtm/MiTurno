@@ -278,23 +278,29 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // --- 1. CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        
+        // Creamos el "empleado" oficial de Supabase
+        let miSupabase;
+        if (window.supabase) {
+            miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        let aliasNegocioActual = "TEST_CLINICA"; 
+
+        // --- 2. FUNCIONES DE NAVEGACIÓN ---
         function cambiarPantalla(idPantalla) {
-            var pantallas = document.querySelectorAll('.pantalla');
-            for(var i = 0; i < pantallas.length; i++) {
-                pantallas[i].classList.remove('activa');
-            }
-            var destino = document.getElementById(idPantalla);
-            if(destino) destino.classList.add('activa');
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(idPantalla).classList.add('activa');
         }
 
         function cambiarModulo(idModulo) {
-            var modulos = document.querySelectorAll('.contenedor-modulo');
-            for(var i = 0; i < modulos.length; i++) {
-                modulos[i].classList.remove('activo');
-            }
-            var destino = document.getElementById(idModulo);
-            if(destino) destino.classList.add('activo');
+            document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
+            document.getElementById(idModulo).classList.add('activo');
 
             document.getElementById('sidebar-dia').style.display = 'none';
             document.getElementById('sidebar-notas').style.display = 'none';
@@ -305,51 +311,49 @@
                 document.getElementById('sidebar-notas').style.display = 'block';
             }
         }
-    </script>
 
-    <script>
-        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        
-        let aliasNegocioActual = "TEST_CLINICA"; 
-
+        // --- 3. FUNCIÓN PARA GUARDAR NOTAS ---
         async function guardarNota() {
-            // DIAGNÓSTICO 1: Verificamos si la librería de Supabase cargó en la compu
-            if (typeof supabase === 'undefined' && typeof window.supabase === 'undefined') {
-                alert("Alerta de Diagnóstico: Tu navegador bloqueó la librería externa de Supabase. Desactivá extensiones/antivirus en esta pestaña e intentá de nuevo.");
-                return;
-            }
+            try {
+                // Verificamos que todo esté conectado
+                if (!miSupabase) {
+                    alert("❌ Error: No se pudo conectar a Supabase.");
+                    return;
+                }
 
-            // Inicializamos si no estaba hecho
-            let client = (typeof supabase !== 'undefined') ? supabase : window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            if (typeof supabase === 'undefined' && window.supabase) {
-                window.supabaseClientInstance = window.supabaseClientInstance || window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                client = window.supabaseClientInstance;
-            }
+                // Agarramos los datos escritos
+                const fechaNota = document.getElementById('nota-fecha').value;
+                const tituloNota = document.getElementById('nota-titulo').value;
+                const contenidoNota = document.getElementById('nota-contenido').value;
 
-            const fechaNota = document.getElementById('nota-fecha').value;
-            const tituloNota = document.getElementById('nota-titulo').value;
-            const contenidoNota = document.getElementById('nota-contenido').value;
+                if(!fechaNota || !tituloNota || !contenidoNota) {
+                    alert("⚠️ Por favor completá la fecha, el título y la nota antes de guardar.");
+                    return;
+                }
 
-            if(!fechaNota || !tituloNota || !contenidoNota) {
-                alert("Por favor completá la fecha, el título y la nota antes de guardar.");
-                return;
-            }
+                // Enviamos a la base de datos
+                const { data, error } = await miSupabase
+                    .from('notas')
+                    .insert([{ 
+                        alias_negocio: aliasNegocioActual, 
+                        fecha: fechaNota, 
+                        titulo: tituloNota, 
+                        contenido: contenidoNota 
+                    }]);
 
-            alert("Diagnóstico: Intentando enviar nota a Supabase...");
+                // Si Supabase rebota la información, frenamos todo y mostramos por qué
+                if (error) throw error;
 
-            const { data, error } = await client
-                .from('notas')
-                .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
-
-            if(error) {
-                console.error("Error guardando:", error);
-                alert("Error de Supabase: " + error.message);
-            } else {
-                alert("¡Nota guardada con éxito en la base de datos!");
+                // Si todo sale bien, festejamos y limpiamos
+                alert("✅ ¡Nota guardada con éxito en tu base de datos!");
+                
                 document.getElementById('nota-fecha').value = "";
                 document.getElementById('nota-titulo').value = "";
                 document.getElementById('nota-contenido').value = "";
+
+            } catch (error) {
+                console.error("Error técnico detallado:", error);
+                alert("❌ Hubo un problema al guardar. Supabase dice: " + error.message);
             }
         }
     </script>
