@@ -152,7 +152,7 @@
     <div id="pantalla-elegir" class="pantalla">
         <div class="panel-izquierdo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-top: 20px;">
-            <div style="width: 100%; max-width: 250px; margin-top: 20px;">
+            <div style="width: 100%; max-width: 250px; margin-top: 40px;">
                 <h3 id="saludo-secretaria" style="color: #555; font-weight: 900; margin-bottom: 25px; font-size: 22px;">Buen día Secretaria!!</h3>
                 <label>¿Qué agenda usarás hoy?</label>
                 <input type="text" id="elegir-profesional" class="input-clasico" placeholder="EJ: Dra Garcia">
@@ -240,4 +240,276 @@
                     </div>
                 </div>
                 <div class="contenedor-volver">
-                    <img src="https
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                </div>
+            </div>
+
+            <div id="modulo-notas" class="contenedor-modulo">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
+                <div style="width: 100%; max-width: 650px;">
+                    <div class="fila-flex">
+                        <div style="width: 180px;"><label>Fecha</label><input type="date" id="nota-fecha" class="input-suave" style="width:100%;"></div>
+                        <div style="flex:1;"><label>Título</label><input type="text" id="nota-titulo" class="input-suave" style="width:100%;" placeholder="Título de la nota"></div>
+                    </div>
+                    <label>Contenido de la Nota</label>
+                    <textarea id="nota-contenido" class="input-suave" style="height: 180px; width: 100%; resize: none; border-radius: 15px; padding: 15px;" placeholder="Escribí los detalles aquí..."></textarea>
+                    <div class="contenedor-volver" style="margin-top: 20px;">
+                        <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                        <button class="btn-guardar-estilo" onclick="guardarNota()">guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modulo-bloqueos" class="contenedor-modulo">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom:10px;">
+                <p class="texto-desc" style="margin:0 0 20px 0;">Selecciona entre qué fechas estará cerrado por vacaciones</p>
+                
+                <div class="fila-flex" style="margin-bottom: 30px;">
+                    <span class="texto-bold">Desde</span>
+                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 160px;">
+                    <span class="texto-bold">Hasta</span>
+                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 160px;">
+                    <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px;" onclick="guardarBloqueoVacaciones(event)">guardar rango</button>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #EAEAEA; margin:20px 0; width:100%; max-width:650px;">
+
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom:10px;">
+                <p class="texto-desc" style="margin:0 0 20px 0;">Cancela un bloque de horarios para un día específico</p>
+                
+                <div class="fila-flex" style="align-items: flex-end;">
+                    <div>
+                        <label>Día a Cancelar</label>
+                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 160px;">
+                    </div>
+                    <div style="margin-left:20px;">
+                        <label>Desde las hs</label>
+                        <input type="time" id="cancelar-desde" class="input-suave" style="width: 120px;">
+                    </div>
+                    <div style="margin-left:10px;">
+                        <label>Hasta las hs</label>
+                        <input type="time" id="cancelar-hasta" class="input-suave" style="width: 120px;">
+                    </div>
+                    <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px; margin-left:20px;" onclick="guardarCancelacionHora(event)">guardar horas</button>
+                </div>
+
+                <div class="contenedor-volver" style="margin-top:auto;">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function cambiarPantalla(idPantalla) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            const destino = document.getElementById(idPantalla);
+            if(destino) destino.classList.add('activa');
+        }
+
+        function cambiarModulo(idModulo) {
+            document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
+            const destino = document.getElementById(idModulo);
+            if(destino) destino.classList.add('activo');
+
+            document.getElementById('sidebar-dia').style.display = 'none';
+            document.getElementById('sidebar-notas').style.display = 'none';
+
+            if (idModulo === 'modulo-dia' || idModulo === 'modulo-darturno' || idModulo === 'modulo-bloqueos') {
+                document.getElementById('sidebar-dia').style.display = 'block';
+            } else if (idModulo === 'modulo-notas') {
+                document.getElementById('sidebar-notas').style.display = 'block';
+            }
+        }
+    </script>
+
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        
+        let miSupabase;
+        if (window.supabase) {
+            miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        // MEMORIA GLOBAL DINÁMICA
+        let aliasNegocioActual = ""; 
+        let usuarioActual = "";
+        let profesionalActual = "";
+
+        // CARGA DINÁMICA DE SUCURSALES DESDE TU SUPABASE REAL
+        async function cargarSucursalesReal() {
+            try {
+                const selectElement = document.getElementById('select-sucursal-global');
+                selectElement.innerHTML = '<option value="">Cargando sucursales...</option>';
+
+                const { data, error } = await miSupabase
+                    .from('sucursales')
+                    .select('nombre') 
+                    .eq('alias_negocio', aliasNegocioActual);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    selectElement.innerHTML = ''; 
+                    data.forEach(suc => {
+                        let opt = document.createElement('option');
+                        opt.value = suc.nombre;
+                        opt.innerText = suc.nombre;
+                        selectElement.appendChild(opt);
+                    });
+                } else {
+                    selectElement.innerHTML = `<option value="sucursal de prueba">sucursal de prueba</option>`;
+                }
+            } catch (err) {
+                console.error("Error al cargar sucursales:", err);
+                document.getElementById('select-sucursal-global').innerHTML = `<option value="sucursal de prueba">sucursal de prueba</option>`;
+            }
+        }
+
+        // LOGIN DE USUARIO (USANDO TUS COLUMNAS REALES DE SUPABASE)
+        async function ejecutarLogin(e) {
+            if(e) e.preventDefault();
+            try {
+                const usr = document.getElementById('login-usuario').value.trim().toLowerCase();
+                const clv = document.getElementById('login-clave').value.trim();
+
+                if(!usr || !clv) { alert("⚠️ Introduce tu usuario y contraseña."); return; }
+
+                const { data, error } = await miSupabase
+                    .from('usuarios_panel')
+                    .select('*')
+                    .eq('alias_usuario', usr)
+                    .eq('password', clv);
+
+                if (error) throw error;
+
+                if(data && data.length > 0) {
+                    aliasNegocioActual = data[0].alias_negocio;
+                    usuarioActual = data[0].alias_usuario;
+                    document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
+                    
+                    // Cambiamos de pantalla inmediatamente a la izquierda
+                    cambiarPantalla('pantalla-elegir');
+                    
+                    // Cargamos tus sucursales reales de fondo
+                    cargarSucursalesReal();
+                } else {
+                    alert("❌ Credenciales incorrectas. Revisa el usuario y clave.");
+                }
+            } catch (err) { alert("❌ Error: " + err.message); }
+        }
+
+        // REGISTRO DE USUARIO NUEVO
+        async function ejecutarRegistro(e) {
+            if(e) e.preventDefault();
+            try {
+                const neg = document.getElementById('reg-negocio').value.trim().toUpperCase();
+                const nom = document.getElementById('reg-nombre').value.trim();
+                const usr = document.getElementById('reg-usuario').value.trim().toLowerCase();
+                const clv = document.getElementById('reg-clave').value.trim();
+
+                if(!neg || !nom || !usr || !clv) { alert("⚠️ Completa todos los campos para registrarte."); return; }
+
+                const { error } = await miSupabase
+                    .from('usuarios_panel')
+                    .insert([{ alias_negocio: neg, nombre_usuario: nom, alias_usuario: usr, password: clv }]);
+
+                if (error) throw error;
+                alert("🎉 ¡Cuenta creada con éxito! Ahora podés iniciar sesión.");
+                cambiarPantalla('pantalla-login');
+            } catch (err) { alert("❌ Servidor: " + err.message); }
+        }
+
+        // ASIGNACIÓN DE PROFESIONAL EN MEMORIA
+        function seleccionarAgenda() {
+            const prof = document.getElementById('elegir-profesional').value.trim();
+            if(!prof) { alert("⚠️ Por favor ingresá el alias del profesional."); return; }
+            profesionalActual = prof;
+            cambiarModulo('modulo-dia'); 
+            cambiarPantalla('pantalla-dia');
+        }
+
+        // GUARDAR NOTA
+        async function guardarNota() {
+            try {
+                const f = document.getElementById('nota-fecha').value;
+                const t = document.getElementById('nota-titulo').value;
+                const c = document.getElementById('nota-contenido').value;
+                if(!f || !t || !c) { alert("⚠️ Completa todos los campos."); return; }
+
+                const { error } = await miSupabase
+                    .from('notas')
+                    .insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
+                if (error) throw error;
+                alert("✅ Nota guardada.");
+                document.getElementById('nota-fecha').value=""; document.getElementById('nota-titulo').value=""; document.getElementById('nota-contenido').value="";
+            } catch (err) { alert("❌ Error: " + err.message); }
+        }
+
+        // GUARDAR VACACIONES CON CRUCE DE SUCURSAL REAL DE SUPABASE
+        async function guardarBloqueoVacaciones(e) {
+            if(e) e.preventDefault();
+            try {
+                const ini = document.getElementById('bloqueo-inicio').value;
+                const fin = document.getElementById('bloqueo-fin').value;
+                const suc = document.getElementById('select-sucursal-global').value;
+
+                if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas de vacaciones."); return; }
+                if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
+
+                const { error } = await miSupabase
+                    .from('bloqueos')
+                    .insert([{ 
+                        alias_negocio: aliasNegocioActual, 
+                        tipo_bloqueo: 'vacaciones', 
+                        fecha_inicio: ini, 
+                        fecha_fin: fin,
+                        hora_inicio: null,
+                        hora_fin: null,
+                        alias_profesional: profesionalActual,
+                        id_sucursal: suc 
+                    }]);
+
+                if (error) throw error;
+                alert("✅ Vacaciones registradas con éxito para " + profesionalActual + " en " + suc);
+                document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
+            } catch (err) { alert("❌ Error de Supabase: " + err.message); }
+        }
+
+        // GUARDAR CANCELACIÓN DE HORAS (¡LLAVE DEL CATCH ARREGLADA!)
+        async function guardarCancelacionHora(e) {
+            if(e) e.preventDefault();
+            try {
+                const dia = document.getElementById('cancelar-dia').value;
+                const des = document.getElementById('cancelar-desde').value;
+                const has = document.getElementById('cancelar-hasta').value;
+                const suc = document.getElementById('select-sucursal-global').value;
+
+                if(!dia || !des || !has) { alert("⚠️ Completa el día y los rangos de horas."); return; }
+                if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
+
+                const { error } = await miSupabase
+                    .from('bloqueos')
+                    .insert([{ 
+                        alias_negocio: aliasNegocioActual, 
+                        tipo_bloqueo: 'cancelacion', 
+                        fecha_inicio: dia, 
+                        fecha_fin: dia, 
+                        hora_inicio: des, 
+                        hora_fin: has,
+                        alias_profesional: profesionalActual,
+                        id_sucursal: suc
+                    }]);
+
+                if (error) throw error;
+                alert("✅ Bloqueo horario guardado con éxito en " + suc);
+                document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
+            } catch (err) { 
+                alert("❌ Error de Supabase: " + err.message); 
+            }
+        }
+    </script>
+</body>
+</html>
