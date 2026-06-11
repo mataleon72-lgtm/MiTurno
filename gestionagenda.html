@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Profesional - Mi Turno</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* FONDO GLOBAL */
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_gestionagenda.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* SISTEMA DE PANTALLAS */
+        .pantalla { display: none; width: 100vw; height: 100vh; flex-direction: row; }
+        .pantalla.activa { display: flex; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* PANELES TRANSPARENTES */
+        .panel-izquierdo {
+            width: 30%; height: 100%; background: transparent; display: flex;
+            flex-direction: column; align-items: center; padding: 40px 30px; box-sizing: border-box;
+        }
+        .panel-derecho {
+            width: 70%; height: 100%; background: transparent; display: flex;
+            flex-direction: column; padding: 40px 50px; box-sizing: border-box; position: relative; 
+        }
+
+        /* ELEMENTOS GRÁFICOS */
+        .logo-chico { width: 100%; max-width: 180px; margin-bottom: 40px; display: block; }
+        .logo-grande { width: 100%; max-width: 220px; margin-bottom: 20px; }
+        .img-titulo-modulo { height: 45px; width: auto; align-self: flex-start; margin-bottom: 30px; display: block; }
+        
+        h1 { color: #555; font-weight: 900; font-size: 32px; margin-top: 0; }
+        label { width: 100%; text-align: left; font-weight: 900; color: #7A7A7A; font-size: 14px; margin-bottom: 5px; display: block; }
+        
+        .input-clasico {
+            width: 100%; padding: 14px 20px; border-radius: 12px; border: none; 
+            background: #FFFFFF; box-shadow: 0px 4px 10px rgba(0,0,0,0.05); 
+            margin-bottom: 20px; box-sizing: border-box; font-size: 15px; 
+            font-weight: 800; color: #555; font-family: 'Nunito', sans-serif; outline: none;
+        }
+        
+        .btn-img { width: 180px; cursor: pointer; transition: transform 0.2s; margin-top: 10px; }
+        .btn-img:active { transform: scale(0.95); }
+        .link-text { color: #555; font-weight: 800; font-size: 14px; margin-top: auto; cursor: pointer; }
+        
+        /* SIDEBARS */
+        #sidebar-dia { width: 100%; max-width: 250px; display: block; }
+        #sidebar-notas { width: 100%; max-width: 250px; display: none; } 
+
+        .calendario-header { display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 15px; }
+        .calendario-header h3 { color: #333; font-weight: 900; margin: 0; font-size: 18px; }
+        .calendario-header span { font-weight: 900; font-size: 18px; cursor: pointer; color: #555; }
+        .dias-semana, .grilla-dias { display: grid; grid-template-columns: repeat(7, 1fr); width: 100%; text-align: center; gap: 5px; }
+        .dias-semana div { font-weight: 900; color: #333; font-size: 14px; margin-bottom: 10px; }
+        .grilla-dias div { font-weight: 800; color: #333; font-size: 16px; padding: 5px 0; cursor: pointer; border-radius: 8px; }
+        .grilla-dias div:hover { background: #EAEAEA; }
+        .grilla-dias div.inactivo { color: #CCC; }
+        
+        /* CONTENEDORES MÓDULOS DERECHOS */
+        .contenedor-modulo { display: none; width: 100%; height: 100%; flex-direction: column; }
+        .contenedor-modulo.activo { display: flex; animation: fadeIn 0.2s ease; }
+
+        /* GRILLA DÍA EN CURSO */
+        .header-dia { font-size: 32px; font-weight: 900; color: #444; margin-bottom: 30px; }
+        .grilla-turnos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 100px; }
+        .tarjeta-turno {
+            background: #FFF; border-radius: 12px; padding: 12px 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; align-items: center; border-top: 5px solid #CCC;
+        }
+        .tarjeta-turno.disponible { border-top-color: #6EB64F; }
+        .tarjeta-turno.cancelado { border-top-color: #ED3237; }
+        .tarjeta-turno.ocupado { border-top-color: #CCC; }
+        .tarjeta-turno p { margin: 0; font-size: 11px; font-weight: 900; color: #555; }
+        .tarjeta-turno p.estado-rojo { color: #ED3237; font-size: 9px; margin-left: auto; }
+
+        /* BOTONERA INFERIOR FIJA */
+        .botonera-inferior { position: absolute; bottom: 40px; left: 50px; display: flex; gap: 20px; align-items: center; z-index: 10; }
+        .btn-modulo { height: 60px; cursor: pointer; transition: transform 0.2s; }
+        .btn-modulo:active { transform: scale(0.95); }
+
+        /* ESTILOS DE INPUTS */
+        .input-suave {
+            background: #FFF; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            border-radius: 12px; padding: 10px 15px; font-weight: 900; color: #555;
+            font-family: 'Nunito', sans-serif; outline: none; font-size: 14px;
+        }
+        ::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+        .texto-bold { font-weight: 900; color: #666; font-size: 16px; }
+        .texto-desc { font-weight: 800; color: #777; font-size: 14px; margin-left: 15px; }
+        .fila-flex { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        
+        .contenedor-volver { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 800px; }
+        .btn-volver-agenda { height: 30px; cursor: pointer; transition: transform 0.2s; align-self: flex-start; }
+        .btn-volver-agenda:active { transform: scale(0.95); }
+
+        .btn-guardar {
+            background-color: #007D82; color: white; padding: 12px 35px; border-radius: 12px; 
+            font-weight: 900; font-size: 20px; border: none; cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
+        }
+        .btn-guardar:active { transform: scale(0.95); background-color: #006064; }
+
+    </style>
+</head>
+<body>
+
+    <div id="pantalla-login" class="pantalla activa">
+        <div class="panel-izquierdo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-top: 20px;">
+            <div style="width: 100%; max-width: 250px; margin-top: 40px;">
+                <label>Tu Alias</label>
+                <input type="text" class="input-clasico" placeholder="EJ: JULI">
+                <label>Contraseña</label>
+                <input type="password" class="input-clasico" placeholder="********">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="cambiarPantalla('pantalla-elegir')">
+            </div>
+            <p class="link-text" onclick="cambiarPantalla('pantalla-registro')">¿no tenes cuenta? creala aquí 👈</p>
+        </div>
+        <div class="panel-derecho"></div>
+    </div>
+
+    <div id="pantalla-registro" class="pantalla">
+        <div class="panel-izquierdo" style="padding-top: 20px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 20px;">
+            <img src="https://mataleon72-lgtm.github.io/main/titulo_nuevousuario.png" class="img-titulo-modulo" style="align-self: center;">
+            <div style="width: 100%; max-width: 250px;">
+                <label>Alias Negocio</label><input type="text" class="input-clasico">
+                <label>Tu Nombre</label><input type="text" class="input-clasico">
+                <label>Alias Usuario Nuevo</label><input type="text" class="input-clasico">
+                <label>Contraseña</label><input type="password" class="input-clasico">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="cambiarPantalla('pantalla-login')"> 
+            </div>
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_yatengocuenta.png" class="btn-img" style="margin-top: 40px; width: 150px;" onclick="cambiarPantalla('pantalla-login')">
+        </div>
+        <div class="panel-derecho"></div>
+    </div>
+
+    <div id="pantalla-elegir" class="pantalla">
+        <div class="panel-izquierdo"></div>
+        <div class="panel-derecho" style="align-items: center; justify-content: center;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-grande">
+            <h1>Buen día María!!</h1>
+            <div style="width: 100%; max-width: 350px; text-align: center; margin-top: 30px;">
+                <label style="text-align: center;">Que agenda usaras hoy? Ingresa el Alias</label>
+                <input type="text" class="input-clasico" placeholder="EJ: Juli" style="text-align: center;">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" style="margin-top: 20px;" onclick="cambiarPantalla('pantalla-dia')">
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-dia" class="pantalla">
+        
+        <div class="panel-izquierdo" style="justify-content: flex-start; padding-top: 30px;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 60px;">
+            
+            <div id="sidebar-dia">
+                <div class="calendario-header">
+                    <h3>Junio 2026</h3>
+                    <div><span><</span> &nbsp; <span>></span></div>
+                </div>
+                <div class="dias-semana">
+                    <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                </div>
+                <div class="grilla-dias">
+                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+                    <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+                    <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+                    <div>22</div><div>23</div><div style="background:#009E9B; color:white;">24</div><div>25</div><div>26</div><div>27</div><div>28</div>
+                    <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div><div class="inactivo">4</div><div class="inactivo">5</div>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <label style="text-align: center; font-size: 13px;">Cambiar de Sucursales</label>
+                    <select class="input-clasico" style="margin-bottom: 10px; padding: 10px;">
+                        <option>Centro (Miro 1122)</option>
+                        <option>Norte (Av. Sol 44)</option>
+                    </select>
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_ir.png" style="width: 50px; cursor: pointer;" onclick="cambiarModulo('modulo-dia')">
+                </div>
+            </div>
+
+            <div id="sidebar-notas">
+                <h2 style="color: #555; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%; text-align: left;">Notas</h2>
+                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
+                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
+                </div>
+                </div>
+        </div>
+
+        <div class="panel-derecho">
+            
+            <div id="modulo-dia" class="contenedor-modulo activo">
+                <div class="header-dia">22/06/2026</div>
+                <div class="grilla-turnos">
+                    <div class="tarjeta-turno cancelado"><p>⏰ 08:00 &nbsp; Gaston Romanutti</p><p class="estado-rojo">CANCELADO</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 08:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 09:00 &nbsp; Gaston Romanutti</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 09:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 10:00 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 10:30 &nbsp; Gaston Romanutti</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 11:00 &nbsp; Gaston Romanutti</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 11:30 &nbsp; Gaston Romanutti</p></div>
+                </div>
+                <div class="botonera-inferior">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_blockdenotas.png" class="btn-modulo" onclick="cambiarModulo('modulo-notas')">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_bloqueos.png" class="btn-modulo" onclick="cambiarModulo('modulo-bloqueos')">
+                </div>
+            </div>
+
+            <div id="modulo-darturno" class="contenedor-modulo">
+                <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
+                
+                <div style="display: flex; gap: 60px; margin-top: 10px;">
+                    <div style="width: 250px;">
+                        <label>Número de DNI</label>
+                        <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
+                        
+                        <label style="margin-bottom: 15px;">Elegir fecha</label>
+                        <div class="calendario-header" style="margin-bottom: 10px;">
+                            <h3 style="font-size: 16px;">Junio 2026</h3>
+                            <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
+                        </div>
+                        <div class="dias-semana">
+                            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                        </div>
+                        <div class="grilla-dias">
+                            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+                            <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+                            <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+                            <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
+                            <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; padding-top: 50px;">
+                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 320px;">
+                            <h3 style="margin: 0; color: #333; font-weight: 900; font-size: 16px;">Dra Garcia</h3>
+                            <p style="margin: 0 0 10px 0; color: #096991; font-weight: 900; font-size: 12px;">Odontología</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">Sucursal: Centro (Miro<br>1122 C.A.B.A.)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-volver">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                </div>
+            </div>
+
+            <div id="modulo-notas" class="contenedor-modulo">
+                <div style="display: flex; flex-direction: column; width: 100%; max-width: 800px;">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
+                    
+                    <div class="fila-flex" style="margin-bottom: 20px;">
+                        <div style="width: 150px;">
+                            <label>Fecha</label>
+                            <input type="date" id="nota-fecha" class="input-suave" style="width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Título</label>
+                            <input type="text" id="nota-titulo" class="input-suave" style="width: 100%; box-sizing: border-box;">
+                        </div>
+                    </div>
+                    
+                    <label>Notas</label>
+                    <textarea id="nota-contenido" class="input-suave" style="height: 250px; width: 100%; box-sizing: border-box; resize: none; border-radius: 15px; padding: 20px;"></textarea>
+                    
+                    <div class="contenedor-volver" style="margin-top: 20px;">
+                        <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                        <button class="btn-guardar" onclick="guardarNota()">guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modulo-bloqueos" class="contenedor-modulo">
+                
+                <div class="fila-flex" style="margin-bottom: 30px;">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
+                </div>
+                
+                <div class="fila-flex" style="margin-bottom: 60px; margin-left: 20px;">
+                    <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
+                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
+                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                </div>
+
+                <div class="fila-flex" style="margin-bottom: 30px;">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
+                </div>
+
+                <div class="fila-flex" style="margin-bottom: 15px; align-items: center; margin-left: 20px;">
+                    <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
+                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Desde las</span>
+                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Hasta las</span>
+                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-volver">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        // Usamos la llave pública de la etapa 1
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Simulamos que estamos logueados en un negocio para poder guardar datos
+        let aliasNegocioActual = "TEST_CLINICA"; 
+
+        // --- 2. FUNCIONES VISUALES (Las que ya teníamos) ---
+        function cambiarPantalla(idPantalla) {
+            const pantallas = document.querySelectorAll('.pantalla');
+            pantallas.forEach(p => p.classList.remove('activa'));
+            document.getElementById(idPantalla).classList.add('activa');
+        }
+
+        function cambiarModulo(idModulo) {
+            const modulos = document.querySelectorAll('.contenedor-modulo');
+            modulos.forEach(m => m.classList.remove('activo'));
+            document.getElementById(idModulo).classList.add('activo');
+
+            document.getElementById('sidebar-dia').style.display = 'none';
+            document.getElementById('sidebar-notas').style.display = 'none';
+
+            if (idModulo === 'modulo-dia') {
+                document.getElementById('sidebar-dia').style.display = 'block';
+            } else if (idModulo === 'modulo-notas') {
+                document.getElementById('sidebar-notas').style.display = 'block';
+            }
+        }
+
+        // --- 3. FUNCIONES DE BASE DE DATOS ---
+        async function guardarNota() {
+            // Agarramos lo que el usuario escribió
+            const fechaNota = document.getElementById('nota-fecha').value;
+            const tituloNota = document.getElementById('nota-titulo').value;
+            const contenidoNota = document.getElementById('nota-contenido').value;
+
+            // Validación básica
+            if(!fechaNota || !tituloNota || !contenidoNota) {
+                alert("Por favor completá la fecha, el título y la nota antes de guardar.");
+                return;
+            }
+
+            // Enviamos a Supabase
+            const { data, error } = await supabase
+                .from('notas')
+                .insert([
+                    { 
+                        alias_negocio: aliasNegocioActual, 
+                        fecha: fechaNota, 
+                        titulo: tituloNota, 
+                        contenido: contenidoNota 
+                    }
+                ]);
+
+            if(error) {
+                console.error("Error guardando:", error);
+                alert("Hubo un problema al guardar la nota.");
+            } else {
+                alert("¡Nota guardada con éxito en la base de datos!");
+                // Limpiamos el formulario para que quede listo para otra nota
+                document.getElementById('nota-fecha').value = "";
+                document.getElementById('nota-titulo').value = "";
+                document.getElementById('nota-contenido').value = "";
+            }
+        }
+    </script>
+</body>
+</html>
