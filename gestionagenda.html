@@ -224,6 +224,7 @@
 
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
+                
                 <div style="display: flex; gap: 60px; margin-top: 10px;">
                     <div style="width: 250px;">
                         <label>Número de DNI</label>
@@ -231,8 +232,8 @@
                         
                         <label style="margin-bottom: 15px;">Elegir fecha</label>
                         <div class="calendario-header" style="margin-bottom: 10px;">
-                            <h3 style="font-size: 16px;">Junio 2026</h3>
-                            <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
+                            <h3>Junio 2026</h3>
+                            <div><span><</span> &nbsp; <span>></span></div>
                         </div>
                         <div class="dias-semana">
                             <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
@@ -255,6 +256,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -283,27 +285,35 @@
             </div>
 
             <div id="modulo-bloqueos" class="contenedor-modulo">
+                
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
                     <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
                 </div>
-                <div class="fila-flex" style="margin-bottom: 25px; margin-left: 20px;">
+                
+                <div class="fila-flex" style="margin-bottom: 40px; margin-left: 20px;">
                     <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
-                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px;">
+                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px; text-align: center;">
+                    
                     <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
-                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px;">
+                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px; text-align: center;">
+                    
                     <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
                 </div>
+
                 <hr style="border: 0; border-top: 1px solid #DDD; margin: 40px 0;">
+
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
                     <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
                 </div>
+
                 <div class="fila-flex" style="margin-bottom: 15px; align-items: flex-start; margin-left: 20px;">
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
                         <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px; text-align: center;">
                     </div>
+                    
                     <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="texto-bold" style="width: 85px;">Desde las</span>
@@ -316,8 +326,10 @@
                             <span class="texto-bold">hs</span>
                         </div>
                     </div>
+                    
                     <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 40px; align-self: center;" onclick="guardarCancelacionHora()">guardar horas</button>
                 </div>
+
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -470,37 +482,53 @@
             } catch (error) { alert("❌ Error: " + error.message); }
         }
 
-        // 5. GUARDAR VACACIONES DINÁMICAS
+        // 5. GUARDAR VACACIONES DINÁMICAS (TABLA BLOQUEOS)
         async function guardarBloqueoVacaciones() {
             try {
                 const inicio = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
-                if(!inicio || !fin) { alert("⚠️ Completa las fechas."); return; }
+                if(!inicio || !fin) { alert("⚠️ Completa las fechas de vacaciones."); return; }
 
                 const { error } = await miSupabase
                     .from('bloqueos')
-                    .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: inicio, fecha_fin: fin }]);
+                    .insert([{ 
+                        alias_negocio: aliasNegocioActual, 
+                        tipo_bloqueo: 'vacaciones', 
+                        fecha_inicio: inicio, 
+                        fecha_fin: fin,
+                        hora_inicio: null,
+                        hora_fin: null
+                    }]);
+
                 if (error) throw error;
-                alert("✅ Rango de vacaciones bloqueado.");
+                alert("✅ Rango de vacaciones bloqueado en la base de datos.");
                 document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
-            } catch (error) { alert("❌ Error: " + error.message); }
+            } catch (error) { alert("❌ Error de Supabase: " + error.message); }
         }
 
-        // 6. GUARDAR CANCELACIÓN DINÁMICA
+        // 6. GUARDAR CANCELACIÓN DINÁMICA (TABLA BLOQUEOS)
         async function guardarCancelacionHora() {
             try {
                 const dia = document.getElementById('cancelar-dia').value;
                 const desde = document.getElementById('cancelar-desde').value;
                 const hasta = document.getElementById('cancelar-hasta').value;
-                if(!dia || !desde || !hasta) { alert("⚠️ Completa día y horas."); return; }
+                if(!dia || !desde || !hasta) { alert("⚠️ Completa el día y las horas de corte."); return; }
 
                 const { error } = await miSupabase
                     .from('bloqueos')
-                    .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: desde, hora_fin: hasta }]);
+                    .insert([{ 
+                        alias_negocio: aliasNegocioActual, 
+                        tipo_bloqueo: 'cancelacion', 
+                        fecha_inicio: dia, 
+                        fecha_fin: dia, 
+                        hora_inicio: desde, 
+                        hora_fin: hasta 
+                    }]);
+
                 if (error) throw error;
-                alert("✅ Horarios cancelados.");
+                alert("✅ Horarios cancelados con éxito.");
                 document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
-            } catch (error) { alert("❌ Error: " + error.message); }
+            } catch (error) { alert("❌ Error de Supabase: " + error.message); }
         }
     </script>
 </body>
