@@ -50,10 +50,10 @@
         .img-titulo { width: 95%; margin-top: 0; margin-bottom: 40px; } 
         .img-puntos { width: 30%; margin-top: 0; margin-bottom: 25px; } 
         
-        /* Ajuste EXACTO y exclusivo para empujar el texto del Login a su lugar */
+        /* Ajuste Login */
         .texto-gris-oscuro-login { color: #555; font-weight: 900; font-size: 28px; margin-top: 25px; margin-bottom: 60px; text-align: center; } 
         
-        /* Botones clickeables con z-index */
+        /* Botones clickeables */
         .btn-img { width: 85%; margin-top: 5px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .btn-img:active { transform: scale(0.96); }
         .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
@@ -291,9 +291,9 @@
         }
 
         async function cargarMisMedicos() {
-            const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro)').eq('paciente_id', pacienteActual.id);
+            const { data } = await supabaseCliente.from('pacientes_profesionales').select('negocio_id, negocios(nombre, rubro, alias)').eq('paciente_id', pacienteActual.id);
             document.getElementById('lista-medicos').innerHTML = data?.map(p => `
-                <div class="tarjeta-medico" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}')">
+                <div class="tarjeta-medico" onclick="abrirTurnero('${p.negocio_id}', '${p.negocios.nombre}', '${p.negocios.alias}')">
                     <div>
                         <h4>${p.negocios.nombre}</h4>
                         <p>${p.negocios.rubro || 'Profesional'}</p>
@@ -303,15 +303,20 @@
             `).join('') || '<p style="text-align:center; color:#888; font-size:14px;">Aún no agregaste profesionales.</p>';
         }
 
-        async function abrirTurnero(idMed, nombreMed) {
+        // MEMORIA GLOBAL DEL ALIAS PARA CRUZAR CON EL FILTRO DE BLOQUEOS
+        let aliasMedicoActualParaFiltro = "";
+
+        async function abrirTurnero(idMed, nombreMed, aliasMed) {
             medicoSeleccionadoId = idMed;
+            aliasMedicoActualParaFiltro = aliasMed; // Guardamos el alias limpio para cruzar datos
+            
             document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
             document.getElementById('turnero-integrado').style.display = 'block';
             
             setTimeout(() => { document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' }); }, 100);
             
             const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
-            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+            document.getElementById('turnero-sucursal').innerHTML = '<option value="">-- Seleccioná Sede --</option>' + sucs?.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
             
             document.getElementById('turnero-fecha').value = "";
             document.getElementById('grilla-horas').innerHTML = '';
@@ -324,11 +329,48 @@
             document.getElementById('label-horas').style.display = 'none';
         }
 
+        // ESCUDO DE VALIDACIÓN: FILTRADO REAL CONTRA LA TABLA BLOQUEOS DE SUPABASE
         async function cargarHorariosDisponibles() {
             const idSuc = document.getElementById('turnero-sucursal').value;
             const fechaElegida = document.getElementById('turnero-fecha').value;
             if (!idSuc || !fechaElegida) return;
 
+            // 1. LEER BLOQUEOS ACTIVOS (Filtramos estrictamente por ID de sucursal y alias del profesional)
+            const { data: bloqueosExistentes, error: errBloq } = await supabaseCliente
+                .from('bloqueos')
+                .select('*')
+                .eq('id_sucursal', idSuc)
+                .eq('alias_profesional', aliasMedicoActualParaFiltro);
+
+            // Verificamos si la fecha elegida cae en un rango de vacaciones
+            let estaDeVacaciones = false;
+            let horasCanceladasEnElDia = []; // Guardará objetos {inicio, fin} de cancelaciones horarias
+
+            if (bloqueosExistentes && bloqueosExistentes.length > 0) {
+                bloqueosExistentes.forEach(bloq => {
+                    if (bloq.tipo_bloqueo === 'vacaciones') {
+                        if (fechaElegida >= bloq.fecha_inicio && fechaElegida <= bloq.fecha_fin) {
+                            estaDeVacaciones = true;
+                        }
+                    } else if (bloq.tipo_bloqueo === 'cancelacion') {
+                        if (fechaElegida === bloq.fecha_inicio) {
+                            horasCanceladasEnElDia.push({
+                                desde: bloq.hora_inicio.slice(0,5),
+                                hasta: bloq.hora_fin.slice(0,5)
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Si está de vacaciones, matamos el flujo acá y no mostramos horas
+            if (estaDeVacaciones) {
+                document.getElementById('label-horas').style.display = 'none';
+                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional se encuentra de vacaciones en este rango de fechas.</p>';
+                return;
+            }
+
+            // 2. LEER ESQUEMA HABITUAL
             const diaSemana = new Date(fechaElegida + "T00:00:00").getDay();
             const { data: esquema } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc).eq('dia_semana', diaSemana);
 
@@ -338,6 +380,7 @@
                 return;
             }
 
+            // 3. LEER TURNOS OCUPADOS
             const { data: ocupados } = await supabaseCliente.from('turnos_activos').select('hora').eq('sucursal_id', idSuc).eq('fecha', fechaElegida).in('estado', ['pendiente', 'confirmado']);
             const listaOcupados = ocupados?.map(o => o.hora.slice(0,5)) || [];
             let htmlHoras = '';
@@ -348,9 +391,19 @@
                 duracionConfigurada = slot.duracion_minutos; 
 
                 while (actual < fin) {
-                    if (!listaOcupados.includes(actual)) {
+                    // Verificamos si la hora actual cae dentro de un rango de cancelación horaria
+                    let horaEstaCancelada = false;
+                    horasCanceladasEnElDia.forEach(rango => {
+                        if (actual >= rango.desde && actual < rango.hasta) {
+                            horaEstaCancelada = true;
+                        }
+                    });
+
+                    // Si la hora no está ocupada por otro paciente Y no está bloqueada por la secretaria, la mostramos
+                    if (!listaOcupados.includes(actual) && !horaEstaCancelada) {
                         htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}')">${actual}</div>`;
                     }
+                    
                     let [h, m] = actual.split(':').map(Number);
                     m += duracionConfigurada;
                     if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
