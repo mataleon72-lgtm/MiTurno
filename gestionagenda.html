@@ -327,7 +327,7 @@
         let usuarioActual = "";
         let profesionalActual = "";
 
-        // 1. REGISTRO REAL EN SUPABASE
+        // 1. REGISTRO REAL REVISADO (Usando nombres exactos SQL)
         async function ejecutarRegistro() {
             try {
                 if (!miSupabase) return;
@@ -341,20 +341,26 @@
                     return;
                 }
 
+                // CORRECCIÓN DE COLUMNAS: Ajustado idéntico a tu SQL Editor
                 const { data, error } = await miSupabase
                     .from('usuarios_panel')
-                    .insert([{ alias_negocio: negocio, nombre: nombre, usuario: usuario, contrasena: clave }]);
+                    .insert([{ 
+                        alias_negocio: negocio, 
+                        nombre_usuario: nombre, 
+                        alias_usuario: usuario, 
+                        password: clave 
+                    }]);
 
                 if (error) throw error;
 
-                alert("🎉 ¡Cuenta creada con éxito! Ya podés iniciar sesión.");
+                alert("🎉 ¡Cuenta creada con éxito en Supabase! Iniciemos sesión.");
                 cambiarPantalla('pantalla-login');
             } catch (error) {
-                alert("❌ No se pudo crear el usuario: " + error.message);
+                alert("❌ Error: " + error.message);
             }
         }
 
-        // 2. LOGIN REAL VALIDANDO EN SUPABASE
+        // 2. LOGIN REAL REVISADO
         async function ejecutarLogin() {
             try {
                 if (!miSupabase) return;
@@ -366,22 +372,20 @@
                     return;
                 }
 
+                // CORRECCIÓN DE CAMPOS: Buscamos usando alias_usuario y password
                 const { data, error } = await miSupabase
                     .from('usuarios_panel')
                     .select('*')
-                    .eq('usuario', usuarioInput)
-                    .eq('contrasena', claveInput);
+                    .eq('alias_usuario', usuarioInput)
+                    .eq('password', claveInput);
 
                 if (error) throw error;
 
                 if(data && data.length > 0) {
-                    // Guardamos la info del usuario en memoria
                     aliasNegocioActual = data[0].alias_negocio;
-                    usuarioActual = data[0].usuario;
+                    usuarioActual = data[0].alias_usuario;
                     
-                    // Modificamos el saludo dinámicamente
-                    document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre + "!!";
-                    
+                    document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     cambiarPantalla('pantalla-elegir');
                 } else {
                     alert("❌ Usuario o contraseña incorrectos. Revisa los datos.");
@@ -395,14 +399,14 @@
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) {
-                alert("⚠️ Por favor ingresá el alias del profesional para abrir su agenda.");
+                alert("⚠️ Por favor ingresá el alias del profesional.");
                 return;
             }
             profesionalActual = prof;
             cambiarPantalla('pantalla-dia');
         }
 
-        // 4. GUARDAR NOTAS (Impactando con el negocio real logueado)
+        // 4. GUARDAR NOTAS
         async function guardarNota() {
             try {
                 const fechaNota = document.getElementById('nota-fecha').value;
