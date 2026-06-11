@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Mi Turno</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* FONDO GLOBAL */
@@ -168,6 +170,7 @@
     </div>
 
     <div id="pantalla-dia" class="pantalla">
+        
         <div class="panel-izquierdo" style="justify-content: flex-start; padding-top: 30px;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 60px;">
             
@@ -201,10 +204,14 @@
                 <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
                     <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
                 </div>
+                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
+                    <p style="margin:0; font-size: 10px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Buscar nuevos sillones</p>
+                </div>
             </div>
         </div>
 
         <div class="panel-derecho">
+            
             <div id="modulo-dia" class="contenedor-modulo activo">
                 <div class="header-dia">22/06/2026</div>
                 <div class="grilla-turnos">
@@ -212,6 +219,10 @@
                     <div class="tarjeta-turno disponible"><p>⏰ 08:30 &nbsp; Disponible</p></div>
                     <div class="tarjeta-turno ocupado"><p>⏰ 09:00 &nbsp; Gaston Romanutti</p></div>
                     <div class="tarjeta-turno disponible"><p>⏰ 09:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 10:00 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 10:30 &nbsp; Gaston Romanutti</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 11:00 &nbsp; Gaston Romanutti</p></div>
+                    <div class="tarjeta-turno ocupado"><p>⏰ 11:30 &nbsp; Gaston Romanutti</p></div>
                 </div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
@@ -222,12 +233,14 @@
 
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
+                
                 <div style="display: flex; gap: 60px; margin-top: 10px;">
                     <div style="width: 250px;">
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
+                        
                         <label style="margin-bottom: 15px;">Elegir fecha</label>
-                        <div class="calendario-header">
+                        <div class="calendario-header" style="margin-bottom: 10px;">
                             <h3 style="font-size: 16px;">Junio 2026</h3>
                             <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
                         </div>
@@ -252,6 +265,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -260,6 +274,7 @@
             <div id="modulo-notas" class="contenedor-modulo">
                 <div style="display: flex; flex-direction: column; width: 100%; max-width: 800px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_blockdenotas.png" class="img-titulo-modulo">
+                    
                     <div class="fila-flex" style="margin-bottom: 20px;">
                         <div style="width: 150px;">
                             <label>Fecha</label>
@@ -270,6 +285,7 @@
                             <input type="text" id="nota-titulo" class="input-suave" style="width: 100%; box-sizing: border-box;">
                         </div>
                     </div>
+                    
                     <label>Notas</label>
                     <textarea id="nota-contenido" class="input-suave" style="height: 250px; width: 100%; box-sizing: border-box; resize: none; border-radius: 15px; padding: 20px;"></textarea>
                     
@@ -281,21 +297,28 @@
             </div>
 
             <div id="modulo-bloqueos" class="contenedor-modulo">
+                
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
                 </div>
+                
                 <div class="fila-flex" style="margin-bottom: 60px; margin-left: 20px;">
                     <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
                     <input type="date" class="input-suave" style="width: 140px; text-align: center;">
                     <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
                     <input type="date" class="input-suave" style="width: 140px; text-align: center;">
                 </div>
+
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
                 </div>
+
                 <div class="fila-flex" style="margin-bottom: 15px; align-items: center; margin-left: 20px;">
                     <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
                     <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    
                     <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="texto-bold" style="width: 85px;">Desde las</span>
@@ -309,10 +332,12 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
             </div>
+
         </div>
     </div>
 
