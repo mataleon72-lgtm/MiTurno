@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Mi Turno</title>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* FONDO GLOBAL */
@@ -229,8 +227,29 @@
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
                         <label style="margin-bottom: 15px;">Elegir fecha</label>
-                        <div class="calendario-header"><h3 style="font-size: 16px;">Junio 2026</h3></div>
-                        <div class="grilla-dias"><div>1</div><div>2</div><div>3</div></div>
+                        <div class="calendario-header">
+                            <h3 style="font-size: 16px;">Junio 2026</h3>
+                            <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
+                        </div>
+                        <div class="dias-semana">
+                            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                        </div>
+                        <div class="grilla-dias">
+                            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+                            <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+                            <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+                            <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
+                            <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; padding-top: 50px;">
+                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 320px;">
+                            <h3 style="margin: 0; color: #333; font-weight: 900; font-size: 16px;">Dra Garcia</h3>
+                            <p style="margin: 0 0 10px 0; color: #096991; font-weight: 900; font-size: 12px;">Odontología</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">Sucursal: Centro (Miro<br>1122 C.A.B.A.)</p>
+                        </div>
                     </div>
                 </div>
                 <div class="contenedor-volver">
@@ -271,6 +290,25 @@
                     <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
                     <input type="date" class="input-suave" style="width: 140px; text-align: center;">
                 </div>
+                <div class="fila-flex" style="margin-bottom: 30px;">
+                    <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                </div>
+                <div class="fila-flex" style="margin-bottom: 15px; align-items: center; margin-left: 20px;">
+                    <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
+                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Desde las</span>
+                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Hasta las</span>
+                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
                 </div>
@@ -278,29 +316,23 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // --- 1. CONFIGURACIÓN DE SUPABASE ---
-        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
-        
-        // Creamos el "empleado" oficial de Supabase
-        let miSupabase;
-        if (window.supabase) {
-            miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-
-        let aliasNegocioActual = "TEST_CLINICA"; 
-
-        // --- 2. FUNCIONES DE NAVEGACIÓN ---
         function cambiarPantalla(idPantalla) {
-            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
-            document.getElementById(idPantalla).classList.add('activa');
+            var pantallas = document.querySelectorAll('.pantalla');
+            for(var i = 0; i < pantallas.length; i++) {
+                pantallas[i].classList.remove('activa');
+            }
+            var destino = document.getElementById(idPantalla);
+            if(destino) destino.classList.add('activa');
         }
 
         function cambiarModulo(idModulo) {
-            document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
-            document.getElementById(idModulo).classList.add('activo');
+            var modulos = document.querySelectorAll('.contenedor-modulo');
+            for(var i = 0; i < modulos.length; i++) {
+                modulos[i].classList.remove('activo');
+            }
+            var destino = document.getElementById(idModulo);
+            if(destino) destino.classList.add('activo');
 
             document.getElementById('sidebar-dia').style.display = 'none';
             document.getElementById('sidebar-notas').style.display = 'none';
@@ -311,17 +343,26 @@
                 document.getElementById('sidebar-notas').style.display = 'block';
             }
         }
+    </script>
 
-        // --- 3. FUNCIÓN PARA GUARDAR NOTAS ---
+    <script>
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        
+        let miSupabase;
+        if (window.supabase) {
+            miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        let aliasNegocioActual = "TEST_CLINICA"; 
+
         async function guardarNota() {
             try {
-                // Verificamos que todo esté conectado
                 if (!miSupabase) {
-                    alert("❌ Error: No se pudo conectar a Supabase.");
+                    alert("❌ Error de conexión a la base de datos.");
                     return;
                 }
 
-                // Agarramos los datos escritos
                 const fechaNota = document.getElementById('nota-fecha').value;
                 const tituloNota = document.getElementById('nota-titulo').value;
                 const contenidoNota = document.getElementById('nota-contenido').value;
@@ -331,7 +372,6 @@
                     return;
                 }
 
-                // Enviamos a la base de datos
                 const { data, error } = await miSupabase
                     .from('notas')
                     .insert([{ 
@@ -341,19 +381,17 @@
                         contenido: contenidoNota 
                     }]);
 
-                // Si Supabase rebota la información, frenamos todo y mostramos por qué
                 if (error) throw error;
 
-                // Si todo sale bien, festejamos y limpiamos
-                alert("✅ ¡Nota guardada con éxito en tu base de datos!");
+                alert("✅ ¡Nota guardada con éxito en tu agenda!");
                 
                 document.getElementById('nota-fecha').value = "";
                 document.getElementById('nota-titulo').value = "";
                 document.getElementById('nota-contenido').value = "";
 
             } catch (error) {
-                console.error("Error técnico detallado:", error);
-                alert("❌ Hubo un problema al guardar. Supabase dice: " + error.message);
+                console.error("Error al guardar:", error);
+                alert("❌ Hubo un problema al guardar: " + error.message);
             }
         }
     </script>
