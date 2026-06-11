@@ -212,6 +212,8 @@
                 <div class="grilla-turnos">
                     <div class="tarjeta-turno disponible"><p>⏰ 08:30 &nbsp; Disponible</p></div>
                     <div class="tarjeta-turno disponible"><p>⏰ 09:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 10:30 &nbsp; Disponible</p></div>
+                    <div class="tarjeta-turno disponible"><p>⏰ 11:30 &nbsp; Disponible</p></div>
                 </div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
@@ -226,6 +228,31 @@
                     <div style="width: 250px;">
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 30px;">
+                        
+                        <label style="margin-bottom: 15px;">Elegir fecha</label>
+                        <div class="calendario-header" style="margin-bottom: 10px;">
+                            <h3 style="font-size: 16px;">Junio 2026</h3>
+                            <div><span style="font-size: 14px;"><</span> &nbsp; <span style="font-size: 14px;">></span></div>
+                        </div>
+                        <div class="dias-semana">
+                            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                        </div>
+                        <div class="grilla-dias">
+                            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+                            <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+                            <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+                            <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
+                            <div>29</div><div>30</div><div class="inactivo">1</div><div class="inactivo">2</div><div class="inactivo">3</div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; padding-top: 50px;">
+                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 320px;">
+                            <h3 style="margin: 0; color: #333; font-weight: 900; font-size: 16px;">Dra Garcia</h3>
+                            <p style="margin: 0 0 10px 0; color: #096991; font-weight: 900; font-size: 12px;">Odontología</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: 900; font-size: 13px;">Sucursal: Centro (Miro<br>1122 C.A.B.A.)</p>
+                        </div>
                     </div>
                 </div>
                 <div class="contenedor-volver">
@@ -258,23 +285,38 @@
             <div id="modulo-bloqueos" class="contenedor-modulo">
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
                 </div>
                 <div class="fila-flex" style="margin-bottom: 25px; margin-left: 20px;">
-                    <span class="texto-bold">Bloquear desde</span>
+                    <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
                     <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px;">
-                    <span class="texto-bold">Hasta</span>
+                    <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
                     <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px;">
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
                 </div>
                 <hr style="border: 0; border-top: 1px solid #DDD; margin: 40px 0;">
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
+                    <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
                 </div>
-                <div class="fila-flex" style="margin-bottom: 15px; margin-left: 20px;">
-                    <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px;">
-                    <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px;">
-                    <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px;">
-                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px;" onclick="guardarCancelacionHora()">guardar horas</button>
+                <div class="fila-flex" style="margin-bottom: 15px; align-items: flex-start; margin-left: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
+                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px; text-align: center;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Desde las</span>
+                            <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="texto-bold" style="width: 85px;">Hasta las</span>
+                            <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px; text-align: center;">
+                            <span class="texto-bold">hs</span>
+                        </div>
+                    </div>
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 40px; align-self: center;" onclick="guardarCancelacionHora()">guardar horas</button>
                 </div>
                 <div class="contenedor-volver">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')">
@@ -319,19 +361,18 @@
         
         let miSupabase;
 
-        // Aseguramos inicialización limpia
         if (window.supabase) {
             miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
+        // MEMORIA GLOBAL DINÁMICA
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
 
-        // REGISTRO TOTALMENTE BLINDADO CONTRA SUBMIT NATIVO
+        // 1. REGISTRO DE USUARIOS
         async function ejecutarRegistro(e) {
-            if(e) e.preventDefault(); // Cortamos cualquier recarga del navegador de raíz
-            
+            if(e) e.preventDefault();
             try {
                 if (!miSupabase && window.supabase) {
                     miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -362,14 +403,13 @@
                 alert("🎉 ¡Cuenta creada con éxito! Pasemos al login.");
                 cambiarPantalla('pantalla-login');
             } catch (error) {
-                console.error(error);
                 alert("❌ Problema del Servidor: " + error.message);
             }
         }
 
+        // 2. LOGIN DE USUARIOS
         async function ejecutarLogin(e) {
             if(e) e.preventDefault();
-            
             try {
                 if (!miSupabase && window.supabase) {
                     miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -405,6 +445,7 @@
             }
         }
 
+        // 3. SELECCIÓN DE PROFESIONAL
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) { alert("⚠️ Ingresa el profesional."); return; }
@@ -412,46 +453,53 @@
             cambiarPantalla('pantalla-dia');
         }
 
+        // 4. GUARDAR NOTAS DINÁMICAS
         async function guardarNota() {
             try {
                 const fechaNota = document.getElementById('nota-fecha').value;
                 const tituloNota = document.getElementById('nota-titulo').value;
                 const contenidoNota = document.getElementById('nota-contenido').value;
-                if(!fechaNota || !tituloNota || !contenidoNota) return;
+                if(!fechaNota || !tituloNota || !contenidoNota) { alert("⚠️ Completa los campos."); return; }
 
                 const { error } = await miSupabase
                     .from('notas')
                     .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
                 if (error) throw error;
-                alert("✅ ¡Nota guardada!");
+                alert("✅ ¡Nota guardada con éxito!");
                 document.getElementById('nota-fecha').value = ""; document.getElementById('nota-titulo').value = ""; document.getElementById('nota-contenido').value = "";
             } catch (error) { alert("❌ Error: " + error.message); }
         }
 
+        // 5. GUARDAR VACACIONES DINÁMICAS
         async function guardarBloqueoVacaciones() {
             try {
                 const inicio = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
-                if(!inicio || !fin) return;
+                if(!inicio || !fin) { alert("⚠️ Completa las fechas."); return; }
+
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: inicio, fecha_fin: fin }]);
                 if (error) throw error;
                 alert("✅ Rango de vacaciones bloqueado.");
+                document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
             } catch (error) { alert("❌ Error: " + error.message); }
         }
 
+        // 6. GUARDAR CANCELACIÓN DINÁMICA
         async function guardarCancelacionHora() {
             try {
                 const dia = document.getElementById('cancelar-dia').value;
                 const desde = document.getElementById('cancelar-desde').value;
                 const hasta = document.getElementById('cancelar-hasta').value;
-                if(!dia || !desde || !hasta) return;
+                if(!dia || !desde || !hasta) { alert("⚠️ Completa día y horas."); return; }
+
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: desde, hora_fin: hasta }]);
                 if (error) throw error;
                 alert("✅ Horarios cancelados.");
+                document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
             } catch (error) { alert("❌ Error: " + error.message); }
         }
     </script>
