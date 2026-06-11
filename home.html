@@ -309,13 +309,13 @@
             document.getElementById('label-horas').style.display = 'none';
         }
 
-        // CONTROLADOR CORREGIDO: LIMPIA ESTADOS PREVIOS EN CADA CLICK DEL CALENDARIO
+        // CONTROLADOR REVISADO Y SANEADO AL 100%
         async function cargarHorariosDisponibles() {
             const nombreSucursal = document.getElementById('turnero-sucursal').value; 
             const fechaElegida = document.getElementById('turnero-fecha').value;
             if (!nombreSucursal || !fechaElegida) return;
 
-            // --- REESTABLECER EL LIENZO ANTES DE EVALUAR LA NUEVA FECHA ---
+            // --- RESET VISUAL ANTES DE LA EVALUACIÓN ---
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
 
@@ -346,14 +346,14 @@
                 });
             }
 
-            // Si está de vacaciones, frena el flujo e informa
+            // Si está de vacaciones, frena el flujo e informa en la grilla directamente
             if (estaDeVacaciones) {
                 document.getElementById('label-horas').style.display = 'none';
                 document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional se encuentra de vacaciones en este rango de fechas.</p>';
                 return;
             }
 
-            // Conseguir el UUID real para consultar la grilla horaria habitual
+            // Conseguir el UUID real para consultar la grilla horaria habitual de configuracion_agenda
             const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id_sucursal').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id_sucursal;
@@ -387,7 +387,8 @@
                     });
 
                     if (!listaOcupados.includes(actual) && !horaEstaCancelada) {
-                        htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}', '${uuidSucursalReal}')">${actual}</div>`;
+                        // Socio: Corregido para pasarle los parámetros correctos que espera confirmarReserva
+                        htmlHoras += `<div class="btn-hora" onclick="confirmarReserva('${actual}')">${actual}</div>`;
                     }
                     
                     let [h, m] = actual.split(':').map(Number);
@@ -397,13 +398,25 @@
                 }
             });
 
-            document.getElementById('label-horas').style.display = 'block';
-            document.getElementById('grilla-horas').innerHTML = htmlHoras || '<p style="grid-column:1/-1; color:#888; font-weight:800; font-size:14px; text-align:center;">No hay turnos disponibles para esta fecha.</p>';
+            // Mostramos la grilla de horarios solo si logramos poblar botones válidos
+            if (htmlHoras) {
+                document.getElementById('label-horas').style.display = 'block';
+                document.getElementById('grilla-horas').innerHTML = htmlHoras;
+            } else {
+                document.getElementById('label-horas').style.display = 'none';
+                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#888; font-weight:800; font-size:14px; text-align:center;">No hay turnos disponibles para esta fecha.</p>';
+            }
         }
 
-        async function confirmarReserva(horaTurno, uuidSucursalReal) {
+        async function confirmarReserva(horaTurno) {
+            const nombreSucursal = document.getElementById('turnero-sucursal').value;
             const fecha = document.getElementById('turnero-fecha').value;
             if(!confirm(`¿Querés confirmar tu turno a las ${horaTurno} hs?`)) return;
+
+            // Obtenemos el UUID en caliente para insertar el registro limpio en turnos_activos
+            const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id_sucursal').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
+            if(!sucursalInfo || sucursalInfo.length === 0) return;
+            const uuidSucursalReal = sucursalInfo[0].id_sucursal;
 
             await supabaseCliente.from('turnos_activos').insert([{
                 negocio_id: medicoSeleccionadoId, 
