@@ -145,7 +145,7 @@
             <div style="width: 100%; max-width: 250px;">
                 <label>Alias Negocio</label><input type="text" id="reg-negocio" class="input-clasico" placeholder="EJ: CLINICA_DENTAL">
                 <label>Tu Nombre Real</label><input type="text" id="reg-nombre" class="input-clasico" placeholder="EJ: Maria">
-                <label>Alias Usuario Nuevo</label><input type="text" id="reg-usuario" class="input-clasico" placeholder="EJ: MARIA123">
+                <label>Alias Usuario Nuevo</label><input type="text" id="reg-usuario" class="input-clasico" placeholder="EJ: maria">
                 <label>Contraseña</label><input type="password" id="reg-clave" class="input-clasico" placeholder="********">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ejecutarRegistro()"> 
             </div>
@@ -322,12 +322,12 @@
             miSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        // MEMORIA GLOBAL DEL SISTEMA
+        // MEMORIA GLOBAL
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
 
-        // 1. REGISTRO REAL REVISADO (Usando nombres exactos SQL)
+        // 1. REGISTRO CORREGIDO (Alineado con tu captura de columnas)
         async function ejecutarRegistro() {
             try {
                 if (!miSupabase) return;
@@ -337,11 +337,10 @@
                 const clave = document.getElementById('reg-clave').value.trim();
 
                 if(!negocio || !nombre || !usuario || !clave) {
-                    alert("⚠️ Por favor completa todos los datos para registrar la cuenta.");
+                    alert("⚠️ Por favor completa todos los campos.");
                     return;
                 }
 
-                // CORRECCIÓN DE COLUMNAS: Ajustado idéntico a tu SQL Editor
                 const { data, error } = await miSupabase
                     .from('usuarios_panel')
                     .insert([{ 
@@ -353,14 +352,14 @@
 
                 if (error) throw error;
 
-                alert("🎉 ¡Cuenta creada con éxito en Supabase! Iniciemos sesión.");
+                alert("🎉 ¡Cuenta creada con éxito! Ahora podés iniciar sesión.");
                 cambiarPantalla('pantalla-login');
             } catch (error) {
                 alert("❌ Error: " + error.message);
             }
         }
 
-        // 2. LOGIN REAL REVISADO
+        // 2. LOGIN CORREGIDO (Usa alias_usuario y password)
         async function ejecutarLogin() {
             try {
                 if (!miSupabase) return;
@@ -372,7 +371,6 @@
                     return;
                 }
 
-                // CORRECCIÓN DE CAMPOS: Buscamos usando alias_usuario y password
                 const { data, error } = await miSupabase
                     .from('usuarios_panel')
                     .select('*')
@@ -391,7 +389,7 @@
                     alert("❌ Usuario o contraseña incorrectos. Revisa los datos.");
                 }
             } catch (error) {
-                alert("❌ Error al conectar: " + error.message);
+                alert("❌ Error: " + error.message);
             }
         }
 
