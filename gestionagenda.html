@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Mi Turno</title>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* FONDO GLOBAL */
@@ -303,34 +301,43 @@
                     <span class="texto-desc">Selecciona entre que fechas estará cerrado por vacaciones</span>
                 </div>
                 
-                <div class="fila-flex" style="margin-bottom: 60px; margin-left: 20px;">
+                <div class="fila-flex" style="margin-bottom: 25px; margin-left: 20px;">
                     <span class="texto-bold" style="width: 130px;">Bloquear desde</span>
-                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    <input type="date" id="bloqueo-inicio" class="input-suave" style="width: 140px; text-align: center;">
+                    
                     <span class="texto-bold" style="width: 60px; text-align: right; margin-right: 15px;">Hasta</span>
-                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                    <input type="date" id="bloqueo-fin" class="input-suave" style="width: 140px; text-align: center;">
+                    
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 20px;" onclick="guardarBloqueoVacaciones()">guardar rango</button>
                 </div>
+
+                <hr style="border: 0; border-top: 1px solid #DDD; margin: 40px 0;">
 
                 <div class="fila-flex" style="margin-bottom: 30px;">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom: 0;">
                     <span class="texto-desc">Selecciona días y horarios cancelados por ti</span>
                 </div>
 
-                <div class="fila-flex" style="margin-bottom: 15px; align-items: center; margin-left: 20px;">
-                    <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
-                    <input type="date" class="input-suave" style="width: 140px; text-align: center;">
+                <div class="fila-flex" style="margin-bottom: 15px; align-items: flex-start; margin-left: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span class="texto-bold" style="width: 180px;">Cancelar turnos del día</span>
+                        <input type="date" id="cancelar-dia" class="input-suave" style="width: 140px; text-align: center;">
+                    </div>
                     
                     <div style="display: flex; flex-direction: column; gap: 15px; margin-left: 40px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="texto-bold" style="width: 85px;">Desde las</span>
-                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <input type="time" id="cancelar-desde" class="input-suave" style="width: 110px; text-align: center;">
                             <span class="texto-bold">hs</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="texto-bold" style="width: 85px;">Hasta las</span>
-                            <input type="time" class="input-suave" style="width: 110px; text-align: center;">
+                            <input type="time" id="cancelar-hasta" class="input-suave" style="width: 110px; text-align: center;">
                             <span class="texto-bold">hs</span>
                         </div>
                     </div>
+                    
+                    <button class="btn-guardar" style="font-size: 14px; padding: 8px 20px; margin-left: 40px; align-self: center;" onclick="guardarCancelacionHora()">guardar horas</button>
                 </div>
 
                 <div class="contenedor-volver">
@@ -381,42 +388,105 @@
 
         let aliasNegocioActual = "TEST_CLINICA"; 
 
+        // 1. GUARDAR NOTAS
         async function guardarNota() {
             try {
-                if (!miSupabase) {
-                    alert("❌ Error de conexión a la base de datos.");
-                    return;
-                }
+                if (!miSupabase) { alert("❌ Error de conexión."); return; }
 
                 const fechaNota = document.getElementById('nota-fecha').value;
                 const tituloNota = document.getElementById('nota-titulo').value;
                 const contenidoNota = document.getElementById('nota-contenido').value;
 
                 if(!fechaNota || !tituloNota || !contenidoNota) {
-                    alert("⚠️ Por favor completá la fecha, el título y la nota antes de guardar.");
+                    alert("⚠️ Por favor completá todos los campos.");
                     return;
                 }
 
                 const { data, error } = await miSupabase
                     .from('notas')
-                    .insert([{ 
-                        alias_negocio: aliasNegocioActual, 
-                        fecha: fechaNota, 
-                        titulo: tituloNota, 
-                        contenido: contenidoNota 
-                    }]);
+                    .insert([{ alias_negocio: aliasNegocioActual, fecha: fechaNota, titulo: tituloNota, contenido: contenidoNota }]);
 
                 if (error) throw error;
 
-                alert("✅ ¡Nota guardada con éxito en tu agenda!");
-                
+                alert("✅ ¡Nota guardada con éxito!");
                 document.getElementById('nota-fecha').value = "";
                 document.getElementById('nota-titulo').value = "";
                 document.getElementById('nota-contenido').value = "";
 
             } catch (error) {
-                console.error("Error al guardar:", error);
-                alert("❌ Hubo un problema al guardar: " + error.message);
+                alert("❌ Problema al guardar nota: " + error.message);
+            }
+        }
+
+        // 2. GUARDAR VACACIONES (RANGO)
+        async function guardarBloqueoVacaciones() {
+            try {
+                if (!miSupabase) { alert("❌ Error de conexión."); return; }
+
+                const inicio = document.getElementById('bloqueo-inicio').value;
+                const fin = document.getElementById('bloqueo-fin').value;
+
+                if(!inicio || !fin) {
+                    alert("⚠️ Por favor completá las fechas de inicio y fin del bloqueo.");
+                    return;
+                }
+
+                const { data, error } = await miSupabase
+                    .from('bloqueos')
+                    .insert([{
+                        alias_negocio: aliasNegocioActual,
+                        tipo_bloqueo: 'vacaciones',
+                        fecha_inicio: inicio,
+                        fecha_fin: fin,
+                        hora_inicio: null, // No aplica a vacaciones
+                        hora_fin: null
+                    }]);
+
+                if (error) throw error;
+
+                alert("✅ ¡Rango de vacaciones bloqueado con éxito!");
+                document.getElementById('bloqueo-inicio').value = "";
+                document.getElementById('bloqueo-fin').value = "";
+
+            } catch (error) {
+                alert("❌ Error de Supabase: " + error.message);
+            }
+        }
+
+        // 3. GUARDAR CANCELACIÓN (HORAS ESPECÍFICAS)
+        async function guardarCancelacionHora() {
+            try {
+                if (!miSupabase) { alert("❌ Error de conexión."); return; }
+
+                const dia = document.getElementById('cancelar-dia').value;
+                const desde = document.getElementById('cancelar-desde').value;
+                const hasta = document.getElementById('cancelar-hasta').value;
+
+                if(!dia || !desde || !hasta) {
+                    alert("⚠️ Por favor completá el día y las horas de la cancelación.");
+                    return;
+                }
+
+                const { data, error } = await miSupabase
+                    .from('bloqueos')
+                    .insert([{
+                        alias_negocio: aliasNegocioActual,
+                        tipo_bloqueo: 'cancelacion',
+                        fecha_inicio: dia,
+                        fecha_fin: dia, // Al ser un solo día, el fin es el mismo día
+                        hora_inicio: desde,
+                        hora_fin: hasta
+                    }]);
+
+                if (error) throw error;
+
+                alert("✅ ¡Horarios cancelados con éxito!");
+                document.getElementById('cancelar-dia').value = "";
+                document.getElementById('cancelar-desde').value = "";
+                document.getElementById('cancelar-hasta').value = "";
+
+            } catch (error) {
+                alert("❌ Error de Supabase: " + error.message);
             }
         }
     </script>
