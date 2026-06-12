@@ -103,7 +103,8 @@
                 <label>Duración</label>
                 <select id="hor-duracion"><option value="20">20 Minutos</option><option value="30" selected>30 Minutos</option><option value="60">60 Minutos</option></select>
             </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" style="display:none;"> <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignarhorarios.png" class="btn-img" onclick="guardarHorario()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" style="display:none;">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignarhorarios.png" class="btn-img" onclick="guardarHorario()">
             <div style="width: 100%; margin-top: 15px;"><label>Mis Horarios</label><div class="caja-blanca"><div id="lista-horarios"></div></div></div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
         </div>
@@ -133,7 +134,6 @@
         }
 
         async function cargarSelectores() {
-            // CANDADO DE SEGURIDAD ESTRICTO: Solo carga tus sedes reales
             if (!idMedico) return;
             const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico).order('nombre');
             const opcionesSedes = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '';

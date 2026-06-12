@@ -250,7 +250,6 @@
                 const selectElement = document.getElementById('select-sucursal-global');
                 selectElement.innerHTML = '<option value="">Cargando sucursales...</option>';
 
-                // FILTRO HERMÉTICO ESTRICTO: Solo carga tus sedes reales
                 if (!negocioIdActual) return;
                 const { data, error } = await miSupabase.from('sucursales').select('id, nombre').eq('negocio_id', negocioIdActual);
                 if (error) throw error;
@@ -324,16 +323,17 @@
                 const { data, error } = await miSupabase.from('usuarios_panel').select('*').eq('alias_usuario', usr).eq('password', clv);
                 if (error) throw error;
                 if(data && data.length > 0) {
-                    aliasNegocioActual = data[0].alias_negocio;
+                    aliasNegocioActual = data[0].alias_negocio.trim();
                     usuarioActual = data[0].alias_usuario;
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
+                    // BÚSQUEDA ROBUSTA E INSENSIBLE A MAYÚSCULAS/MINÚSCULAS
                     const { data: negData } = await miSupabase.from('negocios').select('id').ilike('alias', aliasNegocioActual);
                     if (negData && negData.length > 0) { 
                         negocioIdActual = negData[0].id; 
                         cambiarPantalla('pantalla-elegir');
                         cargarSucursalesReal();
-                    } else { alert("❌ Error de sincronización del Negocio."); }
+                    } else { alert("❌ Error: No se encontró el negocio vinculado."); }
                 } else { alert("❌ Credenciales incorrectas."); }
             } catch (err) { alert("❌ Error: " + err.message); }
         }
