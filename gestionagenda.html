@@ -7,23 +7,37 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        /* FONDO GLOBAL */
         body { font-family: 'Nunito', sans-serif; margin: 0; padding: 0; background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_gestionagenda.png'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; overflow: hidden; }
+        
+        /* SISTEMA DE PANTALLAS */
         .pantalla { display: none; width: 100vw; height: 100vh; flex-direction: row; }
         .pantalla.activa { display: flex; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* PANELES TRANSPARENTES */
         .panel-izquierdo { width: 30%; height: 100%; background: transparent; display: flex; flex-direction: column; align-items: center; padding: 40px 30px; box-sizing: border-box; position: relative; z-index: 10; }
         .panel-derecho { width: 70%; height: 100%; background: transparent; display: flex; flex-direction: column; padding: 40px 50px; box-sizing: border-box; position: relative; z-index: 5; }
+
+        /* ELEMENTOS GRÁFICOS */
         .logo-chico { width: 100%; max-width: 180px; margin-bottom: 40px; display: block; }
         .logo-grande { width: 100%; max-width: 220px; margin-bottom: 20px; }
         .img-titulo-modulo { height: 45px; width: auto; align-self: flex-start; margin-bottom: 30px; display: block; }
+        
         h1 { color: #555; font-weight: 900; font-size: 32px; margin-top: 0; }
         label { width: 100%; text-align: left; font-weight: 900; color: #7A7A7A; font-size: 14px; margin-bottom: 5px; display: block; }
+        
         .input-clasico { width: 100%; padding: 14px 20px; border-radius: 12px; border: none; background: #FFFFFF; box-shadow: 0px 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; box-sizing: border-box; font-size: 15px; font-weight: 800; color: #555; font-family: 'Nunito', sans-serif; outline: none; position: relative; z-index: 100; }
+        
+        /* BOTONES */
         .btn-img { width: 180px; cursor: pointer; transition: transform 0.2s; margin-top: 10px; position: relative; z-index: 1000; display: block; }
         .btn-img:active { transform: scale(0.95); }
         .link-text { color: #555; font-weight: 800; font-size: 14px; margin-top: auto; cursor: pointer; padding: 15px; position: relative; z-index: 1000; display: inline-block; text-align: center; width: 100%; }
+        
+        /* SIDEBARS */
         #sidebar-dia { width: 100%; max-width: 250px; display: block; }
         #sidebar-notas { width: 100%; max-width: 250px; display: none; } 
+
         .calendario-header { display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 15px; }
         .calendario-header h3 { color: #333; font-weight: 900; margin: 0; font-size: 18px; }
         .calendario-header span { font-weight: 900; font-size: 18px; cursor: pointer; color: #555; }
@@ -32,27 +46,62 @@
         .grilla-dias div { font-weight: 800; color: #333; font-size: 16px; padding: 5px 0; cursor: pointer; border-radius: 8px; }
         .grilla-dias div:hover { background: #EAEAEA; }
         .grilla-dias div.inactivo { color: #CCC; }
+        
+        /* CONTENEDORES MÓDULOS DERECHOS */
         .contenedor-modulo { display: none; width: 100%; height: 100%; flex-direction: column; }
         .contenedor-modulo.activo { display: flex; animation: fadeIn 0.2s ease; }
+
+        /* GRILLA PRINCIPAL */
         .header-dia { font-size: 32px; font-weight: 900; color: #444; margin-bottom: 30px; }
         .grilla-turnos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 100px; }
         .tarjeta-turno { background: #FFF; border-radius: 12px; padding: 12px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; align-items: center; border-top: 5px solid #6EB64F; }
         .tarjeta-turno p { margin: 0; font-size: 11px; font-weight: 900; color: #555; }
+
+        /* BOTONERA INFERIOR FIJA */
         .botonera-inferior { position: absolute; bottom: 40px; left: 50px; display: flex; gap: 20px; align-items: center; z-index: 1000; }
         .btn-modulo { height: 60px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1000; }
         .btn-modulo:active { transform: scale(0.95); }
+
+        /* ESTILOS DE INPUTS INTERNOS */
         .input-suave { background: #FFF; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-radius: 12px; padding: 14px 20px; font-weight: 900; color: #555; font-family: 'Nunito', sans-serif; outline: none; font-size: 15px; position: relative; z-index: 100; box-sizing: border-box; }
         .texto-bold { font-weight: 900; color: #666; font-size: 16px; }
         .texto-desc { font-weight: 800; color: #777; font-size: 14px; margin-left: 15px; }
         .fila-flex { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        
         .contenedor-volver { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 800px; }
         .btn-volver-agenda { height: 35px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1000; }
         .btn-volver-agenda:active { transform: scale(0.95); }
+
         .btn-guardar-estilo { background-color: #007D82; color: white; padding: 12px 35px; border-radius: 12px; font-weight: 900; font-size: 20px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; position: relative; z-index: 1000; }
         .btn-guardar-estilo:active { transform: scale(0.95); background-color: #006064; }
+
+        /* --- MODAL DE WHATSAPP --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: 85vh; }
+        .modal-box h3 { color: #ED3237; font-weight: 900; margin-top: 0; margin-bottom: 10px; font-size: 22px; }
+        .modal-box p { color: #555; font-weight: 800; font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
+        .lista-afectados { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; padding-right: 5px; }
+        .tarjeta-afectado { background: #F8F8F8; border-left: 5px solid #ED3237; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .info-afectado { display: flex; flex-direction: column; }
+        .info-afectado span { font-weight: 900; color: #333; font-size: 16px; }
+        .info-afectado small { font-weight: 800; color: #777; font-size: 13px; margin-top: 4px; }
+        .btn-wa { background: #25D366; color: white; text-decoration: none; padding: 10px 15px; border-radius: 12px; font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); transition: transform 0.2s; cursor: pointer; }
+        .btn-wa:active { transform: scale(0.95); }
+        .btn-cerrar-modal { background: #EAEAEA; color: #555; border: none; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-cerrar-modal:active { transform: scale(0.95); background: #CCC; }
     </style>
 </head>
 <body>
+
+    <div id="modal-wa" class="modal-overlay">
+        <div class="modal-box">
+            <h3>⚠️ Turnos Cancelados</h3>
+            <p>Se guardó el bloqueo con éxito. Los siguientes turnos entraban en esa franja y fueron <b>dados de baja automáticamente</b> en el sistema. Avisales por WhatsApp:</p>
+            <div id="lista-turnos-afectados" class="lista-afectados">
+                </div>
+            <button class="btn-cerrar-modal" onclick="cerrarModalWA()">Terminar y Cerrar</button>
+        </div>
+    </div>
 
     <div id="pantalla-login" class="pantalla activa">
         <div class="panel-izquierdo">
@@ -134,7 +183,6 @@
         </div>
 
         <div class="panel-derecho">
-            
             <div id="modulo-dia" class="contenedor-modulo activo">
                 <div class="header-dia">22/06/2026</div>
                 <div class="grilla-turnos">
@@ -152,7 +200,6 @@
 
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
-                
                 <div style="display: flex; gap: 40px; width: 100%;">
                     <div style="width: 260px; display:flex; flex-direction:column;">
                         <label>Número de DNI</label>
@@ -257,6 +304,10 @@
                 document.getElementById('sidebar-notas').style.display = 'block';
             }
         }
+
+        function cerrarModalWA() {
+            document.getElementById('modal-wa').style.display = 'none';
+        }
     </script>
 
     <script>
@@ -350,11 +401,10 @@
             } catch (err) { alert("❌ Servidor: " + err.message); }
         }
 
-        // AQUÍ FORZAMOS LAS MINÚSCULAS PARA ESTANDARIZAR LA BASE DE DATOS
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) { alert("⚠️ Por favor ingresá el alias del profesional."); return; }
-            profesionalActual = prof.toLowerCase(); // GUARDA SIEMPRE EN MINÚSCULAS
+            profesionalActual = prof.toLowerCase(); 
             cambiarModulo('modulo-dia'); 
             cambiarPantalla('pantalla-dia');
         }
@@ -375,6 +425,65 @@
             } catch (err) { alert("❌ Error: " + err.message); }
         }
 
+        // --- SISTEMA AUTOMÁTICO DE CANCELACIÓN Y WHATSAPP ---
+        async function procesarCancelaciones(uuidSucursal, fechaInicio, fechaFin, horaInicio, horaFin) {
+            // 1. Buscamos los turnos de esos días en Supabase
+            const { data: turnos, error } = await miSupabase.from('turnos_activos')
+                .select('*')
+                .eq('sucursal_id', uuidSucursal)
+                .in('estado', ['pendiente', 'confirmado'])
+                .gte('fecha', fechaInicio)
+                .lte('fecha', fechaFin);
+            
+            if (error) { console.error("Error buscando turnos:", error); return []; }
+            let afectados = turnos || [];
+            
+            // 2. Si es cancelación por horas, filtramos los de esa franja
+            if (horaInicio && horaFin) {
+                afectados = afectados.filter(t => {
+                    const horaT = t.hora.slice(0,5);
+                    return horaT >= horaInicio && horaT < horaFin;
+                });
+            }
+
+            if (afectados.length === 0) return [];
+
+            // 3. Los damos de baja en la base de datos automáticamente
+            const idsToUpdate = afectados.map(t => t.id);
+            await miSupabase.from('turnos_activos')
+                .update({ estado: 'cancelado_por_profesional' })
+                .in('id', idsToUpdate);
+
+            return afectados;
+        }
+
+        function mostrarModalWhatsapp(afectados) {
+            const container = document.getElementById('lista-turnos-afectados');
+            container.innerHTML = '';
+
+            afectados.forEach(t => {
+                const numLimpio = t.cliente_telefono.replace(/\D/g, ''); // Saca guiones o espacios
+                const fechaLimpia = t.fecha.split('-').reverse().join('/');
+                const horaLimpia = t.hora.slice(0,5);
+                const mensaje = `Hola ${t.cliente_nombre}, nos comunicamos para avisarte que lamentablemente tuvimos que cancelar tu turno del día ${fechaLimpia} a las ${horaLimpia} hs por un imprevisto del profesional. Por favor, ingresá nuevamente a la aplicación para reprogramarlo. ¡Pedimos disculpas por las molestias!`;
+                
+                const linkWA = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
+
+                container.innerHTML += `
+                    <div class="tarjeta-afectado">
+                        <div class="info-afectado">
+                            <span>👤 ${t.cliente_nombre}</span>
+                            <small>📅 ${fechaLimpia} - ⏰ ${horaLimpia} hs</small>
+                        </div>
+                        <a href="${linkWA}" target="_blank" class="btn-wa">💬 Avisar</a>
+                    </div>
+                `;
+            });
+
+            document.getElementById('modal-wa').style.display = 'flex';
+        }
+
+        // --- GUARDADO DE VACACIONES ---
         async function guardarBloqueoVacaciones(e) {
             if(e) e.preventDefault();
             try {
@@ -385,6 +494,11 @@
                 if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas de vacaciones."); return; }
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
+                // Buscamos el UUID real de la sucursal para cruzarlo con los turnos
+                const { data: sucursalInfo } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc).eq('alias_negocio', aliasNegocioActual);
+                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal."); return; }
+                const uuidSucursalReal = sucursalInfo[0].id;
+
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ 
@@ -394,16 +508,26 @@
                         fecha_fin: fin,
                         hora_inicio: null,
                         hora_fin: null,
-                        alias_profesional: profesionalActual, // Ya va siempre normalizado
+                        alias_profesional: profesionalActual, 
                         id_sucursal: suc 
                     }]);
 
                 if (error) throw error;
-                alert("✅ Vacaciones registradas con éxito para " + profesionalActual + " en " + suc);
+
+                // Lanzamos la limpieza automática
+                const afectados = await procesarCancelaciones(uuidSucursalReal, ini, fin, null, null);
+                
+                if (afectados.length > 0) {
+                    mostrarModalWhatsapp(afectados); // Abre cartel de WhatsApp
+                } else {
+                    alert("✅ Vacaciones registradas con éxito.\n¡Agenda limpia, no había turnos para cancelar!");
+                }
+
                 document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
             } catch (err) { alert("❌ Error de Supabase: " + err.message); }
         }
 
+        // --- GUARDADO DE HORAS ---
         async function guardarCancelacionHora(e) {
             if(e) e.preventDefault();
             try {
@@ -415,6 +539,11 @@
                 if(!dia || !des || !has) { alert("⚠️ Completa el día y los rangos de horas."); return; }
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
+                // Buscamos el UUID real de la sucursal
+                const { data: sucursalInfo } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc).eq('alias_negocio', aliasNegocioActual);
+                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal."); return; }
+                const uuidSucursalReal = sucursalInfo[0].id;
+
                 const { error } = await miSupabase
                     .from('bloqueos')
                     .insert([{ 
@@ -424,12 +553,21 @@
                         fecha_fin: dia, 
                         hora_inicio: des, 
                         hora_fin: has,
-                        alias_profesional: profesionalActual, // Ya va siempre normalizado
+                        alias_profesional: profesionalActual, 
                         id_sucursal: suc
                     }]);
 
                 if (error) throw error;
-                alert("✅ Bloqueo horario guardado con éxito en " + suc);
+
+                // Lanzamos la limpieza automática
+                const afectados = await procesarCancelaciones(uuidSucursalReal, dia, dia, des, has);
+
+                if (afectados.length > 0) {
+                    mostrarModalWhatsapp(afectados); // Abre cartel de WhatsApp
+                } else {
+                    alert("✅ Bloqueo horario guardado con éxito.\n¡Agenda limpia, no había turnos en esa franja!");
+                }
+
                 document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
             } catch (err) { 
                 alert("❌ Error de Supabase: " + err.message); 
