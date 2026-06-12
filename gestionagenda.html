@@ -322,6 +322,7 @@
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
+        let negocioIdActual = null; // <-- ACÁ GUARDAMOS EL UUID DEL NEGOCIO
 
         async function cargarSucursalesReal() {
             try {
@@ -331,7 +332,7 @@
                 const { data, error } = await miSupabase
                     .from('sucursales')
                     .select('nombre') 
-                    .eq('alias_negocio', aliasNegocioActual);
+                    .eq('negocio_id', negocioIdActual); // Búsqueda perfecta por UUID
 
                 if (error) throw error;
 
@@ -373,6 +374,12 @@
                     usuarioActual = data[0].alias_usuario;
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
+                    // ATRAPAMOS EL UUID DEL NEGOCIO REAL
+                    const { data: negData } = await miSupabase.from('negocios').select('id').ilike('alias', aliasNegocioActual);
+                    if (negData && negData.length > 0) {
+                        negocioIdActual = negData[0].id;
+                    }
+
                     cambiarPantalla('pantalla-elegir');
                     cargarSucursalesReal();
                 } else {
@@ -427,7 +434,6 @@
 
         // --- SISTEMA AUTOMÁTICO DE CANCELACIÓN Y WHATSAPP ---
         async function procesarCancelaciones(uuidSucursal, fechaInicio, fechaFin, horaInicio, horaFin) {
-            // 1. Buscamos los turnos de esos días en Supabase
             const { data: turnos, error } = await miSupabase.from('turnos_activos')
                 .select('*')
                 .eq('sucursal_id', uuidSucursal)
@@ -438,7 +444,6 @@
             if (error) { console.error("Error buscando turnos:", error); return []; }
             let afectados = turnos || [];
             
-            // 2. Si es cancelación por horas, filtramos los de esa franja
             if (horaInicio && horaFin) {
                 afectados = afectados.filter(t => {
                     const horaT = t.hora.slice(0,5);
@@ -448,7 +453,6 @@
 
             if (afectados.length === 0) return [];
 
-            // 3. Los damos de baja en la base de datos automáticamente
             const idsToUpdate = afectados.map(t => t.id);
             await miSupabase.from('turnos_activos')
                 .update({ estado: 'cancelado_por_profesional' })
@@ -462,7 +466,7 @@
             container.innerHTML = '';
 
             afectados.forEach(t => {
-                const numLimpio = t.cliente_telefono.replace(/\D/g, ''); // Saca guiones o espacios
+                const numLimpio = t.cliente_telefono.replace(/\D/g, ''); 
                 const fechaLimpia = t.fecha.split('-').reverse().join('/');
                 const horaLimpia = t.hora.slice(0,5);
                 const mensaje = `Hola ${t.cliente_nombre}, nos comunicamos para avisarte que lamentablemente tuvimos que cancelar tu turno del día ${fechaLimpia} a las ${horaLimpia} hs por un imprevisto del profesional. Por favor, ingresá nuevamente a la aplicación para reprogramarlo. ¡Pedimos disculpas por las molestias!`;
@@ -494,9 +498,12 @@
                 if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas de vacaciones."); return; }
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
-                // Buscamos el UUID real de la sucursal para cruzarlo con los turnos
-                const { data: sucursalInfo } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc).eq('alias_negocio', aliasNegocioActual);
-                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal."); return; }
+                // Buscamos el UUID real de la sucursal cruzándolo con el negocio
+                const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales')
+                    .select('id').ilike('nombre', suc).eq('negocio_id', negocioIdActual);
+                
+                if(errSuc) throw errSuc;
+                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la base de datos."); return; }
                 const uuidSucursalReal = sucursalInfo[0].id;
 
                 const { error } = await miSupabase
@@ -514,11 +521,10 @@
 
                 if (error) throw error;
 
-                // Lanzamos la limpieza automática
                 const afectados = await procesarCancelaciones(uuidSucursalReal, ini, fin, null, null);
                 
                 if (afectados.length > 0) {
-                    mostrarModalWhatsapp(afectados); // Abre cartel de WhatsApp
+                    mostrarModalWhatsapp(afectados); 
                 } else {
                     alert("✅ Vacaciones registradas con éxito.\n¡Agenda limpia, no había turnos para cancelar!");
                 }
@@ -540,8 +546,11 @@
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
                 // Buscamos el UUID real de la sucursal
-                const { data: sucursalInfo } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc).eq('alias_negocio', aliasNegocioActual);
-                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal."); return; }
+                const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales')
+                    .select('id').ilike('nombre', suc).eq('negocio_id', negocioIdActual);
+                
+                if(errSuc) throw errSuc;
+                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la base de datos."); return; }
                 const uuidSucursalReal = sucursalInfo[0].id;
 
                 const { error } = await miSupabase
@@ -559,11 +568,10 @@
 
                 if (error) throw error;
 
-                // Lanzamos la limpieza automática
                 const afectados = await procesarCancelaciones(uuidSucursalReal, dia, dia, des, has);
 
                 if (afectados.length > 0) {
-                    mostrarModalWhatsapp(afectados); // Abre cartel de WhatsApp
+                    mostrarModalWhatsapp(afectados); 
                 } else {
                     alert("✅ Bloqueo horario guardado con éxito.\n¡Agenda limpia, no había turnos en esa franja!");
                 }
