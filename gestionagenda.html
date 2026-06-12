@@ -168,7 +168,7 @@
                 </div>
                 <div style="margin-top: 40px; text-align: center;">
                     <label style="text-align: center; font-size: 13px;">Cambiar de Sucursales</label>
-                    <select id="select-sucursal-global" class="input-clasico" style="margin-bottom: 10px; padding: 10px;">
+                    <select id="select-sucursal-global" class="input-clasico" style="margin-bottom: 10px; padding: 10px;" onchange="cargarTurnosDelDiaSecretaria()">
                         <option value="">Cargando sucursales...</option>
                     </select>
                 </div>
@@ -186,11 +186,7 @@
             <div id="modulo-dia" class="contenedor-modulo activo">
                 <div class="header-dia">22/06/2026</div>
                 <div class="grilla-turnos">
-                    <div class="tarjeta-turno"><p>⏰ 08:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno"><p>⏰ 09:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno"><p>⏰ 10:30 &nbsp; Disponible</p></div>
-                    <div class="tarjeta-turno"><p>⏰ 11:30 &nbsp; Disponible</p></div>
-                </div>
+                    </div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_blockdenotas.png" class="btn-modulo" onclick="cambiarModulo('modulo-notas')">
@@ -204,7 +200,6 @@
                     <div style="width: 260px; display:flex; flex-direction:column;">
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 25px;" placeholder="DNI Paciente">
-                        
                         <label style="margin-bottom: 10px;">Elegir fecha</label>
                         <div class="calendario-header">
                             <h3 style="font-size:15px;">Junio 2026</h3>
@@ -294,10 +289,8 @@
             document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
             const destino = document.getElementById(idModulo);
             if(destino) destino.classList.add('activo');
-
             document.getElementById('sidebar-dia').style.display = 'none';
             document.getElementById('sidebar-notas').style.display = 'none';
-
             if (idModulo === 'modulo-dia' || idModulo === 'modulo-darturno' || idModulo === 'modulo-bloqueos') {
                 document.getElementById('sidebar-dia').style.display = 'block';
             } else if (idModulo === 'modulo-notas') {
@@ -324,18 +317,22 @@
         let profesionalActual = "";
         let negocioIdActual = null; 
 
+        function obtenerFechaHoyARG() {
+            const hoy = new Date();
+            const offset = hoy.getTimezoneOffset();
+            const hoyArg = new Date(hoy.getTime() - (offset * 60 * 1000));
+            return hoyArg.toISOString().split('T')[0];
+        }
+
         async function cargarSucursalesReal() {
             try {
                 const selectElement = document.getElementById('select-sucursal-global');
                 selectElement.innerHTML = '<option value="">Cargando sucursales...</option>';
 
                 let query = miSupabase.from('sucursales').select('id, nombre'); 
-                if (negocioIdActual) {
-                    query = query.eq('negocio_id', negocioIdActual);
-                }
+                if (negocioIdActual) { query = query.eq('negocio_id', negocioIdActual); }
 
                 const { data, error } = await query;
-
                 if (error) throw error;
 
                 if (data && data.length > 0) {
@@ -350,10 +347,65 @@
                 } else {
                     selectElement.innerHTML = `<option value="Sucursal de Prueba" data-uuid="null">Sucursal de Prueba</option>`;
                 }
+                cargarTurnosDelDiaSecretaria();
             } catch (err) {
                 console.error("Error al cargar sucursales:", err);
                 document.getElementById('select-sucursal-global').innerHTML = `<option value="Sucursal de Prueba" data-uuid="null">Sucursal de Prueba</option>`;
             }
+        }
+
+        async function cargarTurnosDelDiaSecretaria() {
+            if (!negocioIdActual) return;
+            const fechaHoy = obtenerFechaHoyARG();
+            document.querySelector('.header-dia').innerText = fechaHoy.split('-').reverse().join('/');
+
+            const { data: turnos, error } = await miSupabase.from('turnos_activos')
+                .select('*')
+                .eq('negocio_id', negocioIdActual)
+                .eq('fecha', fechaHoy)
+                .order('hora', { ascending: true });
+
+            if (error) { console.error(error); return; }
+
+            const grilla = document.querySelector('.grilla-turnos');
+            if (!turnos || turnos.length === 0) {
+                grilla.innerHTML = '<p class="texto-bold" style="grid-column: 1/-1; text-align:center; padding: 20px;">No hay turnos agendados para el día de hoy.</p>';
+                return;
+            }
+
+            grilla.innerHTML = turnos.map(t => {
+                let colorBorde = '#6EB64F'; 
+                let botonLlego = '';
+
+                if (t.estado === 'en_espera') {
+                    colorBorde = '#F4B41A'; 
+                    botonLlego = `<span style="font-size:11px; font-weight:900; color:#F4B41A; margin-left:auto;">🛋️ EN SALA</span>`;
+                } else if (t.estado === 'pendiente' || t.estado === 'confirmado') {
+                    botonLlego = `<button style="margin-left:auto; background:#009E9B; color:white; border:none; padding:6px 12px; border-radius:8px; font-weight:900; cursor:pointer; font-size:11px;" onclick="marcarPacienteEnEspera('${t.id}')">🚶 LLEGÓ</button>`;
+                } else if (t.estado.startsWith('cancelado')) {
+                    colorBorde = '#ED3237'; 
+                    botonLlego = `<span style="font-size:11px; font-weight:900; color:#ED3237; margin-left:auto;">❌ CANCELADO</span>`;
+                }
+
+                return `
+                    <div class="tarjeta-turno" style="border-top: 5px solid ${colorBorde}; display:flex; justify-content:space-between; align-items:center; padding:15px; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.02);">
+                        <div>
+                            <p style="font-size:14px; margin:0 0 2px 0; color:#333;"><b>⏰ ${t.hora.slice(0,5)} hs</b></p>
+                            <p style="color:#555; font-size:12px; margin:0;">👤 ${t.cliente_nombre}</p>
+                        </div>
+                        ${botonLlego}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function marcarPacienteEnEspera(turnoId) {
+            const { error } = await miSupabase.from('turnos_activos')
+                .update({ estado: 'en_espera' })
+                .eq('id', turnoId);
+
+            if (error) { alert("Error: " + error.message); }
+            else { cargarTurnosDelDiaSecretaria(); }
         }
 
         async function ejecutarLogin(e) {
@@ -361,7 +413,6 @@
             try {
                 const usr = document.getElementById('login-usuario').value.trim().toLowerCase();
                 const clv = document.getElementById('login-clave').value.trim();
-
                 if(!usr || !clv) { alert("⚠️ Introduce tu usuario y contraseña."); return; }
 
                 const { data, error } = await miSupabase
@@ -378,9 +429,7 @@
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
                     const { data: negData } = await miSupabase.from('negocios').select('id').ilike('alias', aliasNegocioActual);
-                    if (negData && negData.length > 0) {
-                        negocioIdActual = negData[0].id;
-                    }
+                    if (negData && negData.length > 0) { negocioIdActual = negData[0].id; }
 
                     cambiarPantalla('pantalla-elegir');
                     cargarSucursalesReal();
@@ -388,10 +437,6 @@
                     alert("❌ Credenciales incorrectas. Revisa el usuario y clave.");
                 }
             } catch (err) { alert("❌ Error: " + err.message); }
-        }
-
-        async function ejecutarRegistro(e) {
-            // ... (Igual)
         }
 
         function seleccionarAgenda() {
@@ -402,36 +447,31 @@
             cambiarPantalla('pantalla-dia');
         }
 
-        // --- SISTEMA AUTOMÁTICO DE CANCELACIÓN Y WHATSAPP (CON RADAR) ---
-        async function procesarCancelaciones(uuidSucursal, fechaInicio, fechaFin, horaInicio, horaFin) {
-            
-            // 📡 RADAR DE DIAGNÓSTICO: Frenamos y miramos qué hay en la base de datos
-            alert(`📡 RADAR 1 📡\nSecretaria busca borrar turnos con:\n- ID Sucursal: ${uuidSucursal}\n- Día: ${fechaInicio}`);
+        async function guardarNota() {
+            try {
+                const f = document.getElementById('nota-fecha').value;
+                const t = document.getElementById('nota-titulo').value;
+                const c = document.getElementById('nota-contenido').value;
+                if(!f || !t || !c) { alert("⚠️ Completa todos los campos."); return; }
+                const { error } = await miSupabase
+                    .from('notas')
+                    .insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
+                if (error) throw error;
+                alert("✅ Nota guardada.");
+                document.getElementById('nota-fecha').value=""; document.getElementById('nota-titulo').value=""; document.getElementById('nota-contenido').value="";
+            } catch (err) { alert("❌ Error: " + err.message); }
+        }
 
-            // Buscamos sin filtro para ver qué ID de sucursal tienen guardados realmente esos turnos
-            const { data: turnosCrudos } = await miSupabase.from('turnos_activos')
-                .select('id, sucursal_id, estado, hora')
-                .gte('fecha', fechaInicio)
-                .lte('fecha', fechaFin);
-            
-            if (turnosCrudos && turnosCrudos.length > 0) {
-                const testSucursal = turnosCrudos[0].sucursal_id;
-                alert(`📡 RADAR 2 📡\n¡Atención! Supabase SÍ encontró ${turnosCrudos.length} turnos ese día.\nPero mirá el ID de sucursal que tienen guardado:\n[${testSucursal}]\n\nY la secretaria está mandando este:\n[${uuidSucursal}]`);
-            } else {
-                alert(`📡 RADAR 2 📡\nSupabase dice que la tabla está completamente vacía para el día ${fechaInicio}.`);
-            }
-
-            // --- EJECUCIÓN REAL ---
-            if (!uuidSucursal || uuidSucursal === 'null') return []; 
-
+        async function procesarCancelacionesGlobales(fechaInicio, fechaFin, horaInicio, horaFin) {
+            if (!negocioIdActual) return [];
             const { data: turnos, error } = await miSupabase.from('turnos_activos')
                 .select('*')
-                .eq('sucursal_id', uuidSucursal)
-                .in('estado', ['pendiente', 'confirmado'])
+                .eq('negocio_id', negocioIdActual)
+                .in('estado', ['pendiente', 'confirmado', 'en_espera'])
                 .gte('fecha', fechaInicio)
                 .lte('fecha', fechaFin);
             
-            if (error) { alert("Error buscando turnos: " + error.message); return []; }
+            if (error) { console.error("Error buscando turnos:", error); return []; }
             let afectados = turnos || [];
             
             if (horaInicio && horaFin) {
@@ -440,119 +480,64 @@
                     return horaT >= horaInicio && horaT <= horaFin;
                 });
             }
-
             if (afectados.length === 0) return [];
-
             const idsToUpdate = afectados.map(t => t.id);
-            const { error: updErr } = await miSupabase.from('turnos_activos')
-                .update({ estado: 'cancelado_por_profesional' })
-                .in('id', idsToUpdate);
-
-            if(updErr) alert("Error actualizando: " + updErr.message);
-
+            await miSupabase.from('turnos_activos').update({ estado: 'cancelado_por_profesional' }).in('id', idsToUpdate);
             return afectados;
         }
 
         function mostrarModalWhatsapp(afectados) {
             const container = document.getElementById('lista-turnos-afectados');
             container.innerHTML = '';
-
             afectados.forEach(t => {
                 const numLimpio = t.cliente_telefono.replace(/\D/g, ''); 
                 const fechaLimpia = t.fecha.split('-').reverse().join('/');
                 const horaLimpia = t.hora.slice(0,5);
                 const mensaje = `Hola ${t.cliente_nombre}, nos comunicamos para avisarte que lamentablemente tuvimos que cancelar tu turno del día ${fechaLimpia} a las ${horaLimpia} hs por un imprevisto del profesional. Por favor, ingresá nuevamente a la aplicación para reprogramarlo. ¡Pedimos disculpas por las molestias!`;
-                
                 const linkWA = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
-
                 container.innerHTML += `
                     <div class="tarjeta-afectado">
-                        <div class="info-afectado">
-                            <span>👤 ${t.cliente_nombre}</span>
-                            <small>📅 ${fechaLimpia} - ⏰ ${horaLimpia} hs</small>
-                        </div>
+                        <div class="info-afectado"><span>👤 ${t.cliente_nombre}</span><small>📅 ${fechaLimpia} - ⏰ ${horaLimpia} hs</small></div>
                         <a href="${linkWA}" target="_blank" class="btn-wa">💬 Avisar</a>
-                    </div>
-                `;
+                    </div>`;
             });
-
             document.getElementById('modal-wa').style.display = 'flex';
         }
 
-        // --- GUARDADO DE VACACIONES ---
         async function guardarBloqueoVacaciones(e) {
             if(e) e.preventDefault();
             try {
                 const ini = document.getElementById('bloqueo-inicio').value;
                 const fin = document.getElementById('bloqueo-fin').value;
-                const selectEl = document.getElementById('select-sucursal-global');
-                const suc = selectEl.value;
-                
+                const suc = document.getElementById('select-sucursal-global').value;
                 if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas de vacaciones."); return; }
-                if(!suc) { alert("⚠️ Error: Selecciona una sucursal válida."); return; }
-
-                const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc);
-                if(errSuc) throw errSuc;
-                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la BD."); return; }
-                const uuidSucursalReal = sucursalInfo[0].id;
-
-                const { error } = await miSupabase
-                    .from('bloqueos')
-                    .insert([{ 
-                        alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: ini, fecha_fin: fin,
-                        hora_inicio: null, hora_fin: null, alias_profesional: profesionalActual, id_sucursal: suc 
-                    }]);
-
+                if(!suc) { alert("⚠️ Error: Selecciona una sucursal."); return; }
+                const { error } = await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: ini, fecha_fin: fin, hora_inicio: null, hora_fin: null, alias_profesional: profesionalActual, id_sucursal: suc }]);
                 if (error) throw error;
-
-                const afectados = await procesarCancelaciones(uuidSucursalReal, ini, fin, null, null);
-                
-                if (afectados.length > 0) {
-                    mostrarModalWhatsapp(afectados); 
-                } else {
-                    alert("✅ Vacaciones registradas con éxito.\n¡Agenda limpia, no había turnos para cancelar!");
-                }
-
+                const afectados = await procesarCancelacionesGlobales(ini, fin, null, null);
+                if (afectados.length > 0) { mostrarModalWhatsapp(afectados); } 
+                else { alert("✅ Vacaciones registradas con éxito.\n¡Agenda limpia, no había turnos para cancelar!"); }
                 document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
+                cargarTurnosDelDiaSecretaria();
             } catch (err) { alert("❌ Error de Supabase: " + err.message); }
         }
 
-        // --- GUARDADO DE HORAS ---
         async function guardarCancelacionHora(e) {
             if(e) e.preventDefault();
             try {
                 const dia = document.getElementById('cancelar-dia').value;
                 const des = document.getElementById('cancelar-desde').value;
                 const has = document.getElementById('cancelar-hasta').value;
-                const selectEl = document.getElementById('select-sucursal-global');
-                const suc = selectEl.value;
-
+                const suc = document.getElementById('select-sucursal-global').value;
                 if(!dia || !des || !has) { alert("⚠️ Completa el día y los rangos de horas."); return; }
-                if(!suc) { alert("⚠️ Error: Selecciona una sucursal válida."); return; }
-
-                const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales').select('id').ilike('nombre', suc);
-                if(errSuc) throw errSuc;
-                if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la BD."); return; }
-                const uuidSucursalReal = sucursalInfo[0].id;
-
-                const { error } = await miSupabase
-                    .from('bloqueos')
-                    .insert([{ 
-                        alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, 
-                        hora_inicio: des, hora_fin: has, alias_profesional: profesionalActual, id_sucursal: suc
-                    }]);
-
+                if(!suc) { alert("⚠️ Error: Selecciona una sucursal."); return; }
+                const { error } = await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: des, hora_fin: has, alias_profesional: profesionalActual, id_sucursal: suc }]);
                 if (error) throw error;
-
-                const afectados = await procesarCancelaciones(uuidSucursalReal, dia, dia, des, has);
-
-                if (afectados.length > 0) {
-                    mostrarModalWhatsapp(afectados); 
-                } else {
-                    alert("✅ Bloqueo horario guardado con éxito.\n¡Agenda limpia, no había turnos en esa franja!");
-                }
-
+                const afectados = await procesarCancelacionesGlobales(dia, dia, des, has);
+                if (afectados.length > 0) { mostrarModalWhatsapp(afectados); } 
+                else { alert("✅ Bloqueo horario guardado con éxito.\n¡Agenda limpia, no había turnos en esa franja!"); }
                 document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
+                cargarTurnosDelDiaSecretaria();
             } catch (err) { alert("❌ Error de Supabase: " + err.message); }
         }
     </script>
