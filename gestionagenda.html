@@ -322,17 +322,20 @@
         let aliasNegocioActual = ""; 
         let usuarioActual = "";
         let profesionalActual = "";
-        let negocioIdActual = null; // <-- ACÁ GUARDAMOS EL UUID DEL NEGOCIO
+        let negocioIdActual = null; 
 
         async function cargarSucursalesReal() {
             try {
                 const selectElement = document.getElementById('select-sucursal-global');
                 selectElement.innerHTML = '<option value="">Cargando sucursales...</option>';
 
-                const { data, error } = await miSupabase
-                    .from('sucursales')
-                    .select('nombre') 
-                    .eq('negocio_id', negocioIdActual); // Búsqueda perfecta por UUID
+                // Buscamos todas las sucursales libremente o atadas al ID del negocio si existe
+                let query = miSupabase.from('sucursales').select('nombre');
+                if (negocioIdActual) {
+                    query = query.eq('negocio_id', negocioIdActual);
+                }
+
+                const { data, error } = await query;
 
                 if (error) throw error;
 
@@ -345,11 +348,11 @@
                         selectElement.appendChild(opt);
                     });
                 } else {
-                    selectElement.innerHTML = `<option value="sucursal de prueba">sucursal de prueba</option>`;
+                    selectElement.innerHTML = `<option value="Sucursal de Prueba">Sucursal de Prueba</option>`;
                 }
             } catch (err) {
                 console.error("Error al cargar sucursales:", err);
-                document.getElementById('select-sucursal-global').innerHTML = `<option value="sucursal de prueba">sucursal de prueba</option>`;
+                document.getElementById('select-sucursal-global').innerHTML = `<option value="Sucursal de Prueba">Sucursal de Prueba</option>`;
             }
         }
 
@@ -374,7 +377,7 @@
                     usuarioActual = data[0].alias_usuario;
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
-                    // ATRAPAMOS EL UUID DEL NEGOCIO REAL
+                    // Buscamos el UUID real del negocio, sin trabar el sistema si falla
                     const { data: negData } = await miSupabase.from('negocios').select('id').ilike('alias', aliasNegocioActual);
                     if (negData && negData.length > 0) {
                         negocioIdActual = negData[0].id;
@@ -434,6 +437,8 @@
 
         // --- SISTEMA AUTOMÁTICO DE CANCELACIÓN Y WHATSAPP ---
         async function procesarCancelaciones(uuidSucursal, fechaInicio, fechaFin, horaInicio, horaFin) {
+            if (!uuidSucursal) return []; 
+
             const { data: turnos, error } = await miSupabase.from('turnos_activos')
                 .select('*')
                 .eq('sucursal_id', uuidSucursal)
@@ -498,9 +503,9 @@
                 if(!ini || !fin) { alert("⚠️ Selecciona el rango de fechas de vacaciones."); return; }
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
-                // Buscamos el UUID real de la sucursal cruzándolo con el negocio
+                // Buscamos el UUID real de la sucursal SOLO por el nombre directo (A prueba de balas)
                 const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales')
-                    .select('id').ilike('nombre', suc).eq('negocio_id', negocioIdActual);
+                    .select('id').ilike('nombre', suc);
                 
                 if(errSuc) throw errSuc;
                 if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la base de datos."); return; }
@@ -545,9 +550,9 @@
                 if(!dia || !des || !has) { alert("⚠️ Completa el día y los rangos de horas."); return; }
                 if(!suc) { alert("⚠️ Selecciona una sucursal válida."); return; }
 
-                // Buscamos el UUID real de la sucursal
+                // Buscamos el UUID real de la sucursal SOLO por el nombre directo (A prueba de balas)
                 const { data: sucursalInfo, error: errSuc } = await miSupabase.from('sucursales')
-                    .select('id').ilike('nombre', suc).eq('negocio_id', negocioIdActual);
+                    .select('id').ilike('nombre', suc);
                 
                 if(errSuc) throw errSuc;
                 if(!sucursalInfo || sucursalInfo.length === 0) { alert("Error: No se encontró la sucursal en la base de datos."); return; }
