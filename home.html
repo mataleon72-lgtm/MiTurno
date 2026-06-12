@@ -248,9 +248,12 @@
 
             // 1. Traemos TODOS los bloqueos de este negocio (Ignorando si la secretaria le puso otro nombre al profesional)
             const { data: bloqueosExistentes, error: errBloq } = await supabaseCliente
-                .from('bloqueos')
-                .select('*')
-                .eq('alias_negocio', aliasMedicoActualParaFiltro);
+    .from('bloqueos')
+    .select('*')
+    .eq('alias_negocio', aliasMedicoActualParaFiltro);
+
+// 👇 COPIÁ Y PEGÁ ESTA LÍNEA DE RADAR ACÁ ABAJO 👇
+alert("DEBUG: El alias detectado es [" + aliasMedicoActualParaFiltro + "] y Supabase devolvió " + (bloqueosExistentes ? bloqueosExistentes.length : 0) + " bloqueos.");
 
             if (errBloq) { console.error("Error bloqueos:", errBloq); }
 
