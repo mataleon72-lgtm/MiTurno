@@ -51,6 +51,7 @@
 <body>
 
     <div class="app-lienzo">
+        
         <div id="pantalla-login" class="contenedor activa">
             <h2 class="texto-gris-oscuro-login">Ingresa a tu cuenta</h2>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_1.png" class="img-puntos">
@@ -78,12 +79,15 @@
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo mi agenda.png" class="img-titulo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_3.png" class="img-puntos">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_misturnos.png" class="btn-img" style="margin-top: -15px; margin-bottom: 25px;" onclick="switchModulo('turnos')">
+
             <h3 class="texto-gris-oscuro" style="font-size: 20px; margin-top: 0;">Agrega Negocios<br>o Profesionales</h3>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_solicitarID.png" style="width: 80%; margin-top: 15px; margin-bottom: 10px;">
+            
             <div class="buscador-row">
                 <input type="text" id="input-medico-alias" placeholder="EJ: Mild" style="text-transform: uppercase;">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_agregar.png" onclick="vincularMedico()">
             </div>
+
             <label style="font-size: 16px; margin-bottom: 10px;">Tu Lista</label>
             <div id="lista-medicos" style="width: 100%;"></div>
 
@@ -96,15 +100,18 @@
                 <label id="label-horas" style="display:none;">3. Seleccioná el Horario:</label>
                 <div id="grilla-horas" class="grilla-horas"></div>
             </div>
+
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="margin-top: 20px;" onclick="cerrarSesionPaciente()">
         </div>
 
         <div id="pantalla-turnos" class="contenedor">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_misturnos.png" class="img-titulo">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntoshome_4.png" class="img-puntos">
+            
             <div id="lista-turnos-paciente" style="width: 100%;"></div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" style="margin-top: 30px;" onclick="switchModulo('agenda')">
         </div>
+
     </div>
 
     <script>
@@ -210,8 +217,10 @@
         async function abrirTurnero(idMed, nombreMed, aliasMed) {
             medicoSeleccionadoId = idMed;
             aliasMedicoActualParaFiltro = aliasMed; 
+
             document.getElementById('turnero-medico-nombre').innerText = "Turnos con " + nombreMed;
             document.getElementById('turnero-integrado').style.display = 'block';
+            
             setTimeout(() => { document.getElementById('turnero-integrado').scrollIntoView({ behavior: 'smooth' }); }, 100);
             
             const { data: sucs } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMed);
@@ -228,6 +237,7 @@
             document.getElementById('label-horas').style.display = 'none';
         }
 
+        // CONTROLADOR BLINDADO 100%: Filtros de JS para vencer problemas de DB
         async function cargarHorariosDisponibles() {
             const nombreSucursal = document.getElementById('turnero-sucursal').value; 
             const fechaElegida = document.getElementById('turnero-fecha').value;
@@ -236,12 +246,11 @@
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
 
-            // AQUÍ LA SOLUCIÓN FINAL: .ilike TANTO PARA SUCURSAL COMO PROFESIONAL
+            // 1. Traemos TODOS los bloqueos de este negocio (Ignorando si la secretaria le puso otro nombre al profesional)
             const { data: bloqueosExistentes, error: errBloq } = await supabaseCliente
                 .from('bloqueos')
                 .select('*')
-                .ilike('id_sucursal', nombreSucursal) 
-                .ilike('alias_profesional', aliasMedicoActualParaFiltro);
+                .eq('alias_negocio', aliasMedicoActualParaFiltro);
 
             if (errBloq) { console.error("Error bloqueos:", errBloq); }
 
@@ -250,16 +259,22 @@
 
             if (bloqueosExistentes && bloqueosExistentes.length > 0) {
                 bloqueosExistentes.forEach(bloq => {
-                    if (bloq.tipo_bloqueo === 'vacaciones') {
-                        if (fechaElegida >= bloq.fecha_inicio && fechaElegida <= bloq.fecha_fin) {
-                            estaDeVacaciones = true;
-                        }
-                    } else if (bloq.tipo_bloqueo === 'cancelacion') {
-                        if (fechaElegida === bloq.fecha_inicio) {
-                            horasCanceladasEnElDia.push({
-                                desde: bloq.hora_inicio.slice(0,5),
-                                hasta: bloq.hora_fin.slice(0,5)
-                            });
+                    // Limpiamos espacios y pasamos a minúsculas para comparar exacto y sin fallas
+                    const sucursalBloqueo = (bloq.id_sucursal || "").trim().toLowerCase();
+                    const sucursalElegida = (nombreSucursal || "").trim().toLowerCase();
+
+                    if (sucursalBloqueo === sucursalElegida) {
+                        if (bloq.tipo_bloqueo === 'vacaciones') {
+                            if (fechaElegida >= bloq.fecha_inicio && fechaElegida <= bloq.fecha_fin) {
+                                estaDeVacaciones = true;
+                            }
+                        } else if (bloq.tipo_bloqueo === 'cancelacion') {
+                            if (fechaElegida === bloq.fecha_inicio) {
+                                horasCanceladasEnElDia.push({
+                                    desde: bloq.hora_inicio ? bloq.hora_inicio.slice(0,5) : "",
+                                    hasta: bloq.hora_fin ? bloq.hora_fin.slice(0,5) : ""
+                                });
+                            }
                         }
                     }
                 });
@@ -271,7 +286,6 @@
                 return;
             }
 
-            // Aplicamos .ilike acá también por las dudas, para que no falle buscando el UUID
             const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').ilike('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id;
