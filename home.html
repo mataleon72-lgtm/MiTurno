@@ -236,11 +236,14 @@
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
 
+            // AQUÍ LA SOLUCIÓN FINAL: .ilike TANTO PARA SUCURSAL COMO PROFESIONAL
             const { data: bloqueosExistentes, error: errBloq } = await supabaseCliente
                 .from('bloqueos')
                 .select('*')
-                .eq('id_sucursal', nombreSucursal)
+                .ilike('id_sucursal', nombreSucursal) 
                 .ilike('alias_profesional', aliasMedicoActualParaFiltro);
+
+            if (errBloq) { console.error("Error bloqueos:", errBloq); }
 
             let estaDeVacaciones = false;
             let horasCanceladasEnElDia = [];
@@ -268,7 +271,8 @@
                 return;
             }
 
-            const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
+            // Aplicamos .ilike acá también por las dudas, para que no falle buscando el UUID
+            const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').ilike('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id;
 
@@ -323,7 +327,7 @@
             const fecha = document.getElementById('turnero-fecha').value;
             if(!confirm(`¿Querés confirmar tu turno a las ${horaTurno} hs?`)) return;
 
-            const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
+            const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').ilike('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id;
 
