@@ -143,11 +143,10 @@
                     </select>
                 </div>
             </div>
-            <div id="sidebar-notas">
+            <div id="sidebar-notas" style="width: 100%;">
                 <h2 style="color: #555; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%;">Notas</h2>
-                <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%;">
-                    <p style="margin:0; font-size: 11px; font-weight: 900; color: #555;">20/06/2026 &nbsp; Llamada del laboratorio</p>
-                </div>
+                <div id="lista-notas-contenedor" style="display:flex; flex-direction:column; gap:12px; width: 100%; max-height: 450px; overflow-y: auto; padding-right: 5px;">
+                    </div>
             </div>
         </div>
 
@@ -226,6 +225,11 @@
             if(document.getElementById(idModulo)) document.getElementById(idModulo).classList.add('activo');
             document.getElementById('sidebar-dia').style.display = (idModulo !== 'modulo-notas') ? 'block' : 'none';
             document.getElementById('sidebar-notas').style.display = (idModulo === 'modulo-notas') ? 'block' : 'none';
+            
+            // Si entra al módulo de notas, cargamos el listado real de notas al instante
+            if(idModulo === 'modulo-notas') {
+                cargarNotasSecretaria();
+            }
         }
         function cerrarModalWA() { document.getElementById('modal-wa').style.display = 'none'; }
     </script>
@@ -315,6 +319,36 @@
             cargarTurnosDelDiaSecretaria();
         }
 
+        // 👁️ CARGAR NOTAS REALES DESDE SUPABASE AL LISTADO DE LA IZQUIERDA
+        async function cargarNotasSecretaria() {
+            if (!aliasNegocioActual) return;
+            const container = document.getElementById('lista-notas-contenedor');
+            container.innerHTML = '<p style="color:#777; font-weight:800; font-size:13px; text-align:center;">Cargando notas...</p>';
+
+            const { data: notas, error } = await miSupabase.from('notas')
+                .select('*')
+                .eq('alias_negocio', aliasNegocioActual)
+                .order('fecha', { ascending: false });
+
+            if (error) { console.error(error); return; }
+
+            if (!notas || notas.length === 0) {
+                container.innerHTML = '<p style="color:#A0A0A0; font-weight:800; font-size:13px; text-align:center;">No hay notas guardadas.</p>';
+                return;
+            }
+
+            container.innerHTML = notas.map(n => {
+                const fechaLimpia = n.fecha.split('-').reverse().join('/');
+                return `
+                    <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 100%; box-sizing:border-box;">
+                        <p style="margin:0; font-size: 12px; font-weight: 900; color: #333;">📅 ${fechaLimpia}</p>
+                        <p style="margin:4px 0 2px 0; font-size: 13px; font-weight: 900; color: #007D82;">📌 ${n.titulo}</p>
+                        <p style="margin:0; font-size: 11px; font-weight: 800; color: #666; line-height:1.3; white-space: pre-wrap;">${n.contenido}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
         async function ejecutarLogin(e) {
             if(e) e.preventDefault();
             try {
@@ -327,7 +361,6 @@
                     usuarioActual = data[0].alias_usuario;
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
-                    // 🎯 RASTREO MULTIPROPÓSITO: Busca tanto por nombre "Probador" como por alias "YO" para que nunca falle
                     const { data: negData } = await miSupabase.from('negocios').select('id')
                         .or(`alias.ilike.${aliasNegocioActual},nombre.ilike.${aliasNegocioActual}`);
                         
@@ -347,13 +380,21 @@
             cambiarModulo('modulo-dia'); cambiarPantalla('pantalla-dia');
         }
 
+        // GUARDAR NOTA DINÁMICA ACTUALIZADA AL INSTANTE
         async function guardarNota() {
             const f = document.getElementById('nota-fecha').value;
             const t = document.getElementById('nota-titulo').value;
             const c = document.getElementById('nota-contenido').value;
-            await miSupabase.from('notas').insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
-            alert("✅ Nota guardada.");
+            if(!f || !t || !c) { alert("⚠️ Completa todos los campos para guardar la nota."); return; }
+
+            const { error } = await miSupabase.from('notas').insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
+            if (error) { alert("Error al guardar: " + error.message); return; }
+
+            alert("✅ Nota guardada con éxito.");
             document.getElementById('nota-fecha').value=""; document.getElementById('nota-titulo').value=""; document.getElementById('nota-contenido').value="";
+            
+            // 🔄 LA MAGIA RE-RENDERIZADA: Se actualiza el listado de la izquierda en caliente
+            cargarNotasSecretaria();
         }
 
         async function procesarCancelacionesGlobales(fechaInicio, fechaFin, horaInicio, horaFin) {
