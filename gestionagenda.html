@@ -327,8 +327,10 @@
                     usuarioActual = data[0].alias_usuario;
                     document.getElementById('saludo-secretaria').innerText = "Buen día " + data[0].nombre_usuario + "!!";
                     
-                    // BÚSQUEDA ROBUSTA E INSENSIBLE A MAYÚSCULAS/MINÚSCULAS
-                    const { data: negData } = await miSupabase.from('negocios').select('id').ilike('alias', aliasNegocioActual);
+                    // 🎯 RASTREO MULTIPROPÓSITO: Busca tanto por nombre "Probador" como por alias "YO" para que nunca falle
+                    const { data: negData } = await miSupabase.from('negocios').select('id')
+                        .or(`alias.ilike.${aliasNegocioActual},nombre.ilike.${aliasNegocioActual}`);
+                        
                     if (negData && negData.length > 0) { 
                         negocioIdActual = negData[0].id; 
                         cambiarPantalla('pantalla-elegir');
@@ -372,7 +374,7 @@
             const container = document.getElementById('lista-turnos-afectados'); container.innerHTML = '';
             afectados.forEach(t => {
                 const linkWA = `https://wa.me/${t.cliente_telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${t.cliente_nombre}, lamentamos informarte que por un imprevisto del profesional tuvimos que cancelar tu turno del ${t.fecha.split('-').reverse().join('/')} a las ${t.hora.slice(0,5)} hs. Ingresá de nuevo a la app para reprogramarlo.`)}`;
-                container.innerHTML += `<div class="tarjeta-afectado"><div class="info-afectado"><span>👤 ${t.cliente_nombre}</span><small>⏰ ${t.hora.slice(0,5)} hs</small></div><a href="${linkWA}" target="_blank" class="btn-wa">💬 Avisar</a></div>`;
+                container.innerHTML += `<div class="tarjeta-afectado"><div class="info-afectado"><span>👤 ${t.cliente_nombre}</span><small>📅 ${t.fecha.split('-').reverse().join('/')} - ⏰ ${t.hora.slice(0,5)} hs</small></div><a href="${linkWA}" target="_blank" class="btn-wa">💬 Avisar</a></div>`;
             });
             document.getElementById('modal-wa').style.display = 'flex';
         }
