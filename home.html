@@ -72,7 +72,7 @@
         input::placeholder { color: #A0A0A0; font-weight: 800; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(9, 105, 145, 0.2); }
 
-        /* BUSCADOR */
+        /* BUSCADOR ALINEADO */
         .buscador-row {
             display: flex; width: 100%; gap: 10px; align-items: center; margin-bottom: 20px;
         }
@@ -111,6 +111,7 @@
             margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 10;
         }
 
+        /* TURNERO */
         .bloque-turnero { 
             background: #FFFFFF; padding: 20px; border-radius: 20px; margin-bottom: 20px; 
             display: none; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -309,17 +310,17 @@
             document.getElementById('label-horas').style.display = 'none';
         }
 
-        // CONTROLADOR CORREGIDO Y BLINDADO BAJO TU ESTRUCTURA REAL DE SUPABASE
+        // CONTROLADOR BLINDADO Y QUIRÚRGICO DE BLOQUEOS POR FECHA INDIVIDUAL
         async function cargarHorariosDisponibles() {
             const nombreSucursal = document.getElementById('turnero-sucursal').value; 
             const fechaElegida = document.getElementById('turnero-fecha').value;
             if (!nombreSucursal || !fechaElegida) return;
 
-            // --- RESETEO ABSOLUTO EN CADA SELECCIÓN DE FECHA ---
+            // --- RESETEO TOTAL DEL CONTENEDOR EN CADA LLAMADA ---
             document.getElementById('grilla-horas').innerHTML = '';
             document.getElementById('label-horas').style.display = 'none';
 
-            // 1. LEER BLOQUEOS (Cruce de texto plano nativo e infalible)
+            // 1. LEER BLOQUEOS (Consulta estricta filtrada por la sede y el profesional actual)
             const { data: bloqueosExistentes } = await supabaseCliente
                 .from('bloqueos')
                 .select('*')
@@ -332,6 +333,7 @@
             if (bloqueosExistentes && bloqueosExistentes.length > 0) {
                 bloqueosExistentes.forEach(bloq => {
                     if (bloq.tipo_bloqueo === 'vacaciones') {
+                        // Comprobación matemática estricta: evaluamos SOLO si la fecha elegida entra en el rango
                         if (fechaElegida >= bloq.fecha_inicio && fechaElegida <= bloq.fecha_fin) {
                             estaDeVacaciones = true;
                         }
@@ -346,14 +348,14 @@
                 });
             }
 
-            // Si está de vacaciones, corta la grilla e informa
+            // Si la fecha elegida coincide con el bloqueo por vacaciones, se detiene el flujo acá
             if (estaDeVacaciones) {
                 document.getElementById('label-horas').style.display = 'none';
-                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional se encuentra de vacaciones en este rango de fechas.</p>';
+                document.getElementById('grilla-horas').innerHTML = '<p style="grid-column:1/-1; color:#ED3237; font-weight:800; font-size:14px; text-align:center;">El profesional no atiende en esta fecha.</p>';
                 return;
             }
 
-            // ¡Socio! Cambiamos 'id_sucursal' por 'id' que es tu columna real de UUID en la tabla sucursales
+            // Buscamos el UUID interno de la sucursal (columna 'id' de sucursales) para leer la agenda general habitual
             const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id;
@@ -411,7 +413,6 @@
             const fecha = document.getElementById('turnero-fecha').value;
             if(!confirm(`¿Querés confirmar tu turno a las ${horaTurno} hs?`)) return;
 
-            // Cambiado 'id_sucursal' por 'id' para que traiga el UUID correcto sin fallar
             const { data: sucursalInfo } = await supabaseCliente.from('sucursales').select('id').eq('nombre', nombreSucursal).eq('negocio_id', medicoSeleccionadoId);
             if(!sucursalInfo || sucursalInfo.length === 0) return;
             const uuidSucursalReal = sucursalInfo[0].id;
