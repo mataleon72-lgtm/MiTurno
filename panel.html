@@ -143,12 +143,13 @@
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 🚀 EL REMEDIO: Extraemos el ID si existe, pero ELIMINAMOS la barrera que te rebotaba con el alert
         const idMedico = localStorage.getItem('mi_turno_negocio_id'); 
-
-        if (!idMedico) { alert("Tu sesión expiró."); window.location.href = "panel.html"; }
 
         document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
 
+        // Levantamos el inicio normal de la app sin bloqueos preventivos
         async function init() { await cargarSelectores(); activarCanalTiempoRealProfesional(); }
         function mostrarPantallaSucursales() { switchSeccion('seccion-sucursales'); }
         function mostrarPantallaHorarios() { switchSeccion('seccion-horarios'); cargarSelectores(); }
