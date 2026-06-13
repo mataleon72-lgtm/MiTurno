@@ -145,8 +145,7 @@
             </div>
             <div id="sidebar-notas" style="width: 100%;">
                 <h2 style="color: #555; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%;">Notas</h2>
-                <div id="lista-notas-contenedor" style="display:flex; flex-direction:column; gap:12px; width: 100%; max-height: 450px; overflow-y: auto; padding-right: 5px;">
-                    </div>
+                <div id="lista-notas-contenedor" style="display:flex; flex-direction:column; gap:12px; width: 100%; max-height: 450px; overflow-y: auto; padding-right: 5px;"></div>
             </div>
         </div>
 
@@ -164,16 +163,17 @@
             <div id="modulo-darturno" class="contenedor-modulo">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_darturno.png" class="img-titulo-modulo">
                 <div style="display: flex; gap: 40px; width: 100%;">
-                    <div style="width: 260px; display:flex; flex-direction:column;">
+                    <div style="width: 280px; display:flex; flex-direction:column;">
                         <label>Número de DNI</label>
                         <input type="number" class="input-suave" style="width: 100%; margin-bottom: 25px;" placeholder="DNI Paciente">
-                        <label style="margin-bottom: 10px;">Elegir fecha</label>
-                        <div class="grilla-dias" style="font-size:14px; gap:8px;"><div>1</div><div>2</div><div>3</div></div>
+                        
+                        <label>Elegir Fecha de Turno</label>
+                        <input type="date" id="dar-turno-fecha-real" class="input-suave" style="width: 100%; margin-bottom: 25px;">
                     </div>
                     <div style="flex: 1; padding-top: 25px;">
                         <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 15px solid #6EB64F; max-width: 300px;">
-                            <h3 style="margin: 0; font-weight: 900; font-size: 16px; color:#333;">Dra Garcia</h3>
-                            <p style="margin: 5px 0; color: #555; font-weight: 800; font-size: 13px;">📅 22-06-2026 &nbsp; ⏰ 14:30</p>
+                            <h3 id="dar-turno-nombre-prof" style="margin: 0; font-weight: 900; font-size: 16px; color:#333;">Cargando...</h3>
+                            <p style="margin: 5px 0; color: #555; font-weight: 800; font-size: 13px;">📅 Listo para agendar</p>
                         </div>
                     </div>
                 </div>
@@ -225,11 +225,7 @@
             if(document.getElementById(idModulo)) document.getElementById(idModulo).classList.add('activo');
             document.getElementById('sidebar-dia').style.display = (idModulo !== 'modulo-notas') ? 'block' : 'none';
             document.getElementById('sidebar-notas').style.display = (idModulo === 'modulo-notas') ? 'block' : 'none';
-            
-            // Si entra al módulo de notas, cargamos el listado real de notas al instante
-            if(idModulo === 'modulo-notas') {
-                cargarNotasSecretaria();
-            }
+            if(idModulo === 'modulo-notas') { cargarNotasSecretaria(); }
         }
         function cerrarModalWA() { document.getElementById('modal-wa').style.display = 'none'; }
     </script>
@@ -319,11 +315,10 @@
             cargarTurnosDelDiaSecretaria();
         }
 
-        // 👁️ CARGAR NOTAS REALES DESDE SUPABASE AL LISTADO DE LA IZQUIERDA
         async function cargarNotasSecretaria() {
             if (!aliasNegocioActual) return;
             const container = document.getElementById('lista-notas-contenedor');
-            container.innerHTML = '<p style="color:#777; font-weight:800; font-size:13px; text-align:center;">Cargando notas...</p>';
+            container.innerHTML = '<p style="color:#777; font-weight:800; font-size:13px; text-align:center;">Cargando notes...</p>';
 
             const { data: notas, error } = await miSupabase.from('notas')
                 .select('*')
@@ -333,7 +328,7 @@
             if (error) { console.error(error); return; }
 
             if (!notas || notas.length === 0) {
-                container.innerHTML = '<p style="color:#A0A0A0; font-weight:800; font-size:13px; text-align:center;">No hay notas guardadas.</p>';
+                container.innerHTML = '<p style="color:#A0A0A0; font-weight:800; font-size:13px; text-align:center;">No hay notas.</p>';
                 return;
             }
 
@@ -344,8 +339,7 @@
                         <p style="margin:0; font-size: 12px; font-weight: 900; color: #333;">📅 ${fechaLimpia}</p>
                         <p style="margin:4px 0 2px 0; font-size: 13px; font-weight: 900; color: #007D82;">📌 ${n.titulo}</p>
                         <p style="margin:0; font-size: 11px; font-weight: 800; color: #666; line-height:1.3; white-space: pre-wrap;">${n.contenido}</p>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
@@ -377,23 +371,27 @@
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) return alert("⚠️ Ingresá el profesional.");
             profesionalActual = prof.toLowerCase(); 
+            
+            // Inyectamos el nombre real en la tarjeta del módulo Dar Turno
+            document.getElementById('dar-turno-nombre-prof').innerText = prof.toUpperCase();
+            // Seteamos la fecha mínima del calendario al día de hoy para que no puedan dar turnos en el pasado
+            document.getElementById('dar-turno-fecha-real').min = obtenerFechaHoyARG();
+            document.getElementById('dar-turno-fecha-real').value = obtenerFechaHoyARG();
+
             cambiarModulo('modulo-dia'); cambiarPantalla('pantalla-dia');
         }
 
-        // GUARDAR NOTA DINÁMICA ACTUALIZADA AL INSTANTE
         async function guardarNota() {
             const f = document.getElementById('nota-fecha').value;
             const t = document.getElementById('nota-titulo').value;
             const c = document.getElementById('nota-contenido').value;
-            if(!f || !t || !c) { alert("⚠️ Completa todos los campos para guardar la nota."); return; }
+            if(!f || !t || !c) { alert("⚠️ Completa todos los campos."); return; }
 
             const { error } = await miSupabase.from('notas').insert([{ alias_negocio: aliasNegocioActual, fecha: f, titulo: t, contenido: c }]);
-            if (error) { alert("Error al guardar: " + error.message); return; }
+            if (error) { alert("Error: " + error.message); return; }
 
-            alert("✅ Nota guardada con éxito.");
+            alert("✅ Nota guardada.");
             document.getElementById('nota-fecha').value=""; document.getElementById('nota-titulo').value=""; document.getElementById('nota-contenido').value="";
-            
-            // 🔄 LA MAGIA RE-RENDERIZADA: Se actualiza el listado de la izquierda en caliente
             cargarNotasSecretaria();
         }
 
