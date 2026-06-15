@@ -1,0 +1,17 @@
+{
+  "short_name": "Mi Turno",
+  "name": "Mi Turno - Gestión de Turnos",
+  "icons": [
+    {
+      "src": "https://mataleon72-lgtm.github.io/MiTurno/icono.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "display": "standalone",
+  "orientation": "portrait"
+}
