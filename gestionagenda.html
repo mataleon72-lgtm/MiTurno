@@ -56,14 +56,19 @@
         #sidebar-notas { width: 100%; max-width: 250px; display: none; } 
 
         .calendario-header { display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 15px; }
-        .calendario-header h3 { color: #FFFFFF; text-shadow: 0px 1px 3px rgba(0,0,0,0.4); font-weight: 900; margin: 0; font-size: 18px; }
-        .calendario-header span { font-weight: 900; font-size: 18px; cursor: pointer; color: #FFFFFF; }
+        .calendario-header h3 { color: #FFFFFF; text-shadow: 0px 1px 3px rgba(0,0,0,0.4); font-weight: 900; margin: 0; font-size: 18px; text-transform: capitalize; }
+        .calendario-header span { font-weight: 900; font-size: 18px; cursor: pointer; color: #FFFFFF; transition: 0.2s; padding: 0 10px; }
+        .calendario-header span:active { transform: scale(0.8); }
         .dias-semana, .grilla-dias { display: grid; grid-template-columns: repeat(7, 1fr); width: 100%; text-align: center; gap: 5px; }
         .dias-semana div { font-weight: 900; color: #FFFFFF; font-size: 14px; margin-bottom: 10px; }
-        .grilla-dias div { font-weight: 800; color: #FFFFFF; font-size: 16px; padding: 5px 0; cursor: pointer; border-radius: 8px; }
+        .grilla-dias div { font-weight: 800; color: #FFFFFF; font-size: 16px; padding: 5px 0; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
         .grilla-dias div:hover { background: rgba(255,255,255,0.15); }
-        .grilla-dias div.inactivo { color: #666666; }
+        .grilla-dias div.inactivo { color: rgba(255,255,255,0.3); pointer-events: none; }
+        .grilla-dias div.seleccionado { background: #009E9B !important; color: white !important; font-weight: 900; }
         
+        .btn-hoy { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; font-size: 11px; font-weight: 900; cursor: pointer; padding: 4px 8px; margin-left: 10px; transition: 0.2s; }
+        .btn-hoy:hover { background: rgba(255,255,255,0.3); }
+
         /* CONTENEDORES MÓDULOS DERECHOS */
         .contenedor-modulo { display: none; width: 100%; height: 100%; flex-direction: column; }
         .contenedor-modulo.activo { display: flex; animation: fadeIn 0.2s ease; }
@@ -168,21 +173,22 @@
     <div id="pantalla-dia" class="pantalla">
         <div class="panel-izquierdo" style="justify-content: flex-start; padding-top: 30px;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/logo_miturno_oscuro.png" class="logo-chico" style="margin-bottom: 60px;">
+            
             <div id="sidebar-dia">
                 <div class="calendario-header">
-                    <h3>Junio 2026</h3>
-                    <div><span>&lt;</span> &nbsp; <span>&gt;</span></div>
+                    <div style="display:flex; align-items:center;">
+                        <h3 id="mes-anio-texto">Junio 2026</h3>
+                        <button class="btn-hoy" onclick="irAlMesActual()">📅 Hoy</button>
+                    </div>
+                    <div><span onclick="cambiarMes(-1)">&lt;</span> &nbsp; <span onclick="cambiarMes(1)">&gt;</span></div>
                 </div>
                 <div class="dias-semana">
                     <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
                 </div>
-                <div class="grilla-dias">
-                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-                    <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-                    <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
-                    <div>22</div><div>23</div><div style="background:#009E9B; color:white;">24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-                    <div>29</div><div>30</div>
+                <div class="grilla-dias" id="dias-calendario">
+                    <!-- Javascript inyecta los dias aca -->
                 </div>
+                
                 <div style="margin-top: 40px; text-align: center;">
                     <label style="text-align: center; font-size: 13px;">Cambiar de Sucursales</label>
                     <select id="select-sucursal-global" class="input-clasico" style="margin-bottom: 10px; padding: 10px;" onchange="cargarTurnosDelDiaSecretaria()">
@@ -190,6 +196,7 @@
                     </select>
                 </div>
             </div>
+            
             <div id="sidebar-notas" style="width: 100%;">
                 <h2 style="color: #FFFFFF; font-weight: 900; margin-bottom: 20px; font-size: 22px; width: 100%;">Notas</h2>
                 <div id="lista-notas-contenedor" style="display:flex; flex-direction:column; gap:12px; width: 100%; max-height: 450px; overflow-y: auto; padding-right: 5px;"></div>
@@ -198,7 +205,7 @@
 
         <div class="panel-derecho">
             <div id="modulo-dia" class="contenedor-modulo activa">
-                <div class="header-dia">22/06/2026</div>
+                <div class="header-dia">Cargando...</div>
                 <div class="grilla-turnos"></div>
                 <div class="botonera-inferior">
                     <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_darturno.png" class="btn-modulo" onclick="cambiarModulo('modulo-darturno')">
@@ -212,14 +219,18 @@
                 <div style="display: flex; gap: 40px; width: 100%;">
                     <div style="width: 280px; display:flex; flex-direction:column;">
                         <label>Número de DNI</label>
-                        <input type="number" class="input-suave" style="width: 100%; margin-bottom: 25px;" placeholder="DNI Paciente">
+                        <input type="number" id="dar-turno-dni" class="input-suave" style="width: 100%; margin-bottom: 25px;" placeholder="DNI Paciente">
                         <label>Elegir Fecha de Turno</label>
-                        <input type="date" id="dar-turno-fecha-real" class="input-suave" style="width: 100%; margin-bottom: 25px;">
+                        <input type="date" id="dar-turno-fecha-real" class="input-suave" style="width: 100%; margin-bottom: 25px;" onchange="cargarHorariosDisponibles()">
+                        <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignar.png" class="btn-img" style="margin-top: 10px;" onclick="asignarTurno()">
                     </div>
                     <div style="flex: 1; padding-top: 25px;">
-                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-right: 15px solid #6EB64F; max-width: 300px;">
+                        <div style="background: #FFF; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-right: 15px solid #6EB64F; max-width: 320px;">
                             <h3 id="dar-turno-nombre-prof" style="margin: 0; font-weight: 900; font-size: 16px; color:#333333;">Cargando...</h3>
-                            <p style="margin: 5px 0; color: #096991; font-weight: 800; font-size: 13px;">📅 Listo para agendar</p>
+                            <p style="margin: 5px 0 15px 0; color: #096991; font-weight: 800; font-size: 13px;">📅 Horarios Disponibles</p>
+                            <div id="contenedor-horarios-disponibles" style="display: flex; flex-wrap: wrap; gap: 10px; max-height: 250px; overflow-y: auto;">
+                                <p style="color:#666; font-size:12px; font-weight:800; margin:0;">Seleccioná una fecha a la izquierda para ver la disponibilidad.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -241,14 +252,18 @@
                 </div>
             </div>
 
-            <div id="modulo-bloqueos" class="contenedor-modulo">
+            <div id="modulo-bloqueos" class="contenedor-modulo" style="height: 100%; display: none; flex-direction: column;">
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_bloqueos.png" class="img-titulo-modulo" style="margin-bottom:10px;">
                 <div class="fila-flex">
                     <span class="texto-bold">Desde</span><input type="date" id="bloqueo-inicio" class="input-suave" style="width: 160px;">
                     <span class="texto-bold">Hasta</span><input type="date" id="bloqueo-fin" class="input-suave" style="width: 160px;">
                     <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px;" onclick="guardarBloqueoVacaciones(event)">guardar rango</button>
                 </div>
-                <hr style="border:0; border-top:1px solid #EAEAEA; margin:20px 0; width:100%;">
+                
+                <div id="lista-vacaciones" style="display:flex; gap:10px; overflow-x:auto; margin-bottom:20px; padding-bottom:5px;"></div>
+
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:20px 0; width:100%;">
+                
                 <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_cancelaciones.png" class="img-titulo-modulo" style="margin-bottom:10px;">
                 <div class="fila-flex" style="align-items: flex-end;">
                     <div><label>Día</label><input type="date" id="cancelar-dia" class="input-suave" style="width: 160px;"></div>
@@ -256,7 +271,10 @@
                     <div><label>Hasta</label><input type="time" id="cancelar-hasta" class="input-suave" style="width: 120px;"></div>
                     <button class="btn-guardar-estilo" style="font-size:15px; padding:10px 25px;" onclick="guardarCancelacionHora(event)">guardar horas</button>
                 </div>
-                <div class="contenedor-volver"><img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')"></div>
+
+                <div id="lista-cancelaciones" style="display:flex; gap:10px; overflow-x:auto; margin-bottom:20px; padding-bottom:5px;"></div>
+
+                <div class="contenedor-volver" style="margin-top:auto;"><img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-volver-agenda" onclick="cambiarModulo('modulo-dia')"></div>
             </div>
         </div>
     </div>
@@ -267,11 +285,22 @@
             if(document.getElementById(idPantalla)) document.getElementById(idPantalla).classList.add('activa');
         }
         function cambiarModulo(idModulo) {
-            document.querySelectorAll('.contenedor-modulo').forEach(m => m.classList.remove('activo'));
-            if(document.getElementById(idModulo)) document.getElementById(idModulo).classList.add('activo');
+            document.querySelectorAll('.contenedor-modulo').forEach(m => {
+                m.classList.remove('activo');
+                m.style.display = 'none'; 
+            });
+            
+            const moduloNuevo = document.getElementById(idModulo);
+            if(moduloNuevo) {
+                moduloNuevo.classList.add('activo');
+                moduloNuevo.style.display = 'flex';
+            }
+            
             document.getElementById('sidebar-dia').style.display = (idModulo !== 'modulo-notas') ? 'block' : 'none';
             document.getElementById('sidebar-notas').style.display = (idModulo === 'modulo-notas') ? 'block' : 'none';
-            if(idModulo === 'modulo-notas') { cargarNotasSecretaria(); }
+            
+            if(idModulo === 'modulo-notas') cargarNotasSecretaria();
+            if(idModulo === 'modulo-bloqueos') cargarListasDeBloqueos(); 
         }
         function cerrarModalWA() { document.getElementById('modal-wa').style.display = 'none'; }
     </script>
@@ -285,6 +314,62 @@
         let usuarioActual = "";
         let profesionalActual = "";
         let negocioIdActual = null; 
+        
+        let horaSeleccionada = null;
+        let fechaGrillaActual = null; 
+
+        let fechaCalendarioMostrada = new Date();
+        const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function renderizarCalendario() {
+            const anio = fechaCalendarioMostrada.getFullYear();
+            const mes = fechaCalendarioMostrada.getMonth();
+            document.getElementById('mes-anio-texto').innerText = `${mesesNombres[mes]} ${anio}`;
+
+            const primerDiaMes = new Date(anio, mes, 1).getDay();
+            const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+            const grillaDias = document.getElementById('dias-calendario');
+            
+            grillaDias.innerHTML = ''; 
+
+            for (let i = 0; i < primerDiaMes; i++) {
+                grillaDias.innerHTML += `<div class="inactivo"></div>`;
+            }
+
+            let diaElegido = null, mesElegido = null, anioElegido = null;
+            if (fechaGrillaActual) {
+                const [y, m, d] = fechaGrillaActual.split('-');
+                diaElegido = parseInt(d);
+                mesElegido = parseInt(m) - 1;
+                anioElegido = parseInt(y);
+            }
+
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                let clase = '';
+                if (dia === diaElegido && mes === mesElegido && anio === anioElegido) {
+                    clase = 'seleccionado';
+                }
+                
+                const fechaISO = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                
+                grillaDias.innerHTML += `<div class="${clase}" onclick="seleccionarDiaCalendario('${fechaISO}')">${dia}</div>`;
+            }
+        }
+
+        function cambiarMes(direccion) {
+            fechaCalendarioMostrada.setMonth(fechaCalendarioMostrada.getMonth() + direccion);
+            renderizarCalendario();
+        }
+
+        function irAlMesActual() {
+            fechaCalendarioMostrada = new Date(); 
+            seleccionarDiaCalendario(obtenerFechaHoyARG()); 
+        }
+
+        function seleccionarDiaCalendario(fechaISO) {
+            cargarTurnosDelDiaSecretaria(fechaISO);
+            renderizarCalendario(); 
+        }
 
         function obtenerFechaHoyARG() {
             const hoy = new Date();
@@ -305,31 +390,39 @@
                 } else {
                     selectElement.innerHTML = `<option value="Sucursal de Prueba" data-uuid="null">Sucursal de Prueba</option>`;
                 }
-                cargarTurnosDelDiaSecretaria();
+                seleccionarDiaCalendario(obtenerFechaHoyARG()); 
             } catch (err) {
                 console.error(err);
                 document.getElementById('select-sucursal-global').innerHTML = `<option value="Sucursal de Prueba" data-uuid="null">Sucursal de Prueba</option>`;
             }
         }
 
-        async function cargarTurnosDelDiaSecretaria() {
-            const fechaHoy = obtenerFechaHoyARG();
-            document.querySelector('.header-dia').innerText = fechaHoy.split('-').reverse().join('/');
+        async function cargarTurnosDelDiaSecretaria(fechaFiltro = null) {
+            if (fechaFiltro) {
+                fechaGrillaActual = fechaFiltro;
+            } else if (!fechaGrillaActual) {
+                fechaGrillaActual = obtenerFechaHoyARG();
+            }
+
+            const fechaParaMostrar = fechaGrillaActual;
+            document.querySelector('.header-dia').innerText = fechaParaMostrar.split('-').reverse().join('/');
+            
             const selectEl = document.getElementById('select-sucursal-global');
             const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+            
             if(!uuidSucursalReal || uuidSucursalReal === 'null') return;
 
             const { data: turnos, error } = await miSupabase.from('turnos_activos')
                 .select('*')
                 .eq('sucursal_id', uuidSucursalReal)
-                .eq('fecha', fechaHoy)
+                .eq('fecha', fechaParaMostrar)
                 .order('hora', { ascending: true });
 
             if (error) return;
 
             const grilla = document.querySelector('.grilla-turnos');
             if (!turnos || turnos.length === 0) {
-                grilla.innerHTML = '<p class="texto-bold" style="grid-column: 1/-1; text-align:center; padding: 20px; color:#fff;">No hay turnos agendados para hoy.</p>';
+                grilla.innerHTML = '<p class="texto-bold" style="grid-column: 1/-1; text-align:center; padding: 20px; color:#fff;">No hay turnos agendados para este día.</p>';
                 return;
             }
 
@@ -345,8 +438,10 @@
                     colorBorde = '#ED3237'; 
                     botonLlego = `<span style="font-size:11px; font-weight:900; color:#ED3237; margin-left:auto;">❌ CANCELADO</span>`;
                 }
+                
                 return `
-                    <div class="tarjeta-turno" style="border-top: 5px solid ${colorBorde}; display:flex; justify-content:space-between; align-items:center; padding:15px; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+                    <div class="tarjeta-turno" style="border-top: 5px solid ${colorBorde}; display:flex; justify-content:space-between; align-items:center; padding:15px; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.15); position: relative;">
+                        <span style="position: absolute; top: 8px; right: 10px; cursor: pointer; font-size: 16px; transition: transform 0.2s;" onclick="eliminarTurno('${t.id}')" title="Eliminar Turno">🗑️</span>
                         <div>
                             <p style="font-size:14px; margin:0; color:#333;"><b>⏰ ${t.hora.slice(0,5)} hs</b></p>
                             <p style="color:#555; font-size:12px; margin:2px 0 0 0;">👤 ${t.cliente_nombre}</p>
@@ -359,6 +454,157 @@
         async function marcarPacienteEnEspera(turnoId) {
             await miSupabase.from('turnos_activos').update({ estado: 'en_espera' }).eq('id', turnoId);
             cargarTurnosDelDiaSecretaria();
+        }
+
+        async function eliminarTurno(idTurno) {
+            if(!confirm("⚠️ ¿Estás segura de que querés ELIMINAR este turno de la agenda? El paciente perderá su reserva y la acción no se puede deshacer.")) return;
+            try {
+                const { error } = await miSupabase.from('turnos_activos').delete().eq('id', idTurno);
+                if (error) throw error;
+                cargarTurnosDelDiaSecretaria();
+            } catch (err) { alert("❌ Error al borrar el turno: " + err.message); }
+        }
+
+        async function cargarHorariosDisponibles() {
+            const fecha = document.getElementById('dar-turno-fecha-real').value;
+            const selectEl = document.getElementById('select-sucursal-global');
+            const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+            const container = document.getElementById('contenedor-horarios-disponibles');
+
+            horaSeleccionada = null;
+
+            if(!fecha || !uuidSucursalReal || uuidSucursalReal === 'null') {
+                container.innerHTML = '<p style="color:#666; font-size:12px; font-weight:800; margin:0;">Seleccioná una sucursal y fecha válida.</p>';
+                return;
+            }
+
+            container.innerHTML = '<p style="color:#096991; font-size:13px; font-weight:800; margin:0;">Cargando horarios...</p>';
+
+            try {
+                const [y, m, d] = fecha.split('-');
+                const diaSemanaJS = new Date(y, m - 1, d).getDay(); 
+                const diaSemanaDB = diaSemanaJS === 0 ? 7 : diaSemanaJS;
+
+                const { data: config } = await miSupabase.from('configuracion_agenda')
+                    .select('*')
+                    .eq('sucursal_id', uuidSucursalReal)
+                    .eq('dia_semana', diaSemanaDB)
+                    .single();
+
+                if (!config) {
+                    container.innerHTML = '<p style="color:#ED3237; font-size:13px; font-weight:900; margin:0;">El profesional no atiende este día.</p>';
+                    return;
+                }
+
+                const { data: turnosOcupados } = await miSupabase.from('turnos_activos')
+                    .select('hora')
+                    .eq('sucursal_id', uuidSucursalReal)
+                    .eq('fecha', fecha)
+                    .in('estado', ['pendiente', 'confirmado', 'en_espera']);
+
+                const horasOcupadas = (turnosOcupados || []).map(t => t.hora.slice(0,5));
+
+                const { data: bloqueos } = await miSupabase.from('bloqueos')
+                    .select('*')
+                    .eq('id_sucursal', uuidSucursalReal)
+                    .lte('fecha_inicio', fecha)
+                    .gte('fecha_fin', fecha);
+
+                const startMins = parseInt(config.hora_inicio.split(':')[0]) * 60 + parseInt(config.hora_inicio.split(':')[1]);
+                const endMins = parseInt(config.hora_fin.split(':')[0]) * 60 + parseInt(config.hora_fin.split(':')[1]);
+                const interval = config.duracion_minutos || 30;
+
+                let htmlSlots = '';
+                for (let m = startMins; m + interval <= endMins; m += interval) {
+                    const hStr = String(Math.floor(m / 60)).padStart(2, '0');
+                    const mStr = String(m % 60).padStart(2, '0');
+                    const timeSlot = `${hStr}:${mStr}`;
+
+                    let estaOcupado = horasOcupadas.includes(timeSlot);
+
+                    if (!estaOcupado && bloqueos) {
+                        for(let b of bloqueos) {
+                            if (b.tipo_bloqueo === 'vacaciones') { estaOcupado = true; break; }
+                            if (b.tipo_bloqueo === 'cancelacion') {
+                                const bStart = b.hora_inicio.slice(0,5);
+                                const bEnd = b.hora_fin.slice(0,5);
+                                if (timeSlot >= bStart && timeSlot < bEnd) { estaOcupado = true; break; }
+                            }
+                        }
+                    }
+
+                    if(!estaOcupado) {
+                        htmlSlots += `<button class="btn-slot" onclick="seleccionarHoraSlot(this, '${timeSlot}')" style="background:#EAEAEA; border:2px solid transparent; padding:8px 15px; border-radius:8px; font-weight:900; color:#333; cursor:pointer; transition:0.2s; font-family:'Nunito'; font-size:14px;">${timeSlot}</button>`;
+                    }
+                }
+
+                if (htmlSlots === '') {
+                    container.innerHTML = '<p style="color:#F4B41A; font-size:13px; font-weight:900; margin:0;">Agenda completamente llena o bloqueada.</p>';
+                } else {
+                    container.innerHTML = htmlSlots;
+                }
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<p style="color:#ED3237; font-size:13px; font-weight:900; margin:0;">Error al cargar horarios.</p>';
+            }
+        }
+
+        function seleccionarHoraSlot(btn, hora) {
+            horaSeleccionada = hora;
+            document.querySelectorAll('.btn-slot').forEach(b => {
+                b.style.background = '#EAEAEA';
+                b.style.color = '#333';
+                b.style.borderColor = 'transparent';
+            });
+            btn.style.background = '#009E9B';
+            btn.style.color = '#FFF';
+            btn.style.borderColor = '#007D82';
+        }
+
+        async function asignarTurno() {
+            const dni = document.getElementById('dar-turno-dni').value.trim();
+            const fecha = document.getElementById('dar-turno-fecha-real').value;
+            const selectEl = document.getElementById('select-sucursal-global');
+            const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+
+            if(!dni) return alert("⚠️ Por favor, ingresá el número de DNI del paciente.");
+            if(!fecha) return alert("⚠️ Elegí una fecha.");
+            if(!horaSeleccionada) return alert("⚠️ Seleccioná un horario de la grilla de la derecha.");
+            if(!uuidSucursalReal) return alert("⚠️ Error: No hay una sucursal seleccionada.");
+
+            try {
+                let nombreGuardar = `Paciente DNI ${dni}`;
+                const { data: pacienteData } = await miSupabase.from('pacientes').select('nombre').eq('dni', dni).single();
+                if (pacienteData && pacienteData.nombre) {
+                    nombreGuardar = pacienteData.nombre;
+                }
+
+                const { error } = await miSupabase.from('turnos_activos').insert([{
+                    negocio_id: negocioIdActual,
+                    sucursal_id: uuidSucursalReal,
+                    fecha: fecha,
+                    hora: horaSeleccionada + ':00',
+                    estado: 'pendiente',
+                    cliente_nombre: nombreGuardar,
+                    cliente_telefono: dni,
+                    cliente_identificador: dni
+                }]);
+
+                if (error) throw error;
+
+                alert(`✅ ¡Turno asignado con éxito!\nPaciente: ${nombreGuardar}\nDía: ${fecha.split('-').reverse().join('/')} a las ${horaSeleccionada} hs.`);
+                
+                document.getElementById('dar-turno-dni').value = '';
+                horaSeleccionada = null;
+                document.getElementById('contenedor-horarios-disponibles').innerHTML = '<p style="color:#666; font-size:12px; font-weight:800; margin:0;">Seleccioná una fecha a la izquierda para ver la disponibilidad.</p>';
+                
+                seleccionarDiaCalendario(fecha);
+                cambiarModulo('modulo-dia');
+
+            } catch (err) {
+                alert("❌ Error al asignar el turno: " + err.message);
+            }
         }
 
         async function cargarNotasSecretaria() {
@@ -381,8 +627,9 @@
             container.innerHTML = notas.map(n => {
                 const fechaLimpia = n.fecha.split('-').reverse().join('/');
                 return `
-                    <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; box-sizing:border-box;">
-                        <p style="margin:0; font-size: 12px; font-weight: 900; color: #333;">📅 ${fechaLimpia}</p>
+                    <div style="background: white; border-top: 6px solid #009E9B; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; box-sizing:border-box; position: relative;">
+                        <span style="position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 16px; transition: transform 0.2s;" onclick="eliminarNota('${n.id}')" title="Borrar Nota">🗑️</span>
+                        <p style="margin:0; font-size: 12px; font-weight: 900; color: #333; padding-right: 25px;">📅 ${fechaLimpia}</p>
                         <p style="margin:4px 0 2px 0; font-size: 13px; font-weight: 900; color: #007D82;">📌 ${n.titulo}</p>
                         <p style="margin:0; font-size: 11px; font-weight: 800; color: #666; line-height:1.3; white-space: pre-wrap;">${n.contenido}</p>
                     </div>`;
@@ -413,7 +660,6 @@
             } catch (err) { alert("❌ Error: " + err.message); }
         }
 
-        /* 🚀 FUNCIÓN COMPLETA PARA REGISTRAR NUEVOS USUARIOS DE PANEL */
         async function ejecutarRegistro(e) {
             if(e) e.preventDefault();
             try {
@@ -427,7 +673,6 @@
                     return;
                 }
 
-                // Inserción directa en la tabla corregida 'usuarios_panel'
                 const { error } = await miSupabase.from('usuarios_panel').insert([
                     { 
                         alias_negocio: neg, 
@@ -441,13 +686,11 @@
 
                 alert("✅ Usuario creado con éxito. Ya podés iniciar sesión.");
                 
-                // Limpiamos los campos del formulario de registro
                 document.getElementById('reg-negocio').value = "";
                 document.getElementById('reg-nombre').value = "";
                 document.getElementById('reg-usuario').value = "";
                 document.getElementById('reg-clave').value = "";
 
-                // Mandamos a la secretaria directo al Login
                 cambiarPantalla('pantalla-login');
 
             } catch (err) {
@@ -481,6 +724,19 @@
             cargarNotasSecretaria();
         }
 
+        async function eliminarNota(idNota) {
+            if(!confirm("⚠️ ¿Estás segura de que querés borrar esta nota? Esta acción no se puede deshacer.")) return;
+            
+            try {
+                const { error } = await miSupabase.from('notas').delete().eq('id', idNota);
+                if (error) throw error;
+                
+                cargarNotasSecretaria();
+            } catch (err) {
+                alert("❌ Error al borrar la nota: " + err.message);
+            }
+        }
+
         async function procesarCancelacionesGlobales(fechaInicio, fechaFin, horaInicio, horaFin) {
             const selectEl = document.getElementById('select-sucursal-global');
             const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
@@ -488,7 +744,7 @@
             const { data: turnos } = await miSupabase.from('turnos_activos').select('*').eq('sucursal_id', uuidSucursalReal).in('estado', ['pendiente', 'confirmado', 'en_espera']).gte('fecha', fechaInicio).lte('fecha', fechaFin);
             let afectados = turnos || [];
             if (horaInicio && horaFin) {
-                afectados = Affected.filter(t => (t.hora?.slice(0,5) >= horaInicio && t.hora?.slice(0,5) <= horaFin));
+                afectados = afectados.filter(t => (t.hora?.slice(0,5) >= horaInicio && t.hora?.slice(0,5) <= horaFin));
             }
             if (afectados.length === 0) return [];
             await miSupabase.from('turnos_activos').update({ estado: 'cancelado_por_profesional' }).in('id', afectados.map(t => t.id));
@@ -504,28 +760,115 @@
             document.getElementById('modal-wa').style.display = 'flex';
         }
 
+        async function cargarListasDeBloqueos() {
+            const selectEl = document.getElementById('select-sucursal-global');
+            const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+            
+            const listVacaciones = document.getElementById('lista-vacaciones');
+            const listCancelaciones = document.getElementById('lista-cancelaciones');
+            
+            listVacaciones.innerHTML = '<p style="color:#FFF; font-size:12px;">Cargando...</p>';
+            listCancelaciones.innerHTML = '<p style="color:#FFF; font-size:12px;">Cargando...</p>';
+
+            if(!uuidSucursalReal) return;
+
+            try {
+                const fechaHoy = obtenerFechaHoyARG();
+                const { data: bloqueos, error } = await miSupabase.from('bloqueos')
+                    .select('*')
+                    .eq('id_sucursal', uuidSucursalReal)
+                    .gte('fecha_fin', fechaHoy) 
+                    .order('fecha_inicio', { ascending: true });
+
+                if (error) throw error;
+
+                const vacas = bloqueos.filter(b => b.tipo_bloqueo === 'vacaciones');
+                const canceladas = bloqueos.filter(b => b.tipo_bloqueo === 'cancelacion');
+
+                if (vacas.length === 0) {
+                    listVacaciones.innerHTML = '<p style="color:rgba(255,255,255,0.5); font-size:13px; font-weight:800; margin:0;">No hay vacaciones futuras registradas.</p>';
+                } else {
+                    listVacaciones.innerHTML = vacas.map(v => `
+                        <div style="background:#FFF; min-width: 220px; border-left:5px solid #F4B41A; border-radius:12px; padding:12px; box-shadow:0 4px 10px rgba(0,0,0,0.15); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <p style="margin:0; font-size:12px; color:#555;"><b>Desde:</b> ${v.fecha_inicio.split('-').reverse().join('/')}</p>
+                                <p style="margin:2px 0 0 0; font-size:12px; color:#555;"><b>Hasta:</b> ${v.fecha_fin.split('-').reverse().join('/')}</p>
+                            </div>
+                            <span style="cursor:pointer; font-size:18px; transition:0.2s;" onclick="eliminarBloqueo('${v.id}')" title="Quitar Bloqueo">🗑️</span>
+                        </div>
+                    `).join('');
+                }
+
+                if (canceladas.length === 0) {
+                    listCancelaciones.innerHTML = '<p style="color:rgba(255,255,255,0.5); font-size:13px; font-weight:800; margin:0;">No hay cancelaciones por hora futuras registradas.</p>';
+                } else {
+                    listCancelaciones.innerHTML = canceladas.map(c => `
+                        <div style="background:#FFF; min-width: 220px; border-left:5px solid #ED3237; border-radius:12px; padding:12px; box-shadow:0 4px 10px rgba(0,0,0,0.15); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <p style="margin:0; font-size:12px; color:#555;"><b>Día:</b> ${c.fecha_inicio.split('-').reverse().join('/')}</p>
+                                <p style="margin:2px 0 0 0; font-size:12px; color:#555;"><b>De:</b> ${c.hora_inicio.slice(0,5)} hs <b>a</b> ${c.hora_fin.slice(0,5)} hs</p>
+                            </div>
+                            <span style="cursor:pointer; font-size:18px; transition:0.2s;" onclick="eliminarBloqueo('${c.id}')" title="Quitar Bloqueo">🗑️</span>
+                        </div>
+                    `).join('');
+                }
+
+            } catch (err) {
+                console.error("Error al cargar bloqueos:", err.message);
+            }
+        }
+
+        async function eliminarBloqueo(idBloqueo) {
+            if(!confirm("⚠️ ¿Estás segura de que querés ELIMINAR este bloqueo? La agenda volverá a estar disponible para que los pacientes saquen turnos.")) return;
+            try {
+                const { error } = await miSupabase.from('bloqueos').delete().eq('id', idBloqueo);
+                if (error) throw error;
+                cargarListasDeBloqueos();
+            } catch (err) { alert("❌ Error al borrar: " + err.message); }
+        }
+
+        /* 🚀 GUARDADO DE BLOQUEOS CORREGIDO */
         async function guardarBloqueoVacaciones(e) {
             e.preventDefault();
-            const ini = document.getElementById('bloqueo-inicio').value; const fin = document.getElementById('bloqueo-fin').value;
-            const static_suc = document.getElementById('select-sucursal-global').value;
-            await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: ini, fecha_fin: fin, alias_profesional: profesionalActual, id_sucursal: static_suc }]);
+            const ini = document.getElementById('bloqueo-inicio').value; 
+            const fin = document.getElementById('bloqueo-fin').value;
+            
+            const selectEl = document.getElementById('select-sucursal-global');
+            const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+            
+            if(!ini || !fin) return alert("Completá las dos fechas.");
+            if(!uuidSucursalReal) return alert("Error: Sucursal no seleccionada.");
+            
+            await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'vacaciones', fecha_inicio: ini, fecha_fin: fin, alias_profesional: profesionalActual, id_sucursal: uuidSucursalReal }]);
             const afectados = await procesarCancelacionesGlobales(ini, fin, null, null);
             if (afectados.length > 0) mostrarModalWhatsapp(afectados);
             else alert("✅ Vacaciones registradas. Agenda limpia.");
+            
             document.getElementById('bloqueo-inicio').value = ""; document.getElementById('bloqueo-fin').value = "";
             cargarTurnosDelDiaSecretaria();
+            cargarListasDeBloqueos(); 
         }
 
         async function guardarCancelacionHora(e) {
             e.preventDefault();
-            const dia = document.getElementById('cancelar-dia').value; const des = document.getElementById('cancelar-desde').value; const has = document.getElementById('cancelar-hasta').value;
-            const static_suc = document.getElementById('select-sucursal-global').value;
-            await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: des, hora_fin: has, alias_profesional: profesionalActual, id_sucursal: static_suc }]);
+            const dia = document.getElementById('cancelar-dia').value; 
+            const des = document.getElementById('cancelar-desde').value; 
+            const has = document.getElementById('cancelar-hasta').value;
+            
+            const selectEl = document.getElementById('select-sucursal-global');
+            const uuidSucursalReal = selectEl.options[selectEl.selectedIndex]?.dataset?.uuid;
+            
+            if(!dia || !des || !has) return alert("Completá todos los campos.");
+            if(!uuidSucursalReal) return alert("Error: Sucursal no seleccionada.");
+
+            await miSupabase.from('bloqueos').insert([{ alias_negocio: aliasNegocioActual, tipo_bloqueo: 'cancelacion', fecha_inicio: dia, fecha_fin: dia, hora_inicio: des, hora_fin: has, alias_profesional: profesionalActual, id_sucursal: uuidSucursalReal }]);
             const afectados = await procesarCancelacionesGlobales(dia, dia, des, has);
             if (afectados.length > 0) mostrarModalWhatsapp(afectados);
             else alert("✅ Horas bloqueadas con éxito.");
+            
             document.getElementById('cancelar-dia').value = ""; document.getElementById('cancelar-desde').value = ""; document.getElementById('cancelar-hasta').value = "";
             cargarTurnosDelDiaSecretaria();
+            cargarListasDeBloqueos(); 
         }
     </script>
 </body>
