@@ -1,23 +1,20 @@
 {
-  "short_name": "Mi Turno",
   "name": "Mi Turno - Gestión de Turnos",
-  "icons": [
-    {
-      "src": "https://mataleon72-lgtm.github.io/MiTurno/icono.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://mataleon72-lgtm.github.io/MiTurno/icono.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
-  "start_url": "https://mataleon72-lgtm.github.io/MiTurno/panel.html",
+  "short_name": "Mi Turno",
+  "start_url": "./panel.html",
+  "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
-  "display": "standalone",
-  "orientation": "portrait"
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
