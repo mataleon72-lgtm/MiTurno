@@ -413,10 +413,52 @@
             } catch (err) { alert("❌ Error: " + err.message); }
         }
 
+        /* 🚀 FUNCIÓN COMPLETA PARA REGISTRAR NUEVOS USUARIOS DE PANEL */
+        async function ejecutarRegistro(e) {
+            if(e) e.preventDefault();
+            try {
+                const neg = document.getElementById('reg-negocio').value.trim().toUpperCase();
+                const nom = document.getElementById('reg-nombre').value.trim();
+                const usr = document.getElementById('reg-usuario').value.trim().toLowerCase();
+                const clv = document.getElementById('reg-clave').value.trim();
+
+                if(!neg || !nom || !usr || !clv) {
+                    alert("⚠️ Por favor, completá todos los campos.");
+                    return;
+                }
+
+                // Inserción directa en la tabla corregida 'usuarios_panel'
+                const { error } = await miSupabase.from('usuarios_panel').insert([
+                    { 
+                        alias_negocio: neg, 
+                        nombre_usuario: nom, 
+                        alias_usuario: usr, 
+                        password: clv 
+                    }
+                ]);
+
+                if (error) throw error;
+
+                alert("✅ Usuario creado con éxito. Ya podés iniciar sesión.");
+                
+                // Limpiamos los campos del formulario de registro
+                document.getElementById('reg-negocio').value = "";
+                document.getElementById('reg-nombre').value = "";
+                document.getElementById('reg-usuario').value = "";
+                document.getElementById('reg-clave').value = "";
+
+                // Mandamos a la secretaria directo al Login
+                cambiarPantalla('pantalla-login');
+
+            } catch (err) {
+                alert("❌ Error al registrar: " + err.message);
+            }
+        }
+
         function seleccionarAgenda() {
             const prof = document.getElementById('elegir-profesional').value.trim();
             if(!prof) return alert("⚠️ Ingresá el profesional.");
-            profesionalActual = prof.toLowerCase(); 
+            profeionalActual = prof.toLowerCase(); 
             
             document.getElementById('dar-turno-nombre-prof').innerText = prof.toUpperCase();
             document.getElementById('dar-turno-fecha-real').min = obtenerFechaHoyARG();
