@@ -166,7 +166,20 @@ label {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
             const nombre = document.getElementById('suc-nombre').value.trim(); const direccion = document.getElementById('suc-dir').value.trim(); const mpLink = document.getElementById('suc-mp-link').value.trim();
             if(!nombre || !direccion) return alert("Completá los campos");
+            
             if (idSucElegida === 'NUEVA') {
+                // --- INICIO BARRERA COMERCIAL BÁSICA ---
+                const { count, error } = await supabaseCliente
+                    .from('sucursales')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('negocio_id', idMedico);
+                    
+                if (count >= 2) {
+                    alert("⚠️ LÍMITE DE PLAN ALCANZADO\n\nLlegaste al límite de 2 sucursales/profesionales de tu plan Básico.\nPara agregar a todo tu equipo, comunicate con nosotros para hacer el upgrade al Plan Pro.");
+                    return; // Corta la ejecución, no crea la sucursal
+                }
+                // --- FIN BARRERA COMERCIAL ---
+
                 await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink }]);
             } else {
                 await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink }).eq('id', idSucElegida);
