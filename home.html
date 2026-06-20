@@ -14,9 +14,8 @@
     <meta name="apple-mobile-web-app-title" content="Mi Turno">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght=400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Fondo oscuro infinito para la transición del lienzo */
         body { font-family: 'Nunito', sans-serif; background-color: #121212; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         
         .app-lienzo { position: relative; width: 100%; max-width: 432px; height: 960px; background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png'); background-size: cover; background-position: top center; background-repeat: no-repeat; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; -ms-overflow-style: none; scrollbar-width: none; }
@@ -28,7 +27,6 @@
         .img-titulo { width: 95%; margin-top: 0; margin-bottom: 40px; } 
         .img-puntos { width: 30%; margin-top: 0; margin-bottom: 25px; } 
         
-        /* TEXTOS EXTERNOS ADAPTADOS AL NUEVO DISEÑO OSCURO */
         .texto-gris-oscuro-login { color: #FFFFFF; text-shadow: 0px 1px 4px rgba(0,0,0,0.4); font-weight: 900; font-size: 28px; margin-top: 25px; margin-bottom: 60px; text-align: center; } 
         .texto-gris-oscuro { color: #FFFFFF; text-shadow: 0px 1px 4px rgba(0,0,0,0.4); font-weight: 900; font-size: 22px; margin-bottom: 5px; text-align: center; }
         label { font-weight: 900; color: #FFFFFF; text-shadow: 0px 1px 3px rgba(0,0,0,0.4); font-size: 14px; width: 100%; text-align: left; padding-left: 10px; margin-bottom: 5px; display: block; }
@@ -38,7 +36,6 @@
         .btn-link-img { width: 65%; margin-top: 25px; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .btn-link-img:active { transform: scale(0.96); }
         
-        /* INTERIOR DE LAS CAJAS DE TEXTO Y DESPLEGABLES */
         input, select { width: 100%; padding: 16px 20px; border-radius: 20px; border: none; background: #FFFFFF; box-shadow: 0px 4px 10px rgba(0,0,0,0.15); margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; color: #333333; font-family: 'Nunito', sans-serif; outline: none; position: relative; z-index: 10; }
         input::placeholder { color: #A0A0A0; font-weight: 800; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(9, 105, 145, 0.3); }
@@ -48,7 +45,6 @@
         .buscador-row img { width: 110px; height: auto; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10; }
         .buscador-row img:active { transform: scale(0.95); }
         
-        /* TARJETAS INTERNAS CONSERVANDO FONDO CLARO */
         .tarjeta-medico { background: #FFFFFF; padding: 18px 20px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; cursor: pointer; position: relative; z-index: 10; }
         .tarjeta-medico h4 { margin: 0; color: #333333; font-size: 16px; font-weight: 900; }
         .tarjeta-medico p { margin: 3px 0 0 0; color: #096991; font-size: 13px; font-weight: 800; } 
@@ -65,7 +61,6 @@
         .btn-cancelar-turno { align-self: flex-start; background: none; border: none; color: #ED3237; font-weight: 900; font-size: 14px; margin-top: 15px; cursor: pointer; padding: 0; position: relative; z-index: 10; }
         
         .bloque-turnero { background: #FFFFFF; padding: 20px; border-radius: 20px; margin-bottom: 20px; display: none; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; position: relative; z-index: 10; }
-        /* Ajuste de labels internos del turnero para legibilidad sobre fondo blanco */
         .bloque-turnero label { color: #555555 !important; text-shadow: none !important; }
         
         .grilla-horas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
@@ -180,11 +175,11 @@
 
         async function registrarPaciente() {
             const nombre = document.getElementById('reg-nombre').value.trim();
-            const telefono = document.getElementById('reg-telefono').value.trim();
+            const telephone = document.getElementById('reg-telefono').value.trim();
             const dni = document.getElementById('reg-dni').value.trim();
-            if(!nombre || !telefono || !dni) return alert("Completá todos los casilleros.");
+            if(!nombre || !telephone || !dni) return alert("Completá todos los casilleros.");
             
-            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono, dni }]).select();
+            const { data, error } = await supabaseCliente.from('pacientes').insert([{ nombre, telefono: telephone, dni }]).select();
             if (error) { alert("❌ Falló el registro: " + error.message); return; }
             
             pacienteActual = data[0];
@@ -388,8 +383,9 @@
         async function cargarMisTurnos() {
             if (!pacienteActual || !pacienteActual.dni) return; 
 
+            // 🎯 AGREGADO DE COLUMNA valor_senia EN LA CONSULTA CON JOIN A SUCURSALES
             const { data, error } = await supabaseCliente.from('turnos_activos')
-                .select('id, fecha, hora, estado, negocios(nombre, rubro), sucursales(nombre, direccion, link_mercadopago)')
+                .select('id, fecha, hora, estado, negocios(nombre, rubro), sucursales(nombre, direccion, link_mercadopago, valor_senia)')
                 .eq('cliente_identificador', pacienteActual.dni) 
                 .order('fecha', { ascending: true });
 
@@ -403,15 +399,39 @@
                 const esCancelado = t.estado === 'cancelado_por_paciente';
                 const colorFranja = esCancelado ? 'franja-roja' : 'franja-verde';
                 
+                // Extraemos el valor de la seña configurado dinámicamente en Supabase
+                const valorSenia = t.sucursales?.valor_senia || 0;
+                
                 let linkPago = t.sucursales?.link_mercadopago || ""; 
                 if (linkPago && !linkPago.startsWith('http')) {
                     const match = linkPago.match(/https?:\/\/[^\s]+/);
                     if (match) linkPago = match[0];
                 }
 
-                const botonPagoHtml = (!esCancelado && t.estado === 'pendiente' && linkPago) 
-                    ? `<a href="${linkPago}" target="_blank" style="display:block; text-align:center; text-decoration:none; background:#F4B41A; color:white; padding:12px; border-radius:15px; font-weight:900; margin-top:10px; font-size:14px; box-shadow: 0 4px 10px rgba(244,180,26,0.3); position: relative; z-index: 10;">💳 Pagar Seña</a>` 
-                    : '';
+                // 🎯 LÓGICA DE RENDERIZADO INTERACTIVO SEGÚN EL PRECIO DE LA SEÑA
+                let seccionPagoHtml = '';
+                if (!esCancelado && t.estado === 'pendiente') {
+                    if (valorSenia > 0 && linkPago) {
+                        seccionPagoHtml = `
+                            <div style="background-color: #FFF3CD !important; border: 2px dashed #F4B41A !important; border-radius: 15px !important; padding: 12px !important; margin: 15px 0 8px 0 !important; text-align: center !important; width: 100% !important; box-sizing: border-box !important; display: block !important;">
+                                <span style="color: #856404 !important; font-weight: 900 !important; font-size: 13px !important; display: block !important; text-transform: uppercase !important; font-family: 'Nunito', sans-serif !important;">
+                                    ⚠️ El turno se confirmará una vez que pagues la seña
+                                </span>
+                            </div>
+                            <a href="${linkPago}" target="_blank" style="display:block !important; text-align:center !important; text-decoration:none !important; background:#F4B41A !important; color:white !important; padding:14px !important; border-radius:15px !important; font-weight:900 !important; margin-top:5px !important; font-size:14px !important; box-shadow: 0 4px 10px rgba(244,180,26,0.3) !important; position: relative !important; z-index: 10 !important; text-transform: uppercase !important;">
+                                💳 Pagar Seña ($${valorSenia})
+                            </a>
+                        `;
+                    } else {
+                        seccionPagoHtml = `
+                            <div style="background-color: #E2F0D9 !important; border: 1px solid #6EB64F !important; border-radius: 15px !important; padding: 12px !important; margin: 15px 0 8px 0 !important; text-align: center !important; width: 100% !important; box-sizing: border-box !important; display: block !important;">
+                                <span style="color: #385723 !important; font-weight: 800 !important; font-size: 13px !important; display: block !important; font-family: 'Nunito', sans-serif !important;">
+                                    ✅ Reserva Confirmada (Sin Seña)
+                                </span>
+                            </div>
+                        `;
+                    }
+                }
 
                 return `
                     <div class="tarjeta-turno">
@@ -423,7 +443,7 @@
                         <p>📅 <span>${t.fecha.split('-').reverse().join('-')}</span> ⏰ <span>${t.hora.slice(0,5)}</span></p>
                         <p>📍 <span>Sucursal: ${t.sucursales?.nombre || 'Sede'} (${t.sucursales?.direccion || ''})</span></p>
                         
-                        ${botonPagoHtml}
+                        ${seccionPagoHtml}
                         
                         ${!esCancelado ? `<button class="btn-cancelar-turno" onclick="cancelarTurno('${t.id}')">CANCELAR TURNO</button>` : ''}
                     </div>
