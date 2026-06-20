@@ -19,14 +19,14 @@
         .btn-img:active { transform: scale(0.96); }
         .btn-link-img { width: 55%; margin-top: 10px; cursor: pointer; transition: transform 0.2s; }
         .btn-link-img:active { transform: scale(0.96); }
-        /* 🎯 FUERZA A TODOS LOS TÍTULOS DE AFUERA A SER BLANCO PURO EN CUALQUIER PANTALLA */
-label { 
-    font-weight: 900 !important; 
-    color: #FFFFFF !important; 
-    text-shadow: 0px 1px 4px rgba(0,0,0,0.6) !important;
-    font-size: 14px !important; 
-    width: 100%; text-align: left; padding-left: 5px; margin-bottom: 6px; display: block;
-}
+        
+        label { 
+            font-weight: 900 !important; 
+            color: #FFFFFF !important; 
+            text-shadow: 0px 1px 4px rgba(0,0,0,0.6) !important;
+            font-size: 14px !important; 
+            width: 100%; text-align: left; padding-left: 5px; margin-bottom: 6px; display: block;
+        }
         input, select { width: 100%; padding: 15px 20px; border-radius: 25px; border: none; background: #FFFFFF; box-shadow: 0px 4px 10px rgba(0,0,0,0.06); margin-bottom: 20px; box-sizing: border-box; font-size: 14px; font-weight: 800; color: #7A7A7A; font-family: 'Nunito', sans-serif; outline: none; }
         input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
         .caja-blanca { position: relative; overflow: hidden; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 25px 15px 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; box-sizing: border-box; min-height: 70px; display: flex; flex-direction: column; justify-content: center; }
@@ -82,9 +82,12 @@ label {
             <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_missucursales.png" class="img-titulo" alt="Mis Sucursales"> 
             <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel5.png" class="img-puntos">
             <div style="width: 100%;">
-                <label>Crear sucursal</label><input type="text" id="suc-nombre" placeholder="Nombre de la sucursal">
-                <input type="text" id="suc-dir" placeholder="Dirección de la sucursal" style="margin-top: -10px;">
-                <label>Link de seña Mercado Pago</label><input type="text" id="suc-mp-link" placeholder="EJ:http://mpago.la//xxxxx">
+                <label>Crear sucursal / Especialidad</label><input type="text" id="suc-nombre" placeholder="Nombre de la sucursal o Especialista">
+                <input type="text" id="suc-dir" placeholder="Dirección o Consultorio" style="margin-top: -10px;">
+                
+                <!-- NUEVOS CAMPOS COMERCIALES INTEGRADOS -->
+                <label>Valor de la Seña ($)</label><input type="number" id="suc-valorseña" placeholder="Ej: 5000 (Poner 0 si es sin seña)" min="0">
+                <label>Link de seña Mercado Pago</label><input type="text" id="suc-mp-link" placeholder="EJ: http://mpago.la/xxxxx">
             </div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_guardar.png" class="btn-img" onclick="guardarOActualizarSucursal()">
             <div style="width: 100%; margin-top: 30px;">
@@ -153,38 +156,44 @@ label {
         async function cargarDatosSucursalAEditar() {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
             if (idSucElegida === 'NUEVA') {
-                document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = '';
+                document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = ''; document.getElementById('suc-valorseña').value = '';
             } else {
                 const { data } = await supabaseCliente.from('sucursales').select('*').eq('id', idSucElegida).single();
                 if (data) {
-                    document.getElementById('suc-nombre').value = data.nombre; document.getElementById('suc-dir').value = data.direccion || ''; document.getElementById('suc-mp-link').value = data.link_mercadopago || '';
+                    document.getElementById('suc-nombre').value = data.nombre; 
+                    document.getElementById('suc-dir').value = data.direccion || ''; 
+                    document.getElementById('suc-mp-link').value = data.link_mercadopago || '';
+                    document.getElementById('suc-valorseña').value = data.valor_senia !== undefined ? data.valor_senia : '';
                 }
             }
         }
 
         async function guardarOActualizarSucursal() {
             const idSucElegida = document.getElementById('select-editar-sucursal').value;
-            const nombre = document.getElementById('suc-nombre').value.trim(); const direccion = document.getElementById('suc-dir').value.trim(); const mpLink = document.getElementById('suc-mp-link').value.trim();
-            if(!nombre || !direccion) return alert("Completá los campos");
+            const nombre = document.getElementById('suc-nombre').value.trim(); 
+            const direccion = document.getElementById('suc-dir').value.trim(); 
+            const mpLink = document.getElementById('suc-mp-link').value.trim();
+            const valorSeniaInput = document.getElementById('suc-valorseña').value;
+            const valorSenia = valorSeniaInput === '' ? 0 : parseFloat(valorSeniaInput);
+
+            if(!nombre || !direccion) return alert("Completá los campos obligatorios");
             
             if (idSucElegida === 'NUEVA') {
-                // --- INICIO BARRERA COMERCIAL BÁSICA ---
-                const { count, error } = await supabaseCliente
+                const { count } = await supabaseCliente
                     .from('sucursales')
                     .select('*', { count: 'exact', head: true })
                     .eq('negocio_id', idMedico);
                     
                 if (count >= 2) {
                     alert("⚠️ LÍMITE DE PLAN ALCANZADO\n\nLlegaste al límite de 2 sucursales/profesionales de tu plan Básico.\nPara agregar a todo tu equipo, comunicate con nosotros para hacer el upgrade al Plan Pro.");
-                    return; // Corta la ejecución, no crea la sucursal
+                    return;
                 }
-                // --- FIN BARRERA COMERCIAL ---
 
-                await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink }]);
+                await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink, valor_senia: valorSenia }]);
             } else {
-                await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink }).eq('id', idSucElegida);
+                await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink, valor_senia: valorSenia }).eq('id', idSucElegida);
             }
-            document.getElementById('select-editar-sucursal').value = 'NUEVA'; document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = '';
+            document.getElementById('select-editar-sucursal').value = 'NUEVA'; document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = ''; document.getElementById('suc-valorseña').value = '';
             await cargarSelectores();
         }
 
