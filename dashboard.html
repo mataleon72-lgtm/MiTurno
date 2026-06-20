@@ -32,7 +32,7 @@
         .caja-blanca { position: relative; overflow: hidden; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 25px 15px 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; box-sizing: border-box; min-height: 70px; display: flex; flex-direction: column; justify-content: center; }
         .linea-verde { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #6EB64F; }
         .linea-roja { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #ED3237; }
-        .item-turno { padding: 10px 0; border-bottom: 1px solid #F0F0F0; font-weight: 800; color: #555; display: flex; flex-direction: column; justify-content: flex-start; font-size: 13px; }
+        .item-turno { padding: 12px 0; border-bottom: 1px solid #F0F0F0; font-weight: 800; color: #555; display: flex; flex-direction: column; justify-content: flex-start; font-size: 13px; }
         .item-turno:last-child { border-bottom: none; }
         .item-turno small { color: #999; display: block; font-size: 11px; font-weight: 800; margin-top: 2px; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; color: white; font-weight: 900; text-align: center; margin-top: 5px; display: inline-block; width: max-content; }
@@ -216,43 +216,67 @@
         }
 
         async function cargarTurnos() {
-            const idSuc = document.getElementById('agenda-sucursal').value; const fecha = document.getElementById('agenda-fecha').value;
+            const idSuc = document.getElementById('agenda-sucursal').value; 
+            const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
 
-            // 1. Buscamos primero los datos de la sucursal seleccionada para conocer su valor_senia y link_mercadopago
-            const { data: datosSucursal } = await supabaseCliente.from('sucursales').select('valor_senia, link_mercadopago').eq('id', idSuc).single();
-            const valorSenia = datosSucursal?.valor_senia || 0;
-            const linkMp = datosSucursal?.link_mercadopago || '';
+            let valorSenia = 0;
+            let linkMp = '';
+
+            try {
+                // Buscamos dinámicamente la seña configurada para la sucursal actual
+                const { data: datosSucursal } = await supabaseCliente
+                    .from('sucursales')
+                    .select('valor_senia, link_mercadopago')
+                    .eq('id', idSuc)
+                    .maybeSingle();
+
+                if (datosSucursal) {
+                    valorSenia = parseFloat(datosSucursal.valor_senia) || 0;
+                    linkMp = datosSucursal.link_mercadopago || '';
+                }
+            } catch (e) {
+                console.log("Error consultando seña:", e);
+            }
 
             const { data: turnos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
-            let activosHtml = ''; let canceladosHtml = '';
+            let activosHtml = ''; 
+            let canceladosHtml = '';
             
             turnos?.forEach(t => {
-                const esCancelado = t.estado.startsWith('cancelado'); const esEnEspera = t.estado === 'en_espera';
-                let badgeText = 'CONFIRMADO'; let badgeClass = 'ok';
-                if (esCancelado) { badgeText = 'CANCELADO'; badgeClass = 'cancel'; }
-                else if (esEnEspera) { badgeText = '🛋️ EN SALA'; badgeClass = 'waiting'; }
+                const esCancelado = t.estado.startsWith('cancelado'); 
+                const esEnEspera = t.estado === 'en_espera';
+                let badgeText = 'CONFIRMADO'; 
+                let badgeClass = 'ok';
                 
-                // 2. Lógica dinámica: Si requiere seña, metemos el cartel de advertencia arriba del botón amarillo
+                if (esCancelado) { 
+                    badgeText = 'CANCELADO'; 
+                    badgeClass = 'cancel'; 
+                } else if (esEnEspera) { 
+                    badgeText = '🛋️ EN SALA'; 
+                    badgeClass = 'waiting'; 
+                }
+                
+                // Renderizado condicional del bloque de pago con refuerzo de estilos inline
                 let seccionPagoHtml = '';
                 if (!esCancelado) {
                     if (valorSenia > 0) {
                         seccionPagoHtml = `
-                            <div style="background-color: #FFF3CD; border: 2px dashed #F4B41A; border-radius: 12px; padding: 10px; margin: 12px 0 8px 0; text-align: center; width: 100%; box-sizing: border-box;">
-                                <span style="color: #856404; font-weight: 900; font-size: 12px; display: block; text-transform: uppercase;">
+                            <div style="background-color: #FFF3CD !important; border: 2px dashed #F4B41A !important; border-radius: 12px !important; padding: 12px !important; margin: 12px 0 8px 0 !important; text-align: center !important; width: 100% !important; box-sizing: border-box !important; display: block !important;">
+                                <span style="color: #856404 !important; font-weight: 900 !important; font-size: 13px !important; display: block !important; text-transform: uppercase !important; font-family: 'Nunito', sans-serif !important;">
                                     ⚠️ El turno se confirmará una vez que pagues la seña
                                 </span>
                             </div>
-                            <a href="${linkMp}" target="_blank" style="text-decoration: none; width: 100%;">
-                                <button style="width: 100%; background-color: #F4B41A; color: white; font-weight: 900; padding: 12px; border-radius: 20px; border: none; cursor: pointer; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <a href="${linkMp}" target="_blank" style="text-decoration: none !important; width: 100% !important; display: block !important;">
+                                <button style="width: 100% !important; background-color: #F4B41A !important; color: white !important; font-weight: 900 !important; padding: 14px !important; border-radius: 20px !important; border: none !important; cursor: pointer !important; text-transform: uppercase !important; font-size: 13px !important; font-family: 'Nunito', sans-serif !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;">
                                     💳 Pagar Seña ($${valorSenia})
                                 </button>
                             </a>
                         `;
                     } else {
                         seccionPagoHtml = `
-                            <div style="background-color: #E2F0D9; border: 1px solid #6EB64F; border-radius: 12px; padding: 10px; margin: 12px 0 8px 0; text-align: center; width: 100%; box-sizing: border-box;">
-                                <span style="color: #385723; font-weight: 800; font-size: 12px; display: block;">
+                            <div style="background-color: #E2F0D9 !important; border: 1px solid #6EB64F !important; border-radius: 12px !important; padding: 10px !important; margin: 12px 0 8px 0 !important; text-align: center !important; width: 100% !important; box-sizing: border-box !important; display: block !important;">
+                                <span style="color: #385723 !important; font-weight: 800 !important; font-size: 12px !important; display: block !important; font-family: 'Nunito', sans-serif !important;">
                                     ✅ Reserva Confirmada (Sin Seña)
                                 </span>
                             </div>
@@ -261,11 +285,11 @@
                 }
 
                 const card = `
-                    <div class="item-turno" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div class="item-turno" style="width: 100% !important; box-sizing: border-box !important; margin-bottom: 15px !important; background: #FFFFFF !important; padding: 12px !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;">
+                        <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important;">
                             <div>
-                                <strong>[${t.hora.slice(0,5)}]</strong> ${t.cliente_nombre || 'Paciente'}
-                                <small>Tel: ${t.cliente_telefono || ''}</small>
+                                <strong style="color: #333 !important;">[${t.hora.slice(0,5)}]</strong> ${t.cliente_nombre || 'Paciente'}
+                                <small style="color: #666 !important; display: block !important; margin-top: 2px !important;">Tel: ${t.cliente_telefono || ''}</small>
                             </div>
                             <span class="badge ${badgeClass}">${badgeText}</span>
                         </div>
@@ -276,8 +300,8 @@
                 if(esCancelado) canceladosHtml += card; else activosHtml += card;
             });
             
-            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="margin:0;">No hay turnos.</p>';
-            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="margin:0;">Sin cancelaciones.</p>';
+            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="margin:0; text-align:center; color:#999;">No hay turnos.</p>';
+            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="margin:0; text-align:center; color:#999;">Sin cancelaciones.</p>';
         }
 
         function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }
