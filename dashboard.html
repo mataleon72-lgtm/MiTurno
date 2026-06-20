@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel de Gestión - Mi Turno</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght=400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Nunito', sans-serif; background-color: #F8F8F8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .app-lienzo { position: relative; width: 100%; max-width: 432px; height: 960px; background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png'); background-size: cover; background-position: top center; background-repeat: no-repeat; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; -ms-overflow-style: none; scrollbar-width: none; }
@@ -32,10 +32,10 @@
         .caja-blanca { position: relative; overflow: hidden; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 25px 15px 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; box-sizing: border-box; min-height: 70px; display: flex; flex-direction: column; justify-content: center; }
         .linea-verde { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #6EB64F; }
         .linea-roja { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #ED3237; }
-        .item-turno { padding: 10px 0; border-bottom: 1px solid #F0F0F0; font-weight: 800; color: #555; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .item-turno { padding: 10px 0; border-bottom: 1px solid #F0F0F0; font-weight: 800; color: #555; display: flex; flex-direction: column; justify-content: flex-start; font-size: 13px; }
         .item-turno:last-child { border-bottom: none; }
         .item-turno small { color: #999; display: block; font-size: 11px; font-weight: 800; margin-top: 2px; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; color: white; font-weight: 900; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; color: white; font-weight: 900; text-align: center; margin-top: 5px; display: inline-block; width: max-content; }
         .badge.ok { background: #6EB64F; }
         .badge.cancel { background: #ED3237; }
         .badge.waiting { background: #F4B41A; animation: blinker 1s linear infinite; }
@@ -85,7 +85,6 @@
                 <label>Crear sucursal / Especialidad</label><input type="text" id="suc-nombre" placeholder="Nombre de la sucursal o Especialista">
                 <input type="text" id="suc-dir" placeholder="Dirección o Consultorio" style="margin-top: -10px;">
                 
-                <!-- NUEVOS CAMPOS COMERCIALES INTEGRADOS -->
                 <label>Valor de la Seña ($)</label><input type="number" id="suc-valorseña" placeholder="Ej: 5000 (Poner 0 si es sin seña)" min="0">
                 <label>Link de seña Mercado Pago</label><input type="text" id="suc-mp-link" placeholder="EJ: http://mpago.la/xxxxx">
             </div>
@@ -209,7 +208,7 @@
             const idSuc = document.getElementById('hor-sucursal').value; if(!idSuc) return;
             const { data } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc);
             const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-turno"><div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div><button class="btn-borrar-horario" onclick="eliminarHorario('${h.id}')">🗑️</button></div>`).join('') || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">Sin horarios.</p>';
+            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-turno"><div style="display:flex; justify-content:space-between; width:100%;"><div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div><button class="btn-borrar-horario" onclick="eliminarHorario('${h.id}')">🗑️</button></div></div>`).join('') || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">Sin horarios.</p>';
         }
 
         async function eliminarHorario(idHorario) {
@@ -219,16 +218,64 @@
         async function cargarTurnos() {
             const idSuc = document.getElementById('agenda-sucursal').value; const fecha = document.getElementById('agenda-fecha').value;
             if(!idSuc || !fecha) return;
+
+            // 1. Buscamos primero los datos de la sucursal seleccionada para conocer su valor_senia y link_mercadopago
+            const { data: datosSucursal } = await supabaseCliente.from('sucursales').select('valor_senia, link_mercadopago').eq('id', idSuc).single();
+            const valorSenia = datosSucursal?.valor_senia || 0;
+            const linkMp = datosSucursal?.link_mercadopago || '';
+
             const { data: turnos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
             let activosHtml = ''; let canceladosHtml = '';
+            
             turnos?.forEach(t => {
                 const esCancelado = t.estado.startsWith('cancelado'); const esEnEspera = t.estado === 'en_espera';
                 let badgeText = 'CONFIRMADO'; let badgeClass = 'ok';
                 if (esCancelado) { badgeText = 'CANCELADO'; badgeClass = 'cancel'; }
                 else if (esEnEspera) { badgeText = '🛋️ EN SALA'; badgeClass = 'waiting'; }
-                const card = `<div class="item-turno"><div>[${t.hora.slice(0,5)}] ${t.cliente_nombre || 'Paciente'}<small>Tel: ${t.cliente_telefono || ''}</small></div><span class="badge ${badgeClass}">${badgeText}</span></div>`;
+                
+                // 2. Lógica dinámica: Si requiere seña, metemos el cartel de advertencia arriba del botón amarillo
+                let seccionPagoHtml = '';
+                if (!esCancelado) {
+                    if (valorSenia > 0) {
+                        seccionPagoHtml = `
+                            <div style="background-color: #FFF3CD; border: 2px dashed #F4B41A; border-radius: 12px; padding: 10px; margin: 12px 0 8px 0; text-align: center; width: 100%; box-sizing: border-box;">
+                                <span style="color: #856404; font-weight: 900; font-size: 12px; display: block; text-transform: uppercase;">
+                                    ⚠️ El turno se confirmará una vez que pagues la seña
+                                </span>
+                            </div>
+                            <a href="${linkMp}" target="_blank" style="text-decoration: none; width: 100%;">
+                                <button style="width: 100%; background-color: #F4B41A; color: white; font-weight: 900; padding: 12px; border-radius: 20px; border: none; cursor: pointer; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    💳 Pagar Seña ($${valorSenia})
+                                </button>
+                            </a>
+                        `;
+                    } else {
+                        seccionPagoHtml = `
+                            <div style="background-color: #E2F0D9; border: 1px solid #6EB64F; border-radius: 12px; padding: 10px; margin: 12px 0 8px 0; text-align: center; width: 100%; box-sizing: border-box;">
+                                <span style="color: #385723; font-weight: 800; font-size: 12px; display: block;">
+                                    ✅ Reserva Confirmada (Sin Seña)
+                                </span>
+                            </div>
+                        `;
+                    }
+                }
+
+                const card = `
+                    <div class="item-turno" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <strong>[${t.hora.slice(0,5)}]</strong> ${t.cliente_nombre || 'Paciente'}
+                                <small>Tel: ${t.cliente_telefono || ''}</small>
+                            </div>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                        ${seccionPagoHtml}
+                    </div>
+                `;
+                
                 if(esCancelado) canceladosHtml += card; else activosHtml += card;
             });
+            
             document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="margin:0;">No hay turnos.</p>';
             document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="margin:0;">Sin cancelaciones.</p>';
         }
