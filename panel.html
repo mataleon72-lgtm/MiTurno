@@ -3,333 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel de Gestión - Mi Turno</title>
+    <title>Acceso Profesional - Mi Turno</title>
+
+    <!-- 🎯 LA RECETA DE YO CALCULO: MANIFEST LOCAL SIMPLE -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
+    <link rel="apple-touch-icon" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mi Turno">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #F8F8F8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .app-lienzo { position: relative; width: 100%; max-width: 432px; height: 960px; background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png'); background-size: cover; background-position: top center; background-repeat: no-repeat; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; -ms-overflow-style: none; scrollbar-width: none; }
-        .app-lienzo::-webkit-scrollbar { display: none; }
-        .contenedor { width: 85%; padding-top: 15px; padding-bottom: 50px; display: none; flex-direction: column; align-items: center; }
-        .contenedor.activa { display: flex; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .img-titulo { width: 95%; margin-bottom: 0px; margin-top: 10px;} 
-        .img-puntos { width: 30%; margin-top: 5px; margin-bottom: 25px; } 
-        .btn-img { width: 85%; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s; }
+        /* Fondo oscuro infinito */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: #121212; 
+            margin: 0; min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+
+        /* Lienzo de la app (432x960px) */
+        .app-lienzo {
+            position: relative;
+            width: 100%;
+            max-width: 432px;
+            height: 960px; 
+            background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png');
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Pantalla de carga con video */
+        #splash-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #121212;
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.4s ease;
+            cursor: pointer;
+        }
+        #splash-screen video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Contenedores de las pantallas */
+        .caja-card { 
+            width: 80%;
+            padding-top: 100px; 
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease;
+        }
+        .caja-card.activa { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Títulos, Puntos y Botones */
+        .img-titulo { width: 95%; margin-bottom: 10px; } 
+        .img-puntos { width: 30%; margin-bottom: 30px; } 
+        .btn-img { width: 85%; margin-top: 15px; cursor: pointer; transition: transform 0.2s; }
         .btn-img:active { transform: scale(0.96); }
-        .btn-link-img { width: 55%; margin-top: 10px; cursor: pointer; transition: transform 0.2s; }
+        .btn-link-img { width: 55%; margin-top: 30px; cursor: pointer; transition: transform 0.2s; }
         .btn-link-img:active { transform: scale(0.96); }
-        
-        /* FUERZA A TODOS LOS TÍTULOS DE AFUERA A SER BLANCO PURO EN CUALQUIER PANTALLA */
+
+        /* 🎯 REGLA UNIVERSAL: Fuerza a todos los títulos de afuera a ser blancos y legibles */
         label { 
             font-weight: 900 !important; 
             color: #FFFFFF !important; 
             text-shadow: 0px 1px 4px rgba(0,0,0,0.6) !important;
             font-size: 14px !important; 
-            width: 100%; text-align: left; padding-left: 5px; margin-bottom: 6px; display: block;
+            width: 100%; text-align: left; padding-left: 15px; margin-bottom: 5px; display: block;
         }
-        input, select { width: 100%; padding: 15px 20px; border-radius: 25px; border: none; background: #FFFFFF; box-shadow: 0px 4px 10px rgba(0,0,0,0.06); margin-bottom: 20px; box-sizing: border-box; font-size: 14px; font-weight: 800; color: #7A7A7A; font-family: 'Nunito', sans-serif; outline: none; }
-        input:focus, select:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.2); }
-        .caja-blanca { position: relative; overflow: hidden; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 25px 15px 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; box-sizing: border-box; min-height: 70px; display: flex; flex-direction: column; justify-content: center; }
-        .linea-verde { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #6EB64F; }
-        .linea-roja { position: absolute; top: 0; left: 0; width: 100px; height: 8px; background-color: #ED3237; }
-        .item-turno { padding: 10px 0; border-bottom: 1px solid #F0F0F0; font-weight: 800; color: #555; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        .item-turno:last-child { border-bottom: none; }
-        .item-turno small { color: #999; display: block; font-size: 11px; font-weight: 800; margin-top: 2px; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; color: white; font-weight: 900; }
-        .badge.ok { background: #6EB64F; }
-        .badge.cancel { background: #ED3237; }
-        .badge.waiting { background: #F4B41A; animation: blinker 1s linear infinite; }
-        .btn-borrar-horario { background: none; border: none; color: #ED3237; font-size: 16px; cursor: pointer; padding: 0; margin-left: 10px; }
-        @keyframes blinker { 50% { opacity: 0.4; } }
-        
-        .modal-espera-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #F4B41A; z-index: 99999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; box-sizing: border-box; cursor: pointer; }
-        @keyframes parpadeoEstroboscopico { 0% { background-color: #F4B41A; } 50% { background-color: #009E9B; } 100% { background-color: #F4B41A; } }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
-        .estrobo-activo { animation: parpadeoEstroboscopico 0.3s infinite !important; }
 
-        /* --- NUEVOS ESTILOS PARA EL CARRUSEL DE FECHAS --- */
-        .carrusel-fechas { display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; gap: 10px; padding-bottom: 15px; margin-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
-        .carrusel-fechas::-webkit-scrollbar { display: none; }
-        .dia-globo { min-width: 65px; height: 75px; background: #FFFFFF; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: all 0.2s ease; color: #7A7A7A; border: 2px solid transparent; }
-        .dia-globo:active { transform: scale(0.95); }
-        .dia-globo.activo { background: #6EB64F; color: #FFFFFF; transform: scale(1.05); box-shadow: 0 6px 15px rgba(110, 182, 79, 0.4); border-color: #FFFFFF; }
-        .dia-globo span.nombre-dia { font-size: 12px; font-weight: 900; text-transform: uppercase; }
-        .dia-globo span.numero-dia { font-size: 24px; font-weight: 900; margin-top: 2px; }
+        /* INTERIOR DE LAS CAJAS DE TEXTO (Gris oscuro nítido sobre fondo blanco) */
+        input { 
+            width: 100%; padding: 16px 20px; border-radius: 25px; border: none; 
+            background: #FFFFFF;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15); 
+            margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; 
+            color: #333333 !important; 
+            font-family: 'Nunito', sans-serif; outline: none;
+        }
+        input::placeholder { color: #A0A0A0; font-weight: 700; }
+        input:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.3); }
     </style>
 </head>
 <body>
 
-    <div id="alerta-sala-espera" class="modal-espera-overlay" onclick="silenciarAlertaEspera()">
-        <div style="font-size: 90px; margin-bottom: 20px; animation: bounce 0.5s infinite alternate;">🛋️</div>
-        <h2 style="font-weight: 900; color: white; font-size: 32px; margin: 0 0 10px 0;">PACIENTE EN SALA DE ESPERA</h2>
-        <p id="nombre-paciente-espera" style="font-weight: 900; color: #333; font-size: 26px; background: white; padding: 15px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin: 15px 0 30px 0; text-transform: uppercase;"></p>
-        <span style="font-weight: 800; color: white; font-size: 14px; background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 50px;">👉 TOCAR PANTALLA PARA RECONOCER 👈</span>
-    </div>
-
     <div class="app-lienzo">
-        <div id="seccion-agenda" class="contenedor activa">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo%20mi%20agenda.png" class="img-titulo" alt="Mi Agenda">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel3.png" class="img-puntos">
+        
+        <div id="splash-screen">
+            <video id="intro-video" src="https://mataleon72-lgtm.github.io/MiTurno/intro.mp4" autoplay muted playsinline></video>
+        </div>
+
+        <div id="card-login" class="caja-card activa">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_accesoprofesional.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos-panel1.png" class="img-puntos">
+
+            <label>Tu Alias (para compartir)</label>
+            <input type="text" id="login-alias" placeholder="EJ: JULI">
             
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearsucursal.png" class="btn-img" onclick="mostrarPantallaSucursales()">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" onclick="mostrarPantallaHorarios()">
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" placeholder="••••••••">
+
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ingresar()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearcuenta.png" class="btn-link-img" onclick="irARegistro()">
+        </div>
+
+        <div id="card-registro" class="caja-card">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_nuevoprofesional.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel2.png" class="img-puntos">
+
+            <label>Nombre / Razón Social</label>
+            <input type="text" id="reg-nombre" placeholder="Ej: Dr. Julián Gómez">
+
+            <label>Rubro / Especialidad</label>
+            <input type="text" id="reg-rubro" placeholder="Ej: Kinesiología">
+
+            <label>Alias (el que compartirás)</label>
+            <input type="text" id="reg-alias" placeholder="EJ: JULIGOMEZ">
             
-            <div style="width: 100%;">
-                <label>Sucursal</label><select id="agenda-sucursal" onchange="cargarTurnos()"></select>
-                
-                <!-- --- NUEVO CARRUSEL HÍBRIDO --- -->
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
-                    <label style="width:auto; margin-bottom:0;">Fecha</label>
-                    <input type="date" id="agenda-fecha" style="width:auto; padding:5px 12px; margin-bottom:0; font-size:12px; border-radius:12px; font-weight:900;" onchange="seleccionarFechaDesdeInputNativo(this.value)">
-                </div>
-                
-                <div class="carrusel-fechas" id="carrusel-fechas">
-                    <!-- Los globos de días se generan por JavaScript -->
-                </div>
-                <!-- --- FIN CARRUSEL --- -->
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Creá una clave segura">
 
-                <label style="color: #555; margin-bottom: 8px;">Turnos programados</label>
-                <div class="caja-blanca"><div class="linea-verde"></div><div id="lista-turnos" style="margin-top: 5px;"></div></div>
-
-                <label style="color: #555; margin-bottom: 8px;">Turnos cancelados</label>
-                <div class="caja-blanca"><div class="linea-roja"></div><div id="lista-cancelados" style="margin-top: 5px;"></div></div>
-            </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_cerrarsesion.png" class="btn-link-img" style="width: 45%; margin-top: 5px;" onclick="cerrarSesion()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crear.png" class="btn-img" onclick="registrarCuenta()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_iniciarsesion.png" class="btn-link-img" onclick="irALogin()">
         </div>
 
-        <div id="seccion-sucursales" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_missucursales.png" class="img-titulo" alt="Mis Sucursales"> 
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel5.png" class="img-puntos">
-            <div style="width: 100%;">
-                <label>Crear sucursal</label><input type="text" id="suc-nombre" placeholder="Nombre de la sucursal">
-                <input type="text" id="suc-dir" placeholder="Dirección de la sucursal" style="margin-top: -10px;">
-                <label>Link de seña Mercado Pago</label><input type="text" id="suc-mp-link" placeholder="EJ:http://mpago.la//xxxxx">
-            </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_guardar.png" class="btn-img" onclick="guardarOActualizarSucursal()">
-            <div style="width: 100%; margin-top: 30px;">
-                <label style="color: #7A7A7A; font-size: 14px; margin-bottom: 8px;">Modificar Sucursal</label>
-                <select id="select-editar-sucursal" onchange="cargarDatosSucursalAEditar()"><option value="NUEVA">Elige la sucursal</option></select>
-            </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
-        </div>
-
-        <div id="seccion-horarios" class="contenedor">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_mishorarios.png" class="img-titulo">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel4.png" class="img-puntos">
-            <div style="width: 100%;">
-                <label>Seleccionar Sucursal</label><select id="hor-sucursal" onchange="cargarHorarios()"></select>
-                <label>Día de la semana</label>
-                <select id="hor-dia">
-                    <option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option><option value="0">Domingo</option>
-                </select>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1"><label>Desde</label><input type="time" id="hor-inicio" value="08:00"></div>
-                    <div style="flex:1"><label>Hasta</label><input type="time" id="hor-fin" value="20:00"></div>
-                </div>
-                <label>Duración</label>
-                <select id="hor-duracion"><option value="20">20 Minutos</option><option value="30" selected>30 Minutos</option><option value="60">60 Minutos</option></select>
-            </div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" style="display:none;">
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignarhorarios.png" class="btn-img" onclick="guardarHorario()">
-            <div style="width: 100%; margin-top: 15px;"><label>Mis Horarios</label><div class="caja-blanca"><div id="lista-horarios"></div></div></div>
-            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
-        </div>
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const video = document.getElementById('intro-video');
+            const splash = document.getElementById('splash-screen');
+            let videoTerminado = false;
+
+            const ocultarSplash = () => {
+                if (videoTerminado) return;
+                videoTerminado = true;
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; video.pause(); }, 400); 
+            };
+
+            video.addEventListener('ended', ocultarSplash);
+            splash.addEventListener('click', ocultarSplash);
+            setTimeout(ocultarSplash, 3500); 
+        });
+
         const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
         const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const idMedico = localStorage.getItem('mi_turno_negocio_id'); 
+        const LINK_SUSCRIPCION_MP = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
 
-        if (!idMedico) {
-            alert("Tu sesión expiró."); window.location.href = "panel.html";
+        function irARegistro() {
+            document.getElementById('card-login').classList.remove('activa');
+            document.getElementById('card-registro').classList.add('activa');
         }
 
-        // --- LÓGICA DEL CARRUSEL DE FECHAS ---
-        function generarCarruselFechas(fechaSeleccionadaStr) {
-            const contenedor = document.getElementById('carrusel-fechas');
-            contenedor.innerHTML = '';
-            
-            const diasAtras = 5;  // Cuántos días para atrás mostrar
-            const totalDias = 30; // Total de días en el carrusel
-            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            
-            let html = '';
-            let idActivo = '';
-            
-            for(let i = -diasAtras; i < (totalDias - diasAtras); i++) {
-                let d = new Date();
-                d.setDate(d.getDate() + i);
-                
-                // Ajuste de zona horaria local para evitar saltos de día a la noche
-                let fechaIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-                
-                let nombreDia = diasSemana[d.getDay()];
-                let numeroDia = d.getDate();
-                
-                let claseActivo = (fechaIso === fechaSeleccionadaStr) ? 'activo' : '';
-                if(claseActivo) idActivo = `globo-${fechaIso}`;
-                
-                html += `
-                    <div id="globo-${fechaIso}" class="dia-globo ${claseActivo}" onclick="seleccionarFechaCarrusel('${fechaIso}')">
-                        <span class="nombre-dia">${nombreDia}</span>
-                        <span class="numero-dia">${numeroDia}</span>
-                    </div>
-                `;
+        function irALogin() {
+            document.getElementById('card-registro').classList.remove('activa');
+            document.getElementById('card-login').classList.add('activa');
+        }
+
+        async function registrarCuenta() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const rubro = document.getElementById('reg-rubro').value.trim();
+            const alias = document.getElementById('reg-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+
+            if(!nombre || !rubro || !alias || !pass) return alert("Por favor, completá todos los campos para registrarte.");
+
+            const { error } = await supabaseCliente.from('negocios').insert([
+                { nombre: nombre, rubro: rubro, alias: alias, password: pass }
+            ]);
+
+            if (error) {
+                if(error.code === '23505') return alert("¡Ese Alias ya está siendo usado por otro profesional! Elegí uno diferente.");
+                return alert("Error al registrar: " + error.message);
             }
-            contenedor.innerHTML = html;
-            
-            // Centrar suavemente el globo activo en la pantalla
-            setTimeout(() => {
-                const activo = document.getElementById(idActivo);
-                if(activo) {
-                    activo.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-            }, 50);
-        }
 
-        function seleccionarFechaCarrusel(fechaIso) {
-            document.getElementById('agenda-fecha').value = fechaIso;
-            generarCarruselFechas(fechaIso);
-            cargarTurnos();
-        }
-
-        function seleccionarFechaDesdeInputNativo(fechaIso) {
-            if(!fechaIso) return;
-            generarCarruselFechas(fechaIso);
-            cargarTurnos();
-        }
-        // --- FIN LÓGICA CARRUSEL ---
-
-        const hoyLocalIso = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-        document.getElementById('agenda-fecha').value = hoyLocalIso;
-        generarCarruselFechas(hoyLocalIso);
-
-        async function init() { await cargarSelectores(); activarCanalTiempoRealProfesional(); }
-        function mostrarPantallaSucursales() { switchSeccion('seccion-sucursales'); }
-        function mostrarPantallaHorarios() { switchSeccion('seccion-horarios'); cargarSelectores(); }
-        function mostrarPantallaAgenda() { switchSeccion('seccion-agenda'); cargarSelectores(); }
-        
-        function switchSeccion(id) { 
-            document.querySelectorAll('.contenedor').forEach(c => c.classList.remove('activa')); 
-            document.getElementById(id).classList.add('activa'); 
-            document.querySelector('.app-lienzo').scrollTo({ top: 0, behavior: 'smooth' }); 
-        }
-
-        async function cargarSelectores() {
-            if (!idMedico) return;
-            const { data } = await supabaseCliente.from('sucursales').select('*').eq('negocio_id', idMedico).order('nombre');
-            const opcionesSedes = data?.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') || '';
-            document.getElementById('agenda-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
-            document.getElementById('hor-sucursal').innerHTML = opcionesSedes || '<option value="">Crea una sucursal primero</option>';
-            document.getElementById('select-editar-sucursal').innerHTML = '<option value="NUEVA">Elige la sucursal</option>' + opcionesSedes;
-            cargarTurnos(); cargarHorarios();
-        }
-
-        async function cargarDatosSucursalAEditar() {
-            const idSucElegida = document.getElementById('select-editar-sucursal').value;
-            if (idSucElegida === 'NUEVA') {
-                document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = '';
+            if (LINK_SUSCRIPCION_MP) {
+                alert("¡Cuenta creada con éxito! Para activar tu membresía y acceder al panel, te redirigiremos a Mercado Pago.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
             } else {
-                const { data } = await supabaseCliente.from('sucursales').select('*').eq('id', idSucElegida).single();
-                if (data) {
-                    document.getElementById('suc-nombre').value = data.nombre; document.getElementById('suc-dir').value = data.direccion || ''; document.getElementById('suc-mp-link').value = data.link_mercadopago || '';
-                }
+                alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
             }
+            irALogin();
         }
 
-        async function guardarOActualizarSucursal() {
-            const idSucElegida = document.getElementById('select-editar-sucursal').value;
-            const nombre = document.getElementById('suc-nombre').value.trim(); const direccion = document.getElementById('suc-dir').value.trim(); const mpLink = document.getElementById('suc-mp-link').value.trim();
-            if(!nombre || !direccion) return alert("Completá los campos");
-            
-            if (idSucElegida === 'NUEVA') {
-                const { count, error } = await supabaseCliente.from('sucursales').select('*', { count: 'exact', head: true }).eq('negocio_id', idMedico);
-                if (count >= 2) {
-                    alert("⚠️ LÍMITE DE PLAN ALCANZADO\n\nLlegaste al límite de 2 sucursales/profesionales de tu plan Básico.\nPara agregar a todo tu equipo, comunicate con nosotros para hacer el upgrade al Plan Pro.");
-                    return; 
-                }
-                await supabaseCliente.from('sucursales').insert([{ negocio_id: idMedico, nombre, direccion, link_mercadopago: mpLink }]);
-            } else {
-                await supabaseCliente.from('sucursales').update({ nombre, direccion, link_mercadopago: mpLink }).eq('id', idSucElegida);
+        async function ingresar() {
+            const alias = document.getElementById('login-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('login-pass').value.trim();
+
+            if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
+
+            const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
+
+            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
+
+            const estadoPago = data.mp_link ? data.mp_link.trim() : "";
+            if (!estadoPago || estadoPago === "") {
+                alert("Tu suscripción no está activa o el pago está pendiente. Por favor, completá tu suscripción en Mercado Pago para activar el panel.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
+                return; 
             }
-            document.getElementById('select-editar-sucursal').value = 'NUEVA'; document.getElementById('suc-nombre').value = ''; document.getElementById('suc-dir').value = ''; document.getElementById('suc-mp-link').value = '';
-            await cargarSelectores();
-        }
 
-        async function guardarHorario() {
-            const idSuc = document.getElementById('hor-sucursal').value;
-            const dia = document.getElementById('hor-dia').value; let ini = document.getElementById('hor-inicio').value; let fin = document.getElementById('hor-fin').value; const duracion = document.getElementById('hor-duracion').value;
-            if(ini.length === 5) ini += ":00"; if(fin.length === 5) fin += ":00";
-            await supabaseCliente.from('configuracion_agenda').insert([{ negocio_id: idMedico, sucursal_id: idSuc, dia_semana: parseInt(dia), hora_inicio: ini, hora_fin: fin, duracion_minutos: parseInt(duracion), cupo_maximo: 1 }]);
-            alert("¡Horario asignado!"); await cargarHorarios();
+            localStorage.setItem('mi_turno_negocio_id', data.id);
+            window.location.href = "dashboard.html";
         }
-
-        async function cargarHorarios() {
-            const idSuc = document.getElementById('hor-sucursal').value; if(!idSuc) return;
-            const { data } = await supabaseCliente.from('configuracion_agenda').select('*').eq('sucursal_id', idSuc);
-            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-            document.getElementById('lista-horarios').innerHTML = data?.map(h => `<div class="item-turno"><div>${dias[h.dia_semana]} <small>${h.hora_inicio.slice(0,5)} a ${h.hora_fin.slice(0,5)} hs</small></div><button class="btn-borrar-horario" onclick="eliminarHorario('${h.id}')">🗑️</button></div>`).join('') || '<p style="text-align:center; color:#A0A0A0; font-size:13px; margin:0;">Sin horarios.</p>';
-        }
-
-        async function eliminarHorario(idHorario) {
-            if(confirm("¿Borrar franja?")) { await supabaseCliente.from('configuracion_agenda').delete().eq('id', idHorario); cargarHorarios(); }
-        }
-
-        async function cargarTurnos() {
-            const idSuc = document.getElementById('agenda-sucursal').value; const fecha = document.getElementById('agenda-fecha').value;
-            if(!idSuc || !fecha) return;
-            const { data: turnos } = await supabaseCliente.from('turnos_activos').select('*').eq('sucursal_id', idSuc).eq('fecha', fecha).order('hora');
-            let activosHtml = ''; let canceladosHtml = '';
-            turnos?.forEach(t => {
-                const esCancelado = t.estado.startsWith('cancelado'); const esEnEspera = t.estado === 'en_espera';
-                let badgeText = 'CONFIRMADO'; let badgeClass = 'ok';
-                if (esCancelado) { badgeText = 'CANCELADO'; badgeClass = 'cancel'; }
-                else if (esEnEspera) { badgeText = '🛋️ EN SALA'; badgeClass = 'waiting'; }
-                const card = `<div class="item-turno"><div>[${t.hora.slice(0,5)}] ${t.cliente_nombre || 'Paciente'}<small>Tel: ${t.cliente_telefono || ''}</small></div><span class="badge ${badgeClass}">${badgeText}</span></div>`;
-                if(esCancelado) canceladosHtml += card; else activosHtml += card;
-            });
-            document.getElementById('lista-turnos').innerHTML = activosHtml || '<p style="margin:0;">No hay turnos.</p>';
-            document.getElementById('lista-cancelados').innerHTML = canceladosHtml || '<p style="margin:0;">Sin cancelaciones.</p>';
-        }
-
-        function cerrarSesion() { localStorage.removeItem('mi_turno_negocio_id'); window.location.href = "panel.html"; }
-
-        let intervaloSonoro = null; let audioCtx = null;
-        function reproducirTimbreCampana() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.6);
-            } catch(e) {}
-        }
-        function iniciarAlertaVisualYSonora(nombrePaciente) {
-            document.getElementById('nombre-paciente-espera').innerText = nombrePaciente;
-            const modal = document.getElementById('alerta-sala-espera');
-            modal.style.display = 'flex'; modal.classList.add('estrobo-activo');
-            reproducirTimbreCampana(); intervaloSonoro = setInterval(reproducirTimbreCampana, 1500);
-        }
-        function silenciarAlertaEspera() {
-            const modal = document.getElementById('alerta-sala-espera');
-            modal.style.display = 'none'; modal.classList.remove('estrobo-activo');
-            if(intervaloSonoro) clearInterval(intervaloSonoro);
-            cargarTurnos();
-        }
-        function activarCanalTiempoRealProfesional() {
-            if (!idMedico) return;
-            const hoyArg = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60 * 1000)).toISOString().split('T')[0];
-            supabaseCliente.channel('sala-espera-channel-med-real')
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'turnos_activos', filter: `negocio_id=eq.${idMedico}` }, (payload) => {
-                    const tMod = payload.new;
-                    if (tMod && tMod.estado === 'en_espera' && tMod.fecha === hoyArg) { iniciarAlertaVisualYSonora(tMod.cliente_nombre); }
-                }).subscribe();
-        }
-        init();
     </script>
 </body>
 </html>
