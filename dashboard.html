@@ -39,6 +39,7 @@
         .badge.ok { background: #6EB64F; }
         .badge.cancel { background: #ED3237; }
         .badge.waiting { background: #F4B41A; animation: blinker 1s linear infinite; }
+        .badge.block { background: #555555; }
         .btn-borrar-horario { background: none; border: none; color: #ED3237; font-size: 16px; cursor: pointer; padding: 0; margin-left: 10px; }
         @keyframes blinker { 50% { opacity: 0.4; } }
         
@@ -46,6 +47,15 @@
         @keyframes parpadeoEstroboscopico { 0% { background-color: #F4B41A; } 50% { background-color: #009E9B; } 100% { background-color: #F4B41A; } }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
         .estrobo-activo { animation: parpadeoEstroboscopico 0.3s infinite !important; }
+
+        /* --- ESTILOS PARA EL CARRUSEL DE FECHAS --- */
+        .carrusel-fechas { display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; gap: 10px; padding-bottom: 15px; margin-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
+        .carrusel-fechas::-webkit-scrollbar { display: none; }
+        .dia-globo { min-width: 65px; height: 75px; background: #FFFFFF; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: all 0.2s ease; color: #7A7A7A; border: 2px solid transparent; }
+        .dia-globo:active { transform: scale(0.95); }
+        .dia-globo.activo { background: #6EB64F; color: #FFFFFF; transform: scale(1.05); box-shadow: 0 6px 15px rgba(110, 182, 79, 0.4); border-color: #FFFFFF; }
+        .dia-globo span.nombre-dia { font-size: 12px; font-weight: 900; text-transform: uppercase; }
+        .dia-globo span.numero-dia { font-size: 24px; font-weight: 900; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -65,9 +75,34 @@
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearsucursal.png" class="btn-img" onclick="mostrarPantallaSucursales()">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" onclick="mostrarPantallaHorarios()">
             
+            <!-- --- BOTÓN PARA BLOQUEAR HORARIOS EN LA AGENDA --- -->
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_bloquear.png" class="btn-img" onclick="mostrarPanelBloqueo()">
+            
+            <!-- PANEL DESPLEGABLE DE BLOQUEO (Sin línea de puntos y botones ajustados) -->
+            <div id="panel-bloqueo" class="caja-blanca" style="display:none; padding:20px;">
+                <label style="color: #333 !important; text-shadow: none !important;">Fecha a bloquear</label>
+                <input type="date" id="bloq-fecha" style="background: #F0F0F0; color:#333; margin-bottom:10px;">
+                <label style="color: #333 !important; text-shadow: none !important;">Hora exacta del turno</label>
+                <input type="time" id="bloq-hora" style="background: #F0F0F0; color:#333; margin-bottom:15px;">
+                <div style="display:flex; gap:10px;">
+                    <button onclick="ejecutarBloqueo()" style="flex:1; background:#CEE800; color:#333; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">BLOQUEAR</button>
+                    <button onclick="ocultarPanelBloqueo()" style="flex:1; background:#999; color:white; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">CANCELAR</button>
+                </div>
+            </div>
+
             <div style="width: 100%;">
                 <label>Sucursal</label><select id="agenda-sucursal" onchange="cargarTurnos()"></select>
-                <label>Fecha</label><input type="date" id="agenda-fecha" onchange="cargarTurnos()">
+                
+                <!-- --- CARRUSEL HÍBRIDO --- -->
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
+                    <label style="width:auto; margin-bottom:0;">Fecha</label>
+                    <input type="date" id="agenda-fecha" style="width:auto; padding:5px 12px; margin-bottom:0; font-size:12px; border-radius:12px; font-weight:900;" onchange="seleccionarFechaDesdeInputNativo(this.value)">
+                </div>
+                
+                <div class="carrusel-fechas" id="carrusel-fechas">
+                    <!-- Los globos de días se generan por JavaScript -->
+                </div>
+                <!-- --- FIN CARRUSEL --- -->
                 
                 <label style="color: #555; margin-bottom: 8px;">Turnos programados</label>
                 <div class="caja-blanca"><div class="linea-verde"></div><div id="lista-turnos" style="margin-top: 5px;"></div></div>
@@ -114,6 +149,22 @@
             </div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_configurarhorarios.png" class="btn-img" style="display:none;">
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_asignarhorarios.png" class="btn-img" onclick="guardarHorario()">
+            
+            <!-- --- BOTÓN PARA BLOQUEAR VACACIONES --- -->
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_vacaciones.png" class="btn-img" onclick="mostrarPanelVacaciones()">
+            
+            <!-- PANEL DESPLEGABLE DE VACACIONES (Sin línea de puntos y botones ajustados) -->
+            <div id="panel-vacaciones" class="caja-blanca" style="display:none; padding:20px;">
+                <label style="color: #333 !important; text-shadow: none !important;">Vacaciones Desde (inclusive)</label>
+                <input type="date" id="vac-desde" style="background: #F0F0F0; color:#333; margin-bottom:10px;">
+                <label style="color: #333 !important; text-shadow: none !important;">Vacaciones Hasta (inclusive)</label>
+                <input type="date" id="vac-hasta" style="background: #F0F0F0; color:#333; margin-bottom:15px;">
+                <div style="display:flex; gap:10px;">
+                    <button onclick="ejecutarVacaciones()" style="flex:1; background:#CEE800; color:#333; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">GUARDAR</button>
+                    <button onclick="ocultarPanelVacaciones()" style="flex:1; background:#999; color:white; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">CANCELAR</button>
+                </div>
+            </div>
+
             <div style="width: 100%; margin-top: 15px;"><label>Mis Horarios</label><div class="caja-blanca"><div id="lista-horarios"></div></div></div>
             <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_volveramiagenda.png" class="btn-link-img" onclick="mostrarPantallaAgenda()">
         </div>
@@ -129,7 +180,62 @@
             alert("Tu sesión expiró."); window.location.href = "panel.html";
         }
 
-        document.getElementById('agenda-fecha').value = new Date().toISOString().split('T')[0];
+        // --- LÓGICA DEL CARRUSEL DE FECHAS ---
+        function generarCarruselFechas(fechaSeleccionadaStr) {
+            const contenedor = document.getElementById('carrusel-fechas');
+            contenedor.innerHTML = '';
+            
+            const diasAtras = 5;  
+            const totalDias = 30; 
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            
+            let html = '';
+            let idActivo = '';
+            
+            for(let i = -diasAtras; i < (totalDias - diasAtras); i++) {
+                let d = new Date();
+                d.setDate(d.getDate() + i);
+                
+                let fechaIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                let nombreDia = diasSemana[d.getDay()];
+                let numeroDia = d.getDate();
+                
+                let claseActivo = (fechaIso === fechaSeleccionadaStr) ? 'activo' : '';
+                if(claseActivo) idActivo = `globo-${fechaIso}`;
+                
+                html += `
+                    <div id="globo-${fechaIso}" class="dia-globo ${claseActivo}" onclick="seleccionarFechaCarrusel('${fechaIso}')">
+                        <span class="nombre-dia">${nombreDia}</span>
+                        <span class="numero-dia">${numeroDia}</span>
+                    </div>
+                `;
+            }
+            contenedor.innerHTML = html;
+            
+            setTimeout(() => {
+                const activo = document.getElementById(idActivo);
+                if(activo) {
+                    activo.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }, 50);
+        }
+
+        function seleccionarFechaCarrusel(fechaIso) {
+            document.getElementById('agenda-fecha').value = fechaIso;
+            generarCarruselFechas(fechaIso);
+            cargarTurnos();
+        }
+
+        function seleccionarFechaDesdeInputNativo(fechaIso) {
+            if(!fechaIso) return;
+            generarCarruselFechas(fechaIso);
+            cargarTurnos();
+        }
+        // --- FIN LÓGICA CARRUSEL ---
+
+        const hoyLocalIso = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        document.getElementById('agenda-fecha').value = hoyLocalIso;
+        generarCarruselFechas(hoyLocalIso);
 
         async function init() { await cargarSelectores(); activarCanalTiempoRealProfesional(); }
         function mostrarPantallaSucursales() { switchSeccion('seccion-sucursales'); }
@@ -215,6 +321,114 @@
             if(confirm("¿Borrar franja?")) { await supabaseCliente.from('configuracion_agenda').delete().eq('id', idHorario); cargarHorarios(); }
         }
 
+        /* ----- FUNCIONES NUEVAS DE BLOQUEO (HORA EXACTA) Y VACACIONES ----- */
+        function mostrarPanelBloqueo() {
+            document.getElementById('panel-bloqueo').style.display = 'block';
+            document.getElementById('bloq-fecha').value = document.getElementById('agenda-fecha').value;
+        }
+
+        function ocultarPanelBloqueo() {
+            document.getElementById('panel-bloqueo').style.display = 'none';
+            document.getElementById('bloq-hora').value = '';
+        }
+
+        async function ejecutarBloqueo() {
+            const idSuc = document.getElementById('agenda-sucursal').value;
+            const fecha = document.getElementById('bloq-fecha').value;
+            let hora = document.getElementById('bloq-hora').value;
+            
+            if(!idSuc || !fecha || !hora) return alert("Completá fecha y hora para poder bloquear.");
+            if(hora.length === 5) hora += ":00";
+            
+            await supabaseCliente.from('turnos_activos').insert([{
+                negocio_id: idMedico,
+                sucursal_id: idSuc,
+                fecha: fecha,
+                hora: hora,
+                cliente_nombre: '🚫 HORARIO BLOQUEADO',
+                cliente_telefono: '',
+                estado: 'bloqueado'
+            }]);
+            
+            ocultarPanelBloqueo();
+            cargarTurnos();
+        }
+
+        function mostrarPanelVacaciones() {
+            document.getElementById('panel-vacaciones').style.display = 'block';
+        }
+
+        function ocultarPanelVacaciones() {
+            document.getElementById('panel-vacaciones').style.display = 'none';
+            document.getElementById('vac-desde').value = '';
+            document.getElementById('vac-hasta').value = '';
+        }
+
+        async function ejecutarVacaciones() {
+            const idSuc = document.getElementById('hor-sucursal').value;
+            const fechaDesde = document.getElementById('vac-desde').value;
+            const fechaHasta = document.getElementById('vac-hasta').value;
+            
+            if(!idSuc || !fechaDesde || !fechaHasta) return alert("Por favor, completá ambos días para cargar las vacaciones.");
+            
+            let desde = new Date(fechaDesde + "T00:00:00");
+            let hasta = new Date(fechaHasta + "T00:00:00");
+            
+            if(desde > hasta) return alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+
+            let inserts = [];
+            let loop = new Date(desde);
+            
+            while(loop <= hasta){
+                let fIso = loop.toISOString().split('T')[0];
+                inserts.push({
+                    negocio_id: idMedico,
+                    sucursal_id: idSuc,
+                    fecha: fIso,
+                    hora: '00:00:00', // Guardamos un registro especial con la hora 00:00 para identificar el día entero
+                    cliente_nombre: '✈️ VACACIONES',
+                    cliente_telefono: '',
+                    estado: 'vacaciones'
+                });
+                loop.setDate(loop.getDate() + 1);
+            }
+            
+            await supabaseCliente.from('turnos_activos').insert(inserts);
+            alert("¡Fechas de vacaciones guardadas exitosamente!");
+            ocultarPanelVacaciones();
+            
+            if(document.getElementById('seccion-agenda').classList.contains('activa')){
+                cargarTurnos();
+            }
+        }
+
+        async function desbloquearHorario(idTurno) {
+            if(confirm("¿Querés desbloquear este horario/día para que vuelva a estar disponible?")) {
+                await supabaseCliente.from('turnos_activos').delete().eq('id', idTurno);
+                cargarTurnos();
+            }
+        }
+
+        async function cancelarTurnoProfesional(idTurno, telefono, nombre, fecha, hora) {
+            if(!confirm("¿Estás seguro de que querés cancelar este turno? Se enviará un WhatsApp al cliente.")) return;
+
+            // 1. Actualizamos estado en base de datos
+            await supabaseCliente.from('turnos_activos').update({ estado: 'cancelado_por_profesional' }).eq('id', idTurno);
+            
+            // 2. Preparamos el mensaje automático
+            const mensaje = encodeURIComponent(`Hola ${nombre}, te pedimos disculpas pero tuvimos que cancelar tu turno del día ${fecha} a las ${hora.slice(0,5)}hs. Por favor, escribinos para reprogramarlo. ¡Gracias!`);
+            
+            // 3. Disparamos el WhatsApp
+            if(telefono && telefono.trim() !== '') {
+                window.open(`https://wa.me/${telefono}?text=${mensaje}`, '_blank');
+            } else {
+                alert("El turno fue cancelado en el sistema, pero el cliente no dejó un teléfono válido para avisarle por WhatsApp.");
+            }
+            
+            cargarTurnos();
+        }
+        /* ------------------------------------------------------------------- */
+
         async function cargarTurnos() {
             const idSuc = document.getElementById('agenda-sucursal').value; 
             const fecha = document.getElementById('agenda-fecha').value;
@@ -224,7 +438,6 @@
             let linkMp = '';
 
             try {
-                // Buscamos dinámicamente la seña configurada para la sucursal actual
                 const { data: datosSucursal } = await supabaseCliente
                     .from('sucursales')
                     .select('valor_senia, link_mercadopago')
@@ -246,6 +459,23 @@
             turnos?.forEach(t => {
                 const esCancelado = t.estado.startsWith('cancelado'); 
                 const esEnEspera = t.estado === 'en_espera';
+                const esBloqueado = t.estado === 'bloqueado';
+                const esVacaciones = t.estado === 'vacaciones';
+                
+                // Si es un día entero de vacaciones, renderizamos una tarjeta especial destacada
+                if (esVacaciones) {
+                    activosHtml += `
+                        <div class="item-turno" style="width: 100% !important; box-sizing: border-box !important; margin-bottom: 15px !important; background: #E0F7FA !important; padding: 15px !important; border-radius: 12px !important; border: 2px dashed #009E9B !important;">
+                            <div style="text-align:center !important; width:100% !important;">
+                                <strong style="color: #009E9B !important; font-size:18px; display:block; margin-bottom:5px;">✈️ DÍA DE VACACIONES</strong>
+                                <span style="font-size:12px; color:#555;">La agenda está cerrada para este día completo.</span>
+                                <button onclick="desbloquearHorario('${t.id}')" style="background: #ED3237 !important; color: white !important; border: none !important; padding: 10px !important; border-radius: 10px !important; margin-top: 15px !important; font-weight: 900 !important; cursor: pointer !important; width: 100% !important;">REABRIR AGENDA PARA ESTE DÍA</button>
+                            </div>
+                        </div>
+                    `;
+                    return; // Saltamos el resto de la lógica estándar de turnos
+                }
+
                 let badgeText = 'CONFIRMADO'; 
                 let badgeClass = 'ok';
                 
@@ -255,11 +485,13 @@
                 } else if (esEnEspera) { 
                     badgeText = '🛋️ EN SALA'; 
                     badgeClass = 'waiting'; 
+                } else if (esBloqueado) {
+                    badgeText = '🔒 BLOQUEADO';
+                    badgeClass = 'block';
                 }
                 
-                // Renderizado condicional del bloque de pago con refuerzo de estilos inline
                 let seccionPagoHtml = '';
-                if (!esCancelado) {
+                if (!esCancelado && !esBloqueado) {
                     if (valorSenia > 0) {
                         seccionPagoHtml = `
                             <div style="background-color: #FFF3CD !important; border: 2px dashed #F4B41A !important; border-radius: 12px !important; padding: 12px !important; margin: 12px 0 8px 0 !important; text-align: center !important; width: 100% !important; box-sizing: border-box !important; display: block !important;">
@@ -284,16 +516,29 @@
                     }
                 }
 
+                // Generamos los botones de acción dinámicos para Cancelar y Desbloquear
+                let botonesAccionHtml = '';
+                if (!esCancelado && !esBloqueado && !esEnEspera) {
+                    botonesAccionHtml = `
+                        <button onclick="cancelarTurnoProfesional('${t.id}', '${t.cliente_telefono}', '${t.cliente_nombre}', '${t.fecha}', '${t.hora}')" style="background: #ED3237 !important; color: white !important; border: none !important; padding: 10px !important; border-radius: 10px !important; margin-top: 10px !important; font-weight: 900 !important; font-family: 'Nunito', sans-serif !important; cursor: pointer !important; width: 100% !important;">🚫 CANCELAR TURNO</button>
+                    `;
+                } else if (esBloqueado) {
+                    botonesAccionHtml = `
+                        <button onclick="desbloquearHorario('${t.id}')" style="background: #555 !important; color: white !important; border: none !important; padding: 10px !important; border-radius: 10px !important; margin-top: 10px !important; font-weight: 900 !important; font-family: 'Nunito', sans-serif !important; cursor: pointer !important; width: 100% !important;">🔓 DESBLOQUEAR HORARIO</button>
+                    `;
+                }
+
                 const card = `
                     <div class="item-turno" style="width: 100% !important; box-sizing: border-box !important; margin-bottom: 15px !important; background: #FFFFFF !important; padding: 12px !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;">
                         <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important;">
                             <div>
                                 <strong style="color: #333 !important;">[${t.hora.slice(0,5)}]</strong> ${t.cliente_nombre || 'Paciente'}
-                                <small style="color: #666 !important; display: block !important; margin-top: 2px !important;">Tel: ${t.cliente_telefono || ''}</small>
+                                ${!esBloqueado ? `<small style="color: #666 !important; display: block !important; margin-top: 2px !important;">Tel: ${t.cliente_telefono || ''}</small>` : ''}
                             </div>
                             <span class="badge ${badgeClass}">${badgeText}</span>
                         </div>
                         ${seccionPagoHtml}
+                        ${botonesAccionHtml}
                     </div>
                 `;
                 
