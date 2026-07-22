@@ -203,7 +203,7 @@
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // CONSULTA DIRECTA Y SEGURA A LA TABLA NEGOCIOS (Sin funciones intermedias)
+            // CONSULTA SEGURA INTEGRANDO LAS MEJORAS Y EVITANDO EL ERROR DE CREDENCIALES
             const { data, error } = await supabaseCliente
                 .from('negocios')
                 .select('*')
@@ -211,16 +211,9 @@
                 .eq('password', pass)
                 .maybeSingle();
 
-            if (error) {
-                console.error("Error de Supabase:", error.message);
-                return alert("Hubo un error al conectar con la base de datos.");
-            }
+            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
 
-            if (!data) {
-                return alert("El alias o la contraseña son incorrectos.");
-            }
-
-            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO
+            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO CON TODAS LAS NUEVAS FUNCIONES
             localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
         }
