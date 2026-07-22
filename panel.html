@@ -197,17 +197,17 @@
             irALogin();
         }
 
-       async function ingresar() {
-            const alias = document.getElementById('login-alias').value.toUpperCase().trim();
+        async function ingresar() {
+            const aliasInput = document.getElementById('login-alias').value; // Sin el toUpperCase restrictivo
             const pass = document.getElementById('login-pass').value.trim();
 
-            if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
+            if(!aliasInput || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // CONSULTA DIRECTA (CHAU VERIFICAR_LOGIN)
+            // CONSULTA DIRECTA Y A PRUEBA DE MAYÚSCULAS/MINÚSCULAS
             const { data, error } = await supabaseCliente
                 .from('negocios')
                 .select('*')
-                .eq('alias', alias)
+                .ilike('alias', aliasInput.trim()) 
                 .eq('password', pass)
                 .maybeSingle();
 
