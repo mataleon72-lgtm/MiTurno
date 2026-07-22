@@ -197,7 +197,7 @@
             irALogin();
         }
 
-        async function ingresar() {
+       async function ingresar() {
             const alias = document.getElementById('login-alias').value.toUpperCase().trim();
             const pass = document.getElementById('login-pass').value.trim();
 
@@ -215,9 +215,9 @@
                 return alert("El alias o la contraseña son incorrectos.");
             }
 
-            // GUARDAMOS EL ALIAS COMO REFERENCIA SEGURA EN EL LOCALSTORAGE Y ENTRAMOS
+            // GUARDAMOS EL ALIAS COMO REFERENCIA SEGURA Y ENTRAMOS
             localStorage.setItem('mi_turno_negocio_id', data.alias);
-            window.location.href = "dashboard.html"; // o el nombre de tu panel interno
+            window.location.href = "dashboard.html"; 
         }
     </script>
 </body>
