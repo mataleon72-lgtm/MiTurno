@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Acceso Profesional - Mi Turno</title>
 
-    <!-- 🎯 LA RECETA DE YO CALCULO: MANIFEST LOCAL SIMPLE -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
     <link rel="apple-touch-icon" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
@@ -208,13 +207,7 @@
 
             if(error || !data) return alert("El alias o la contraseña son incorrectos.");
 
-            const estadoPago = data.mp_link ? data.mp_link.trim() : "";
-            if (!estadoPago || estadoPago === "") {
-                alert("Tu suscripción no está activa o el pago está pendiente. Por favor, completá tu suscripción en Mercado Pago para activar el panel.");
-                window.open(LINK_SUSCRIPCION_MP, '_blank');
-                return; 
-            }
-
+            // GUARDAMOS EL ID Y ENRAMOS DIRECTO AL PANEL (Listo para mostrar las demos y clientes)
             localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
         }
