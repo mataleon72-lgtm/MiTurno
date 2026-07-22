@@ -203,11 +203,24 @@
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
+            // CONSULTA DIRECTA Y SEGURA A LA TABLA NEGOCIOS (Sin funciones intermedias)
+            const { data, error } = await supabaseCliente
+                .from('negocios')
+                .select('*')
+                .eq('alias', alias)
+                .eq('password', pass)
+                .maybeSingle();
 
-            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
+            if (error) {
+                console.error("Error de Supabase:", error.message);
+                return alert("Hubo un error al conectar con la base de datos.");
+            }
 
-            // GUARDAMOS EL ID Y ENRAMOS DIRECTO AL PANEL (Listo para mostrar las demos y clientes)
+            if (!data) {
+                return alert("El alias o la contraseña son incorrectos.");
+            }
+
+            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO
             localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
         }
