@@ -198,34 +198,26 @@
         }
 
         async function ingresar() {
-            const aliasInput = document.getElementById('login-alias').value;
-            const passInput = document.getElementById('login-pass').value;
-
-            const alias = aliasInput.toUpperCase().trim();
-            const pass = passInput.trim();
+            const alias = document.getElementById('login-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('login-pass').value.trim();
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // Traemos el negocio filtrando por alias y contraseña de forma directa
+            // BUSCAMOS DIRECTAMENTE USANDO LAS COLUMNAS REALES DE LA TABLA (SIN ID)
             const { data, error } = await supabaseCliente
                 .from('negocios')
                 .select('*')
                 .eq('alias', alias)
                 .eq('password', pass);
 
-            if (error) {
-                console.error("Error de Supabase:", error);
-                return alert("Error al conectar con la base de datos: " + error.message);
-            }
-
-            if (!data || data.length === 0) {
+            if (error || !data || data.length === 0) {
                 return alert("El alias o la contraseña son incorrectos.");
             }
 
             const negocio = data[0];
 
-            // Guardamos un identificador seguro en el almacenamiento (usamos el alias o la columna primaria disponible)
-            localStorage.setItem('mi_turno_negocio_id', negocio.alias || negocio.nombre);
+            // GUARDAMOS EL ALIAS COMO REFERENCIA SEGURA EN EL LOCALSTORAGE
+            localStorage.setItem('mi_turno_negocio_id', negocio.alias);
             window.location.href = "dashboard.html";
         }
     </script>
