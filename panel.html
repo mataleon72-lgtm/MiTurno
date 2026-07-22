@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Acceso Profesional - Mi Turno</title>
 
+    <!-- 🎯 LA RECETA DE YO CALCULO: MANIFEST LOCAL SIMPLE -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
     <link rel="apple-touch-icon" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
@@ -203,21 +204,18 @@
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // BUSCAMOS DIRECTAMENTE USANDO LAS COLUMNAS REALES DE LA TABLA (SIN ID)
-            const { data, error } = await supabaseCliente
-                .from('negocios')
-                .select('*')
-                .eq('alias', alias)
-                .eq('password', pass);
+            const { data, error } = await supabaseCliente.from('negocios').select('*').eq('alias', alias).eq('password', pass).single();
 
-            if (error || !data || data.length === 0) {
-                return alert("El alias o la contraseña son incorrectos.");
+            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
+
+            const estadoPago = data.mp_link ? data.mp_link.trim() : "";
+            if (!estadoPago || estadoPago === "") {
+                alert("Tu suscripción no está activa o el pago está pendiente. Por favor, completá tu suscripción en Mercado Pago para activar el panel.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
+                return; 
             }
 
-            const negocio = data[0];
-
-            // GUARDAMOS EL ALIAS COMO REFERENCIA SEGURA EN EL LOCALSTORAGE
-            localStorage.setItem('mi_turno_negocio_id', negocio.alias);
+            localStorage.setItem('mi_turno_negocio_id', data.id);
             window.location.href = "dashboard.html";
         }
     </script>
