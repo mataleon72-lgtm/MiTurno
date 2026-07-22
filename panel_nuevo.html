@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acceso Profesional - Mi Turno</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
+    <link rel="apple-touch-icon" href="https://mataleon72-lgtm.github.io/MiTurno/icono.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mi Turno">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Fondo oscuro infinito */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: #121212; 
+            margin: 0; min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+
+        /* Lienzo de la app (432x960px) */
+        .app-lienzo {
+            position: relative;
+            width: 100%;
+            max-width: 432px;
+            height: 960px; 
+            background-image: url('https://mataleon72-lgtm.github.io/MiTurno/lienzo_panel.png');
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Pantalla de carga con video */
+        #splash-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #121212;
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.4s ease;
+            cursor: pointer;
+        }
+        #splash-screen video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Contenedores de las pantallas */
+        .caja-card { 
+            width: 80%;
+            padding-top: 100px; 
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease;
+        }
+        .caja-card.activa { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Títulos, Puntos y Botones */
+        .img-titulo { width: 95%; margin-bottom: 10px; } 
+        .img-puntos { width: 30%; margin-bottom: 30px; } 
+        .btn-img { width: 85%; margin-top: 15px; cursor: pointer; transition: transform 0.2s; }
+        .btn-img:active { transform: scale(0.96); }
+        .btn-link-img { width: 55%; margin-top: 30px; cursor: pointer; transition: transform 0.2s; }
+        .btn-link-img:active { transform: scale(0.96); }
+
+        /* 🎯 REGLA UNIVERSAL: Fuerza a todos los títulos de afuera a ser blancos y legibles */
+        label { 
+            font-weight: 900 !important; 
+            color: #FFFFFF !important; 
+            text-shadow: 0px 1px 4px rgba(0,0,0,0.6) !important;
+            font-size: 14px !important; 
+            width: 100%; text-align: left; padding-left: 15px; margin-bottom: 5px; display: block;
+        }
+
+        /* INTERIOR DE LAS CAJAS DE TEXTO (Gris oscuro nítido sobre fondo blanco) */
+        input { 
+            width: 100%; padding: 16px 20px; border-radius: 25px; border: none; 
+            background: #FFFFFF;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15); 
+            margin-bottom: 18px; box-sizing: border-box; font-size: 15px; font-weight: 800; 
+            color: #333333 !important; 
+            font-family: 'Nunito', sans-serif; outline: none;
+        }
+        input::placeholder { color: #A0A0A0; font-weight: 700; }
+        input:focus { box-shadow: 0px 4px 12px rgba(0, 158, 155, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="app-lienzo">
+        
+        <div id="splash-screen">
+            <video id="intro-video" src="https://mataleon72-lgtm.github.io/MiTurno/intro.mp4" autoplay muted playsinline></video>
+        </div>
+
+        <div id="card-login" class="caja-card activa">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_accesoprofesional.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos-panel1.png" class="img-puntos">
+
+            <label>Tu Alias (para compartir)</label>
+            <input type="text" id="login-alias" placeholder="EJ: JULI">
+            
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" placeholder="••••••••">
+
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_entrar.png" class="btn-img" onclick="ingresar()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crearcuenta.png" class="btn-link-img" onclick="irARegistro()">
+        </div>
+
+        <div id="card-registro" class="caja-card">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/titulo_nuevoprofesional.png" class="img-titulo">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/puntos_panel2.png" class="img-puntos">
+
+            <label>Nombre / Razón Social</label>
+            <input type="text" id="reg-nombre" placeholder="Ej: Dr. Julián Gómez">
+
+            <label>Rubro / Especialidad</label>
+            <input type="text" id="reg-rubro" placeholder="Ej: Kinesiología">
+
+            <label>Alias (el que compartirás)</label>
+            <input type="text" id="reg-alias" placeholder="EJ: JULIGOMEZ">
+            
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Creá una clave segura">
+
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_crear.png" class="btn-img" onclick="registrarCuenta()">
+            <img src="https://mataleon72-lgtm.github.io/MiTurno/boton_iniciarsesion.png" class="btn-link-img" onclick="irALogin()">
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const video = document.getElementById('intro-video');
+            const splash = document.getElementById('splash-screen');
+            let videoTerminado = false;
+
+            const ocultarSplash = () => {
+                if (videoTerminado) return;
+                videoTerminado = true;
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; video.pause(); }, 400); 
+            };
+
+            video.addEventListener('ended', ocultarSplash);
+            splash.addEventListener('click', ocultarSplash);
+            setTimeout(ocultarSplash, 3500); 
+        });
+
+        const SUPABASE_URL = 'https://mvvfkmlgnmkvwnuvtryh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dmZrbWxnbm1rdndudXZ0cnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM2ODcsImV4cCI6MjA5NTgxOTY4N30.2HG0ZWeEIpMKdi2RNqlqY_bcK99DiRwpEkN-eHVjSe0';
+        const supabaseCliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const LINK_SUSCRIPCION_MP = "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=79e1febbb0b9457198d99cbe3f13fbbf";
+
+        function irARegistro() {
+            document.getElementById('card-login').classList.remove('activa');
+            document.getElementById('card-registro').classList.add('activa');
+        }
+
+        function irALogin() {
+            document.getElementById('card-registro').classList.remove('activa');
+            document.getElementById('card-login').classList.add('activa');
+        }
+
+        async function registrarCuenta() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const rubro = document.getElementById('reg-rubro').value.trim();
+            const alias = document.getElementById('reg-alias').value.toUpperCase().trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+
+            if(!nombre || !rubro || !alias || !pass) return alert("Por favor, completá todos los campos para registrarte.");
+
+            const { error } = await supabaseCliente.from('negocios').insert([
+                { nombre: nombre, rubro: rubro, alias: alias, password: pass }
+            ]);
+
+            if (error) {
+                if(error.code === '23505') return alert("¡Ese Alias ya está siendo usado por otro profesional! Elegí uno diferente.");
+                return alert("Error al registrar: " + error.message);
+            }
+
+            if (LINK_SUSCRIPCION_MP) {
+                alert("¡Cuenta creada con éxito! Para activar tu membresía y acceder al panel, te redirigiremos a Mercado Pago.");
+                window.open(LINK_SUSCRIPCION_MP, '_blank');
+            } else {
+                alert("¡Cuenta creada con éxito! Bienvenido a Mi Turno.");
+            }
+            irALogin();
+        }
+
+        async function ingresar() {
+            const aliasInput = document.getElementById('login-alias').value;
+            const passInput = document.getElementById('login-pass').value;
+
+            const alias = aliasInput.toUpperCase().trim();
+            const pass = passInput.trim();
+
+            console.log("🕵️ Intentando ingresar con Alias:", `"${alias}"` , "y Password:", `"${pass}"`);
+
+            if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
+
+            const { data, error } = await supabaseCliente
+                .from('negocios')
+                .select('*')
+                .eq('alias', alias);
+
+            console.log("📊 Resultado de Supabase:", data);
+            console.log("❌ Error de Supabase:", error);
+
+            if (error || !data || data.length === 0) {
+                return alert("No se encontró ningún negocio con el alias: " + alias);
+            }
+
+            const negocio = data[0];
+            console.log("🔑 Password en BD:", `"${negocio.password}"`);
+
+            if (String(negocio.password).trim() !== String(pass)) {
+                return alert(`Contraseña incorrecta. Escribiste "${pass}", pero en la base de datos está guardada como "${negocio.password}"`);
+            }
+
+            localStorage.setItem('mi_turno_negocio_id', negocio.id);
+            window.location.href = "dashboard.html";
+        }
+    </script>
+</body>
+</html>
