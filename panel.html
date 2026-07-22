@@ -198,23 +198,39 @@
         }
 
         async function ingresar() {
-            const alias = document.getElementById('login-alias').value.toUpperCase().trim();
-            const pass = document.getElementById('login-pass').value.trim();
+            const aliasInput = document.getElementById('login-alias').value;
+            const passInput = document.getElementById('login-pass').value;
+
+            const alias = aliasInput.toUpperCase().trim();
+            const pass = passInput.trim();
+
+            console.log("Intentando ingresar con Alias:", `"${alias}"` , "y Password:", `"${pass}"`);
 
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // CONSULTA SEGURA INTEGRANDO LAS MEJORAS Y EVITANDO EL ERROR DE CREDENCIALES
+            // Traemos TODOS los registros que coincidan con el alias (sin filtrar password para ver qué hay guardado)
             const { data, error } = await supabaseCliente
                 .from('negocios')
                 .select('*')
-                .eq('alias', alias)
-                .eq('password', pass)
-                .maybeSingle();
+                .eq('alias', alias);
 
-            if(error || !data) return alert("El alias o la contraseña son incorrectos.");
+            console.log("Resultado de búsqueda en Supabase:", data);
+            console.log("Error de Supabase (si hay):", error);
 
-            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO CON TODAS LAS NUEVAS FUNCIONES
-            localStorage.setItem('mi_turno_negocio_id', data.id);
+            if (error || !data || data.length === 0) {
+                return alert("No se encontró ningún negocio con el alias: " + alias);
+            }
+
+            const negocio = data[0];
+            console.log("Contraseña guardada en la base de datos para este alias:", `"${negocio.password}"`);
+
+            // Comparamos manualmente
+            if (negocio.password !== pass) {
+                return alert(`Contraseña incorrecta. Escribiste "${pass}", pero en la base de datos está guardada como "${negocio.password}"`);
+            }
+
+            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO
+            localStorage.setItem('mi_turno_negocio_id', negocio.id);
             window.location.href = "dashboard.html";
         }
     </script>
