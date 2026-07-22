@@ -204,33 +204,28 @@
             const alias = aliasInput.toUpperCase().trim();
             const pass = passInput.trim();
 
-            console.log("Intentando ingresar con Alias:", `"${alias}"` , "y Password:", `"${pass}"`);
-
             if(!alias || !pass) return alert("Por favor, ingresá tu alias y contraseña.");
 
-            // Traemos TODOS los registros que coincidan con el alias (sin filtrar password para ver qué hay guardado)
+            // Traemos el negocio filtrando por alias y contraseña de forma directa
             const { data, error } = await supabaseCliente
                 .from('negocios')
                 .select('*')
-                .eq('alias', alias);
+                .eq('alias', alias)
+                .eq('password', pass);
 
-            console.log("Resultado de búsqueda en Supabase:", data);
-            console.log("Error de Supabase (si hay):", error);
+            if (error) {
+                console.error("Error de Supabase:", error);
+                return alert("Error al conectar con la base de datos: " + error.message);
+            }
 
-            if (error || !data || data.length === 0) {
-                return alert("No se encontró ningún negocio con el alias: " + alias);
+            if (!data || data.length === 0) {
+                return alert("El alias o la contraseña son incorrectos.");
             }
 
             const negocio = data[0];
-            console.log("Contraseña guardada en la base de datos para este alias:", `"${negocio.password}"`);
 
-            // Comparamos manualmente
-            if (negocio.password !== pass) {
-                return alert(`Contraseña incorrecta. Escribiste "${pass}", pero en la base de datos está guardada como "${negocio.password}"`);
-            }
-
-            // GUARDAMOS EL ID Y ENRAMOS AL PANEL DIRECTO
-            localStorage.setItem('mi_turno_negocio_id', negocio.id);
+            // Guardamos un identificador seguro en el almacenamiento (usamos el alias o la columna primaria disponible)
+            localStorage.setItem('mi_turno_negocio_id', negocio.alias || negocio.nombre);
             window.location.href = "dashboard.html";
         }
     </script>
