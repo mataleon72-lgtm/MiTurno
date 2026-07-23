@@ -85,8 +85,18 @@
             <div id="panel-bloqueo" class="caja-blanca" style="display:none; padding:20px;">
                 <label style="color: #333 !important; text-shadow: none !important;">Fecha a bloquear</label>
                 <input type="date" id="bloq-fecha" style="background: #F0F0F0; color:#333; margin-bottom:10px;">
-                <label style="color: #333 !important; text-shadow: none !important;">Hora exacta del turno</label>
-                <input type="time" id="bloq-hora" style="background: #F0F0F0; color:#333; margin-bottom:15px;">
+                
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <div style="flex:1">
+                        <label style="color: #333 !important; text-shadow: none !important;">Desde</label>
+                        <input type="time" id="bloq-hora-desde" style="background: #F0F0F0; color:#333; margin-bottom:0;">
+                    </div>
+                    <div style="flex:1">
+                        <label style="color: #333 !important; text-shadow: none !important;">Hasta</label>
+                        <input type="time" id="bloq-hora-hasta" style="background: #F0F0F0; color:#333; margin-bottom:0;">
+                    </div>
+                </div>
+
                 <div style="display:flex; gap:10px;">
                     <button onclick="ejecutarBloqueo()" style="flex:1; background:#CEE800; color:#333; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">BLOQUEAR</button>
                     <button onclick="ocultarPanelBloqueo()" style="flex:1; background:#999; color:white; border:none; border-radius:15px; padding:12px; font-weight:900; cursor:pointer;">CANCELAR</button>
@@ -346,29 +356,60 @@
 
         function ocultarPanelBloqueo() {
             document.getElementById('panel-bloqueo').style.display = 'none';
-            document.getElementById('bloq-hora').value = '';
+            document.getElementById('bloq-hora-desde').value = '';
+            document.getElementById('bloq-hora-hasta').value = '';
         }
 
         async function ejecutarBloqueo() {
             const idSuc = document.getElementById('agenda-sucursal').value;
             const fecha = document.getElementById('bloq-fecha').value;
-            let hora = document.getElementById('bloq-hora').value;
+            const horaDesde = document.getElementById('bloq-hora-desde').value;
+            const horaHasta = document.getElementById('bloq-hora-hasta').value;
             
-            if(!idSuc || !fecha || !hora) return alert("Completá fecha y hora para poder bloquear.");
-            if(hora.length === 5) hora += ":00";
+            if(!idSuc || !fecha || !horaDesde || !horaHasta) return alert("Completá todos los campos (Fecha, Desde y Hasta) para bloquear.");
             
-            await supabaseCliente.from('turnos_activos').insert([{
-                negocio_id: idMedico,
-                sucursal_id: idSuc,
-                fecha: fecha,
-                hora: hora,
-                cliente_nombre: '🚫 HORARIO BLOQUEADO',
-                cliente_telefono: '',
-                estado: 'bloqueado'
-            }]);
+            let [hDesde, mDesde] = horaDesde.split(':').map(Number);
+            let [hHasta, mHasta] = horaHasta.split(':').map(Number);
+            let tiempoActual = hDesde * 60 + mDesde;
+            let tiempoFin = hHasta * 60 + mHasta;
+
+            if (tiempoActual >= tiempoFin) return alert("La hora 'Hasta' debe ser mayor a la hora 'Desde'.");
+
+            const diaSemana = new Date(fecha + "T00:00:00").getDay();
+            const { data: configs } = await supabaseCliente.from('configuracion_agenda')
+                .select('duracion_minutos')
+                .eq('sucursal_id', idSuc)
+                .eq('dia_semana', diaSemana)
+                .limit(1);
+
+            let intervalo = (configs && configs.length > 0 && configs[0].duracion_minutos > 0) ? configs[0].duracion_minutos : 30;
+
+            let inserts = [];
+            
+            while (tiempoActual < tiempoFin) {
+                let h = Math.floor(tiempoActual / 60).toString().padStart(2, '0');
+                let m = (tiempoActual % 60).toString().padStart(2, '0');
+                
+                inserts.push({
+                    negocio_id: idMedico,
+                    sucursal_id: idSuc,
+                    fecha: fecha,
+                    hora: `${h}:${m}:00`,
+                    cliente_nombre: '🚫 HORARIO BLOQUEADO',
+                    cliente_telefono: '',
+                    estado: 'bloqueado'
+                });
+                
+                tiempoActual += intervalo;
+            }
+            
+            const { error } = await supabaseCliente.from('turnos_activos').insert(inserts);
+            
+            if (error) return alert("Error al bloquear: " + error.message);
             
             ocultarPanelBloqueo();
             cargarTurnos();
+            alert("✅ ¡Franja horaria bloqueada con éxito!");
         }
 
         function mostrarPanelVacaciones() {
